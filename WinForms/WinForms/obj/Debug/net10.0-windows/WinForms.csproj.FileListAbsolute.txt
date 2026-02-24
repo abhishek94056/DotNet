@@ -1,0 +1,16 @@
+D:\Dot Net\WinForms\WinForms\bin\Debug\net10.0-windows\WinForms.exe
+D:\Dot Net\WinForms\WinForms\bin\Debug\net10.0-windows\WinForms.deps.json
+D:\Dot Net\WinForms\WinForms\bin\Debug\net10.0-windows\WinForms.runtimeconfig.json
+D:\Dot Net\WinForms\WinForms\bin\Debug\net10.0-windows\WinForms.dll
+D:\Dot Net\WinForms\WinForms\bin\Debug\net10.0-windows\WinForms.pdb
+D:\Dot Net\WinForms\WinForms\obj\Debug\net10.0-windows\WinForms.Form1.resources
+D:\Dot Net\WinForms\WinForms\obj\Debug\net10.0-windows\WinForms.csproj.GenerateResource.cache
+D:\Dot Net\WinForms\WinForms\obj\Debug\net10.0-windows\WinForms.GeneratedMSBuildEditorConfig.editorconfig
+D:\Dot Net\WinForms\WinForms\obj\Debug\net10.0-windows\WinForms.AssemblyInfoInputs.cache
+D:\Dot Net\WinForms\WinForms\obj\Debug\net10.0-windows\WinForms.AssemblyInfo.cs
+D:\Dot Net\WinForms\WinForms\obj\Debug\net10.0-windows\WinForms.csproj.CoreCompileInputs.cache
+D:\Dot Net\WinForms\WinForms\obj\Debug\net10.0-windows\WinForms.dll
+D:\Dot Net\WinForms\WinForms\obj\Debug\net10.0-windows\refint\WinForms.dll
+D:\Dot Net\WinForms\WinForms\obj\Debug\net10.0-windows\WinForms.pdb
+D:\Dot Net\WinForms\WinForms\obj\Debug\net10.0-windows\WinForms.genruntimeconfig.cache
+D:\Dot Net\WinForms\WinForms\obj\Debug\net10.0-windows\ref\WinForms.dll

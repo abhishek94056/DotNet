@@ -1,0 +1,16 @@
+D:\Dot Net\WinForms\Label\bin\Debug\net10.0-windows\Label.exe
+D:\Dot Net\WinForms\Label\bin\Debug\net10.0-windows\Label.deps.json
+D:\Dot Net\WinForms\Label\bin\Debug\net10.0-windows\Label.runtimeconfig.json
+D:\Dot Net\WinForms\Label\bin\Debug\net10.0-windows\Label.dll
+D:\Dot Net\WinForms\Label\bin\Debug\net10.0-windows\Label.pdb
+D:\Dot Net\WinForms\Label\obj\Debug\net10.0-windows\Label.Form1.resources
+D:\Dot Net\WinForms\Label\obj\Debug\net10.0-windows\Label.csproj.GenerateResource.cache
+D:\Dot Net\WinForms\Label\obj\Debug\net10.0-windows\Label.GeneratedMSBuildEditorConfig.editorconfig
+D:\Dot Net\WinForms\Label\obj\Debug\net10.0-windows\Label.AssemblyInfoInputs.cache
+D:\Dot Net\WinForms\Label\obj\Debug\net10.0-windows\Label.AssemblyInfo.cs
+D:\Dot Net\WinForms\Label\obj\Debug\net10.0-windows\Label.csproj.CoreCompileInputs.cache
+D:\Dot Net\WinForms\Label\obj\Debug\net10.0-windows\Label.dll
+D:\Dot Net\WinForms\Label\obj\Debug\net10.0-windows\refint\Label.dll
+D:\Dot Net\WinForms\Label\obj\Debug\net10.0-windows\Label.pdb
+D:\Dot Net\WinForms\Label\obj\Debug\net10.0-windows\Label.genruntimeconfig.cache
+D:\Dot Net\WinForms\Label\obj\Debug\net10.0-windows\ref\Label.dll

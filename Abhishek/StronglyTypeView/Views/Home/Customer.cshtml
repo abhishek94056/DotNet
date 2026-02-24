@@ -1,0 +1,13 @@
+﻿@model IEnumerable<StronglyTypeView.Models.Customers>
+<h1>Customers</h1>
+<hr/>
+<div class=" container">
+    @{
+        foreach(var cust in Model)
+        {
+            <h1>c_Id: @cust.c_Id</h1>
+            <h1>Name: @cust.Name</h1>
+            <h1>Email: @cust.Email</h1>
+        }
+    }
+</div>

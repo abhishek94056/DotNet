@@ -1,0 +1,12 @@
+﻿@model StronglyTypeView.Models.Product;
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1>pId: @Model.pId</h1>
+    <h1>pName: @Model.pName</h1>
+    <h1>pPrice: @Model.pPrice</h1>
+    <h1>pQty: @Model.pQty</h1>
+    <p><a href="/Home/Customer">Customers</a></p>
+</div>

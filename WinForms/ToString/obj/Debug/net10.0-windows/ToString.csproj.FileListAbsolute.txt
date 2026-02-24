@@ -1,0 +1,16 @@
+D:\Dot Net\WinForms\ToString\bin\Debug\net10.0-windows\ToString.exe
+D:\Dot Net\WinForms\ToString\bin\Debug\net10.0-windows\ToString.deps.json
+D:\Dot Net\WinForms\ToString\bin\Debug\net10.0-windows\ToString.runtimeconfig.json
+D:\Dot Net\WinForms\ToString\bin\Debug\net10.0-windows\ToString.dll
+D:\Dot Net\WinForms\ToString\bin\Debug\net10.0-windows\ToString.pdb
+D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\ToString.ToString.resources
+D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\ToString.csproj.GenerateResource.cache
+D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\ToString.GeneratedMSBuildEditorConfig.editorconfig
+D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\ToString.AssemblyInfoInputs.cache
+D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\ToString.AssemblyInfo.cs
+D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\ToString.csproj.CoreCompileInputs.cache
+D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\ToString.dll
+D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\refint\ToString.dll
+D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\ToString.pdb
+D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\ToString.genruntimeconfig.cache
+D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\ref\ToString.dll

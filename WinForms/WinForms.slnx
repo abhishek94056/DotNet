@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Label/Label.csproj" />
+  <Project Path="ToString/ToString.csproj" />
+  <Project Path="WinForms/WinForms.csproj" />
+</Solution>

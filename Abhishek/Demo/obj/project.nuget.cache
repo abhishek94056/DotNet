@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "dgSpecHash": "9d/nQFa2i9I=",
+  "success": false,
+  "projectFilePath": "D:\\Dot Net\\Abhishek\\Demo\\Demo.fsproj",
+  "expectedPackageFiles": [],
+  "logs": [
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "Unable to load the service index for source https://api.nuget.org/v3/index.json.\r\n  An error occurred while sending the request.\r\n  The remote name could not be resolved: 'api.nuget.org'",
+      "projectPath": "D:\\Dot Net\\Abhishek\\Demo\\Demo.fsproj",
+      "filePath": "D:\\Dot Net\\Abhishek\\Demo\\Demo.fsproj",
+      "targetGraphs": []
+    }
+  ]
+}

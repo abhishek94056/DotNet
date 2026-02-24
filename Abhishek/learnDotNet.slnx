@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="FormParameter/FormParamete.csproj" Id="df12a676-0558-4c46-a2cd-4dbb9dcb6953" />
+  <Project Path="StronglyTypeView/StronglyTypeView.csproj" Id="af3ef4b0-b810-452d-af3b-ab0f89b3d6e1" />
+  <Project Path="TempData/TempData.csproj" Id="91510b51-f7fc-47bc-993e-2d1dcf55d13b" />
+  <Project Path="ViewBag/ViewBag.csproj" Id="9ffdac9f-db88-40d7-8357-c1d0d3c6d373" />
+  <Project Path="ViewData/ViewData.csproj" Id="e480ab7c-b2c5-4b81-b717-e3c358647813" />
+  <Project Path="viewDemo/Demo.csproj" Id="f1ecfa20-47c4-4bc9-8199-82046ef83311" />
+</Solution>

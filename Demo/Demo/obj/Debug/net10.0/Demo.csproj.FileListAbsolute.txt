@@ -1,0 +1,14 @@
+D:\Dot Net\Demo\Demo\bin\Debug\net10.0\Demo.exe
+D:\Dot Net\Demo\Demo\bin\Debug\net10.0\Demo.deps.json
+D:\Dot Net\Demo\Demo\bin\Debug\net10.0\Demo.runtimeconfig.json
+D:\Dot Net\Demo\Demo\bin\Debug\net10.0\Demo.dll
+D:\Dot Net\Demo\Demo\bin\Debug\net10.0\Demo.pdb
+D:\Dot Net\Demo\Demo\obj\Debug\net10.0\Demo.GeneratedMSBuildEditorConfig.editorconfig
+D:\Dot Net\Demo\Demo\obj\Debug\net10.0\Demo.AssemblyInfoInputs.cache
+D:\Dot Net\Demo\Demo\obj\Debug\net10.0\Demo.AssemblyInfo.cs
+D:\Dot Net\Demo\Demo\obj\Debug\net10.0\Demo.csproj.CoreCompileInputs.cache
+D:\Dot Net\Demo\Demo\obj\Debug\net10.0\Demo.dll
+D:\Dot Net\Demo\Demo\obj\Debug\net10.0\refint\Demo.dll
+D:\Dot Net\Demo\Demo\obj\Debug\net10.0\Demo.pdb
+D:\Dot Net\Demo\Demo\obj\Debug\net10.0\Demo.genruntimeconfig.cache
+D:\Dot Net\Demo\Demo\obj\Debug\net10.0\ref\Demo.dll
