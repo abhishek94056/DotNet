@@ -1,0 +1,17 @@
+D:\Dot Net\WinForms\ComboBox\bin\Debug\net10.0-windows\ComboBox.exe
+D:\Dot Net\WinForms\ComboBox\bin\Debug\net10.0-windows\ComboBox.deps.json
+D:\Dot Net\WinForms\ComboBox\bin\Debug\net10.0-windows\ComboBox.runtimeconfig.json
+D:\Dot Net\WinForms\ComboBox\bin\Debug\net10.0-windows\ComboBox.dll
+D:\Dot Net\WinForms\ComboBox\bin\Debug\net10.0-windows\ComboBox.pdb
+D:\Dot Net\WinForms\ComboBox\obj\Debug\net10.0-windows\ComboBox.Form1.resources
+D:\Dot Net\WinForms\ComboBox\obj\Debug\net10.0-windows\ComboBox.csproj.GenerateResource.cache
+D:\Dot Net\WinForms\ComboBox\obj\Debug\net10.0-windows\ComboBox.GeneratedMSBuildEditorConfig.editorconfig
+D:\Dot Net\WinForms\ComboBox\obj\Debug\net10.0-windows\ComboBox.AssemblyInfoInputs.cache
+D:\Dot Net\WinForms\ComboBox\obj\Debug\net10.0-windows\ComboBox.AssemblyInfo.cs
+D:\Dot Net\WinForms\ComboBox\obj\Debug\net10.0-windows\ComboBox.csproj.CoreCompileInputs.cache
+D:\Dot Net\WinForms\ComboBox\obj\Debug\net10.0-windows\ComboBox.sourcelink.json
+D:\Dot Net\WinForms\ComboBox\obj\Debug\net10.0-windows\ComboBox.dll
+D:\Dot Net\WinForms\ComboBox\obj\Debug\net10.0-windows\refint\ComboBox.dll
+D:\Dot Net\WinForms\ComboBox\obj\Debug\net10.0-windows\ComboBox.pdb
+D:\Dot Net\WinForms\ComboBox\obj\Debug\net10.0-windows\ComboBox.genruntimeconfig.cache
+D:\Dot Net\WinForms\ComboBox\obj\Debug\net10.0-windows\ref\ComboBox.dll

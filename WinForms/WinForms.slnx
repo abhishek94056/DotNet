@@ -1,5 +1,12 @@
 <Solution>
+  <Project Path="Calculator/Calculator.csproj" Id="ed8ea4f8-bcbd-457f-b25b-7cd09a6d93ac" />
+  <Project Path="CheckBox/CheckBox.csproj" Id="457c6fce-de9a-44cf-8c56-19c0f53a5213" />
+  <Project Path="ClientMng/ClientMng.csproj" Id="966c0f72-b634-436c-8072-333cd82e8b53" />
+  <Project Path="ComboBox/ComboBox.csproj" Id="a85a914f-fcd7-40ed-b747-1e09e5e3352e" />
+  <Project Path="Grocery/Grocery.csproj" Id="cd62b267-1503-4dd4-a8f9-5a955bbbfc87" />
   <Project Path="Label/Label.csproj" />
+  <Project Path="ListBox/ListBox.csproj" Id="3d0512ae-82f8-44fe-9cea-12915d3efbfd" />
+  <Project Path="RadioButton/RadioButton.csproj" Id="198962f3-e95d-40fc-862c-31dd19b05564" />
   <Project Path="ToString/ToString.csproj" />
   <Project Path="WinForms/WinForms.csproj" />
 </Solution>

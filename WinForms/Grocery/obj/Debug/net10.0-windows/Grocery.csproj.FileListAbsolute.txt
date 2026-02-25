@@ -1,0 +1,17 @@
+D:\Dot Net\WinForms\Grocery\bin\Debug\net10.0-windows\Grocery.exe
+D:\Dot Net\WinForms\Grocery\bin\Debug\net10.0-windows\Grocery.deps.json
+D:\Dot Net\WinForms\Grocery\bin\Debug\net10.0-windows\Grocery.runtimeconfig.json
+D:\Dot Net\WinForms\Grocery\bin\Debug\net10.0-windows\Grocery.dll
+D:\Dot Net\WinForms\Grocery\bin\Debug\net10.0-windows\Grocery.pdb
+D:\Dot Net\WinForms\Grocery\obj\Debug\net10.0-windows\Grocery.Form1.resources
+D:\Dot Net\WinForms\Grocery\obj\Debug\net10.0-windows\Grocery.csproj.GenerateResource.cache
+D:\Dot Net\WinForms\Grocery\obj\Debug\net10.0-windows\Grocery.GeneratedMSBuildEditorConfig.editorconfig
+D:\Dot Net\WinForms\Grocery\obj\Debug\net10.0-windows\Grocery.AssemblyInfoInputs.cache
+D:\Dot Net\WinForms\Grocery\obj\Debug\net10.0-windows\Grocery.AssemblyInfo.cs
+D:\Dot Net\WinForms\Grocery\obj\Debug\net10.0-windows\Grocery.csproj.CoreCompileInputs.cache
+D:\Dot Net\WinForms\Grocery\obj\Debug\net10.0-windows\Grocery.sourcelink.json
+D:\Dot Net\WinForms\Grocery\obj\Debug\net10.0-windows\Grocery.dll
+D:\Dot Net\WinForms\Grocery\obj\Debug\net10.0-windows\refint\Grocery.dll
+D:\Dot Net\WinForms\Grocery\obj\Debug\net10.0-windows\Grocery.pdb
+D:\Dot Net\WinForms\Grocery\obj\Debug\net10.0-windows\Grocery.genruntimeconfig.cache
+D:\Dot Net\WinForms\Grocery\obj\Debug\net10.0-windows\ref\Grocery.dll
