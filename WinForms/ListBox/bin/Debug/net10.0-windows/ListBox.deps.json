@@ -7,14 +7,30 @@
   "targets": {
     ".NETCoreApp,Version=v10.0": {
       "ListBox/1.0.0": {
+        "dependencies": {
+          "Grocery": "1.0.0"
+        },
         "runtime": {
           "ListBox.dll": {}
+        }
+      },
+      "Grocery/1.0.0": {
+        "runtime": {
+          "Grocery.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }
   },
   "libraries": {
     "ListBox/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Grocery/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

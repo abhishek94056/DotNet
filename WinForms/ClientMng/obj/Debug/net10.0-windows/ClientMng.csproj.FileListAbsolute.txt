@@ -1,0 +1,17 @@
+D:\Dot Net\WinForms\ClientMng\bin\Debug\net10.0-windows\ClientMng.exe
+D:\Dot Net\WinForms\ClientMng\bin\Debug\net10.0-windows\ClientMng.deps.json
+D:\Dot Net\WinForms\ClientMng\bin\Debug\net10.0-windows\ClientMng.runtimeconfig.json
+D:\Dot Net\WinForms\ClientMng\bin\Debug\net10.0-windows\ClientMng.dll
+D:\Dot Net\WinForms\ClientMng\bin\Debug\net10.0-windows\ClientMng.pdb
+D:\Dot Net\WinForms\ClientMng\obj\Debug\net10.0-windows\ClientMng.Form1.resources
+D:\Dot Net\WinForms\ClientMng\obj\Debug\net10.0-windows\ClientMng.csproj.GenerateResource.cache
+D:\Dot Net\WinForms\ClientMng\obj\Debug\net10.0-windows\ClientMng.GeneratedMSBuildEditorConfig.editorconfig
+D:\Dot Net\WinForms\ClientMng\obj\Debug\net10.0-windows\ClientMng.AssemblyInfoInputs.cache
+D:\Dot Net\WinForms\ClientMng\obj\Debug\net10.0-windows\ClientMng.AssemblyInfo.cs
+D:\Dot Net\WinForms\ClientMng\obj\Debug\net10.0-windows\ClientMng.csproj.CoreCompileInputs.cache
+D:\Dot Net\WinForms\ClientMng\obj\Debug\net10.0-windows\ClientMng.sourcelink.json
+D:\Dot Net\WinForms\ClientMng\obj\Debug\net10.0-windows\ClientMng.dll
+D:\Dot Net\WinForms\ClientMng\obj\Debug\net10.0-windows\refint\ClientMng.dll
+D:\Dot Net\WinForms\ClientMng\obj\Debug\net10.0-windows\ClientMng.pdb
+D:\Dot Net\WinForms\ClientMng\obj\Debug\net10.0-windows\ClientMng.genruntimeconfig.cache
+D:\Dot Net\WinForms\ClientMng\obj\Debug\net10.0-windows\ref\ClientMng.dll

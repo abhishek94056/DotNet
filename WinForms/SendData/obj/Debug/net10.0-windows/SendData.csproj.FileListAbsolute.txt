@@ -1,0 +1,17 @@
+D:\Dot Net\WinForms\SendData\bin\Debug\net10.0-windows\SendData.exe
+D:\Dot Net\WinForms\SendData\bin\Debug\net10.0-windows\SendData.deps.json
+D:\Dot Net\WinForms\SendData\bin\Debug\net10.0-windows\SendData.runtimeconfig.json
+D:\Dot Net\WinForms\SendData\bin\Debug\net10.0-windows\SendData.dll
+D:\Dot Net\WinForms\SendData\bin\Debug\net10.0-windows\SendData.pdb
+D:\Dot Net\WinForms\SendData\obj\Debug\net10.0-windows\SendData.Form1.resources
+D:\Dot Net\WinForms\SendData\obj\Debug\net10.0-windows\SendData.csproj.GenerateResource.cache
+D:\Dot Net\WinForms\SendData\obj\Debug\net10.0-windows\SendData.GeneratedMSBuildEditorConfig.editorconfig
+D:\Dot Net\WinForms\SendData\obj\Debug\net10.0-windows\SendData.AssemblyInfoInputs.cache
+D:\Dot Net\WinForms\SendData\obj\Debug\net10.0-windows\SendData.AssemblyInfo.cs
+D:\Dot Net\WinForms\SendData\obj\Debug\net10.0-windows\SendData.csproj.CoreCompileInputs.cache
+D:\Dot Net\WinForms\SendData\obj\Debug\net10.0-windows\SendData.sourcelink.json
+D:\Dot Net\WinForms\SendData\obj\Debug\net10.0-windows\SendData.dll
+D:\Dot Net\WinForms\SendData\obj\Debug\net10.0-windows\refint\SendData.dll
+D:\Dot Net\WinForms\SendData\obj\Debug\net10.0-windows\SendData.pdb
+D:\Dot Net\WinForms\SendData\obj\Debug\net10.0-windows\SendData.genruntimeconfig.cache
+D:\Dot Net\WinForms\SendData\obj\Debug\net10.0-windows\ref\SendData.dll

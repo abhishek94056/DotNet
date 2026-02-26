@@ -1,0 +1,17 @@
+D:\Dot Net\WinForms\ATM\bin\Debug\net10.0-windows\ATM.exe
+D:\Dot Net\WinForms\ATM\bin\Debug\net10.0-windows\ATM.deps.json
+D:\Dot Net\WinForms\ATM\bin\Debug\net10.0-windows\ATM.runtimeconfig.json
+D:\Dot Net\WinForms\ATM\bin\Debug\net10.0-windows\ATM.dll
+D:\Dot Net\WinForms\ATM\bin\Debug\net10.0-windows\ATM.pdb
+D:\Dot Net\WinForms\ATM\obj\Debug\net10.0-windows\ATM.Form1.resources
+D:\Dot Net\WinForms\ATM\obj\Debug\net10.0-windows\ATM.csproj.GenerateResource.cache
+D:\Dot Net\WinForms\ATM\obj\Debug\net10.0-windows\ATM.GeneratedMSBuildEditorConfig.editorconfig
+D:\Dot Net\WinForms\ATM\obj\Debug\net10.0-windows\ATM.AssemblyInfoInputs.cache
+D:\Dot Net\WinForms\ATM\obj\Debug\net10.0-windows\ATM.AssemblyInfo.cs
+D:\Dot Net\WinForms\ATM\obj\Debug\net10.0-windows\ATM.csproj.CoreCompileInputs.cache
+D:\Dot Net\WinForms\ATM\obj\Debug\net10.0-windows\ATM.sourcelink.json
+D:\Dot Net\WinForms\ATM\obj\Debug\net10.0-windows\ATM.dll
+D:\Dot Net\WinForms\ATM\obj\Debug\net10.0-windows\refint\ATM.dll
+D:\Dot Net\WinForms\ATM\obj\Debug\net10.0-windows\ATM.pdb
+D:\Dot Net\WinForms\ATM\obj\Debug\net10.0-windows\ATM.genruntimeconfig.cache
+D:\Dot Net\WinForms\ATM\obj\Debug\net10.0-windows\ref\ATM.dll

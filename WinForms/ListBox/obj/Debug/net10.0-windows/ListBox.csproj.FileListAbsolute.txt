@@ -15,3 +15,10 @@ D:\Dot Net\WinForms\ListBox\obj\Debug\net10.0-windows\refint\ListBox.dll
 D:\Dot Net\WinForms\ListBox\obj\Debug\net10.0-windows\ListBox.pdb
 D:\Dot Net\WinForms\ListBox\obj\Debug\net10.0-windows\ListBox.genruntimeconfig.cache
 D:\Dot Net\WinForms\ListBox\obj\Debug\net10.0-windows\ref\ListBox.dll
+D:\Dot Net\WinForms\ListBox\bin\Debug\net10.0-windows\Grocery.deps.json
+D:\Dot Net\WinForms\ListBox\bin\Debug\net10.0-windows\Grocery.runtimeconfig.json
+D:\Dot Net\WinForms\ListBox\bin\Debug\net10.0-windows\Grocery.exe
+D:\Dot Net\WinForms\ListBox\bin\Debug\net10.0-windows\Grocery.dll
+D:\Dot Net\WinForms\ListBox\bin\Debug\net10.0-windows\Grocery.pdb
+D:\Dot Net\WinForms\ListBox\obj\Debug\net10.0-windows\ListBox.csproj.AssemblyReference.cache
+D:\Dot Net\WinForms\ListBox\obj\Debug\net10.0-windows\ListBox.csproj.Up2Date

@@ -3,12 +3,16 @@
   "WorkspaceRootPath": "D:\\Dot Net\\WinForms\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{CD62B267-1503-4DD4-A8F9-5A955BBBFC87}|Grocery\\Grocery.csproj|d:\\dot net\\winforms\\grocery\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CD62B267-1503-4DD4-A8F9-5A955BBBFC87}|Grocery\\Grocery.csproj|solutionrelative:grocery\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|d:\\dot net\\winforms\\atm\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|solutionrelative:atm\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CD62B267-1503-4DD4-A8F9-5A955BBBFC87}|Grocery\\Grocery.csproj|d:\\dot net\\winforms\\grocery\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{CD62B267-1503-4DD4-A8F9-5A955BBBFC87}|Grocery\\Grocery.csproj|solutionrelative:grocery\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|d:\\dot net\\winforms\\atm\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|solutionrelative:atm\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|d:\\dot net\\winforms\\atm\\users.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|solutionrelative:atm\\users.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,8 +22,21 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 0,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Form1.cs",
+              "DocumentMoniker": "D:\\Dot Net\\WinForms\\ATM\\Form1.cs",
+              "RelativeDocumentMoniker": "ATM\\Form1.cs",
+              "ToolTip": "D:\\Dot Net\\WinForms\\ATM\\Form1.cs",
+              "RelativeToolTip": "ATM\\Form1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAABSAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-25T09:49:19.406Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
@@ -34,27 +51,27 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Form1.cs",
-              "DocumentMoniker": "D:\\Dot Net\\WinForms\\Grocery\\Form1.cs",
-              "RelativeDocumentMoniker": "Grocery\\Form1.cs",
-              "ToolTip": "D:\\Dot Net\\WinForms\\Grocery\\Form1.cs",
-              "RelativeToolTip": "Grocery\\Form1.cs",
-              "ViewState": "AgIAABUAAAAAAAAAAAAAACgAAAA1AAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "Users.cs",
+              "DocumentMoniker": "D:\\Dot Net\\WinForms\\ATM\\Users.cs",
+              "RelativeDocumentMoniker": "ATM\\Users.cs",
+              "ToolTip": "D:\\Dot Net\\WinForms\\ATM\\Users.cs",
+              "RelativeToolTip": "ATM\\Users.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAAB4AAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-25T04:43:38.871Z",
+              "WhenOpened": "2026-02-25T09:37:09.056Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "Form1.cs [Design]",
-              "DocumentMoniker": "D:\\Dot Net\\WinForms\\Grocery\\Form1.cs",
-              "RelativeDocumentMoniker": "Grocery\\Form1.cs",
-              "ToolTip": "D:\\Dot Net\\WinForms\\Grocery\\Form1.cs [Design]",
-              "RelativeToolTip": "Grocery\\Form1.cs [Design]",
+              "DocumentMoniker": "D:\\Dot Net\\WinForms\\ATM\\Form1.cs",
+              "RelativeDocumentMoniker": "ATM\\Form1.cs",
+              "ToolTip": "D:\\Dot Net\\WinForms\\ATM\\Form1.cs [Design]",
+              "RelativeToolTip": "ATM\\Form1.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-25T04:42:52.518Z",
+              "WhenOpened": "2026-02-25T09:25:09.861Z",
               "EditorCaption": " [Design]"
             }
           ]

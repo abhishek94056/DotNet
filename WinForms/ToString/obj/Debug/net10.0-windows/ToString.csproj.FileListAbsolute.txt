@@ -14,3 +14,4 @@ D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\refint\ToString.dll
 D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\ToString.pdb
 D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\ToString.genruntimeconfig.cache
 D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\ref\ToString.dll
+D:\Dot Net\WinForms\ToString\obj\Debug\net10.0-windows\ToString.sourcelink.json

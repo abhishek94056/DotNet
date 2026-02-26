@@ -1,0 +1,17 @@
+D:\Dot Net\WinForms\Recived\bin\Debug\net10.0-windows\Recived.exe
+D:\Dot Net\WinForms\Recived\bin\Debug\net10.0-windows\Recived.deps.json
+D:\Dot Net\WinForms\Recived\bin\Debug\net10.0-windows\Recived.runtimeconfig.json
+D:\Dot Net\WinForms\Recived\bin\Debug\net10.0-windows\Recived.dll
+D:\Dot Net\WinForms\Recived\bin\Debug\net10.0-windows\Recived.pdb
+D:\Dot Net\WinForms\Recived\obj\Debug\net10.0-windows\Recived.Form2.resources
+D:\Dot Net\WinForms\Recived\obj\Debug\net10.0-windows\Recived.csproj.GenerateResource.cache
+D:\Dot Net\WinForms\Recived\obj\Debug\net10.0-windows\Recived.GeneratedMSBuildEditorConfig.editorconfig
+D:\Dot Net\WinForms\Recived\obj\Debug\net10.0-windows\Recived.AssemblyInfoInputs.cache
+D:\Dot Net\WinForms\Recived\obj\Debug\net10.0-windows\Recived.AssemblyInfo.cs
+D:\Dot Net\WinForms\Recived\obj\Debug\net10.0-windows\Recived.csproj.CoreCompileInputs.cache
+D:\Dot Net\WinForms\Recived\obj\Debug\net10.0-windows\Recived.sourcelink.json
+D:\Dot Net\WinForms\Recived\obj\Debug\net10.0-windows\Recived.dll
+D:\Dot Net\WinForms\Recived\obj\Debug\net10.0-windows\refint\Recived.dll
+D:\Dot Net\WinForms\Recived\obj\Debug\net10.0-windows\Recived.pdb
+D:\Dot Net\WinForms\Recived\obj\Debug\net10.0-windows\Recived.genruntimeconfig.cache
+D:\Dot Net\WinForms\Recived\obj\Debug\net10.0-windows\ref\Recived.dll
