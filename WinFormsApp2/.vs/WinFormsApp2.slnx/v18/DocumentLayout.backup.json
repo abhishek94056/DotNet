@@ -3,20 +3,24 @@
   "WorkspaceRootPath": "D:\\Dot Net\\WinFormsApp2\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{FCAC4BDD-1E2D-4971-BD45-04BB250579CD}|WinFormsApp2\\WinFormsApp2.csproj|d:\\dot net\\winformsapp2\\winformsapp2\\form2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FCAC4BDD-1E2D-4971-BD45-04BB250579CD}|WinFormsApp2\\WinFormsApp2.csproj|solutionrelative:winformsapp2\\form2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{FC5D3017-9F03-EC78-92D1-31A48FEDCC15}|WinFormsApp2\\WinFormsApp2.csproj|d:\\dot net\\winformsapp2\\winformsapp2\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FC5D3017-9F03-EC78-92D1-31A48FEDCC15}|WinFormsApp2\\WinFormsApp2.csproj|solutionrelative:winformsapp2\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{FCAC4BDD-1E2D-4971-BD45-04BB250579CD}|WinFormsApp2\\WinFormsApp2.csproj|d:\\dot net\\winformsapp2\\winformsapp2\\form2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{FCAC4BDD-1E2D-4971-BD45-04BB250579CD}|WinFormsApp2\\WinFormsApp2.csproj|D:\\Dot Net\\WinFormsApp2\\winformsapp2\\form2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{FCAC4BDD-1E2D-4971-BD45-04BB250579CD}|WinFormsApp2\\WinFormsApp2.csproj|solutionrelative:winformsapp2\\form2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{FCAC4BDD-1E2D-4971-BD45-04BB250579CD}|WinFormsApp2\\WinFormsApp2.csproj|d:\\dot net\\winformsapp2\\winformsapp2\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FCAC4BDD-1E2D-4971-BD45-04BB250579CD}|WinFormsApp2\\WinFormsApp2.csproj|solutionrelative:winformsapp2\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{FC5D3017-9F03-EC78-92D1-31A48FEDCC15}|WinFormsApp2\\WinFormsApp2.csproj|d:\\dot net\\winformsapp2\\winformsapp2\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{FC5D3017-9F03-EC78-92D1-31A48FEDCC15}|WinFormsApp2\\WinFormsApp2.csproj|solutionrelative:winformsapp2\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{FCAC4BDD-1E2D-4971-BD45-04BB250579CD}|WinFormsApp2\\WinFormsApp2.csproj|d:\\dot net\\winformsapp2\\winformsapp2\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{FCAC4BDD-1E2D-4971-BD45-04BB250579CD}|WinFormsApp2\\WinFormsApp2.csproj|D:\\Dot Net\\WinFormsApp2\\winformsapp2\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{FCAC4BDD-1E2D-4971-BD45-04BB250579CD}|WinFormsApp2\\WinFormsApp2.csproj|solutionrelative:winformsapp2\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FC5D3017-9F03-EC78-92D1-31A48FEDCC15}|WinFormsApp2\\WinFormsApp2.csproj|d:\\dot net\\winformsapp2\\winformsapp2\\form2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FC5D3017-9F03-EC78-92D1-31A48FEDCC15}|WinFormsApp2\\WinFormsApp2.csproj|solutionrelative:winformsapp2\\form2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,7 +30,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Bookmark",
@@ -42,20 +46,32 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
+              "Title": "Form1.cs [Design]",
+              "DocumentMoniker": "D:\\Dot Net\\WinFormsApp2\\WinFormsApp2\\Form1.cs",
+              "RelativeDocumentMoniker": "WinFormsApp2\\Form1.cs",
+              "ToolTip": "D:\\Dot Net\\WinFormsApp2\\WinFormsApp2\\Form1.cs [Design]",
+              "RelativeToolTip": "WinFormsApp2\\Form1.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-26T04:41:39.581Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "Form2.cs",
               "DocumentMoniker": "D:\\Dot Net\\WinFormsApp2\\WinFormsApp2\\Form2.cs",
               "RelativeDocumentMoniker": "WinFormsApp2\\Form2.cs",
               "ToolTip": "D:\\Dot Net\\WinFormsApp2\\WinFormsApp2\\Form2.cs",
               "RelativeToolTip": "WinFormsApp2\\Form2.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAYwBUAAAA7AAAAAAAAAA==",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABIAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-25T07:38:00.769Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "Form1.cs",
               "DocumentMoniker": "D:\\Dot Net\\WinFormsApp2\\WinFormsApp2\\Form1.cs",
               "RelativeDocumentMoniker": "WinFormsApp2\\Form1.cs",
@@ -75,8 +91,7 @@
               "ToolTip": "D:\\Dot Net\\WinFormsApp2\\WinFormsApp2\\Form2.cs [Design]",
               "RelativeToolTip": "WinFormsApp2\\Form2.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-25T07:31:07.626Z",
-              "EditorCaption": " [Design]"
+              "WhenOpened": "2026-02-25T07:31:07.626Z"
             },
             {
               "$type": "Document",
@@ -87,8 +102,7 @@
               "ToolTip": "D:\\Dot Net\\WinFormsApp2\\WinFormsApp2\\Form1.cs [Design]",
               "RelativeToolTip": "WinFormsApp2\\Form1.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-25T07:30:07.827Z",
-              "EditorCaption": " [Design]"
+              "WhenOpened": "2026-02-25T07:30:07.827Z"
             }
           ]
         }

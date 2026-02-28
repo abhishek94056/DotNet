@@ -28,18 +28,26 @@
         /// </summary>
         private void InitializeComponent()
         {
-            tabControl1 = new TabControl();
+            tabRegister = new TabControl();
             tabLogIn = new TabPage();
             groupBox1 = new GroupBox();
+            btnGoRegister = new Button();
+            label1 = new Label();
             LoginButton = new Button();
             label2 = new Label();
             tbxPassword = new TextBox();
             tbxUsername = new TextBox();
             tabATM = new TabPage();
+            panel2 = new Panel();
+            btnDownloadStatement = new Button();
+            lblAN = new Label();
+            lblUserName = new Label();
+            label7 = new Label();
+            label6 = new Label();
             panel1 = new Panel();
+            btnWithdraw = new Button();
             btnDeposit = new Button();
             btnLogout = new Button();
-            btnWithdraw = new Button();
             btnZero = new Button();
             btnNine = new Button();
             btnEight = new Button();
@@ -53,25 +61,41 @@
             btnOne = new Button();
             lblAmount = new Label();
             lblBalance = new Label();
-            lblUserName = new Label();
-            label1 = new Label();
-            tabControl1.SuspendLayout();
+            tabPage1 = new TabPage();
+            dgvTransactions = new DataGridView();
+            tabPage2 = new TabPage();
+            groupBox2 = new GroupBox();
+            btnRegister = new Button();
+            tbxRegPassword = new TextBox();
+            tbxRegUsername = new TextBox();
+            tbxRegName = new TextBox();
+            label5 = new Label();
+            label4 = new Label();
+            label3 = new Label();
+            tabRegister.SuspendLayout();
             tabLogIn.SuspendLayout();
             groupBox1.SuspendLayout();
             tabATM.SuspendLayout();
+            panel2.SuspendLayout();
             panel1.SuspendLayout();
+            tabPage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvTransactions).BeginInit();
+            tabPage2.SuspendLayout();
+            groupBox2.SuspendLayout();
             SuspendLayout();
             // 
-            // tabControl1
+            // tabRegister
             // 
-            tabControl1.Controls.Add(tabLogIn);
-            tabControl1.Controls.Add(tabATM);
-            tabControl1.Dock = DockStyle.Fill;
-            tabControl1.Location = new Point(0, 0);
-            tabControl1.Name = "tabControl1";
-            tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(800, 450);
-            tabControl1.TabIndex = 0;
+            tabRegister.Controls.Add(tabLogIn);
+            tabRegister.Controls.Add(tabATM);
+            tabRegister.Controls.Add(tabPage1);
+            tabRegister.Controls.Add(tabPage2);
+            tabRegister.Dock = DockStyle.Fill;
+            tabRegister.Location = new Point(0, 0);
+            tabRegister.Name = "tabRegister";
+            tabRegister.SelectedIndex = 0;
+            tabRegister.Size = new Size(800, 450);
+            tabRegister.TabIndex = 0;
             // 
             // tabLogIn
             // 
@@ -86,21 +110,43 @@
             // 
             // groupBox1
             // 
+            groupBox1.BackColor = Color.RosyBrown;
+            groupBox1.Controls.Add(btnGoRegister);
             groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(LoginButton);
             groupBox1.Controls.Add(label2);
             groupBox1.Controls.Add(tbxPassword);
             groupBox1.Controls.Add(tbxUsername);
-            groupBox1.Location = new Point(127, 38);
+            groupBox1.Location = new Point(128, 52);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(529, 308);
+            groupBox1.Size = new Size(566, 310);
             groupBox1.TabIndex = 0;
             groupBox1.TabStop = false;
             groupBox1.Text = "Log In";
             // 
+            // btnGoRegister
+            // 
+            btnGoRegister.BackColor = Color.Green;
+            btnGoRegister.Location = new Point(295, 161);
+            btnGoRegister.Name = "btnGoRegister";
+            btnGoRegister.Size = new Size(138, 57);
+            btnGoRegister.TabIndex = 6;
+            btnGoRegister.Text = "Create New Account";
+            btnGoRegister.UseVisualStyleBackColor = false;
+            btnGoRegister.Click += btnGoRegister_Click_1;
+            // 
+            // label1
+            // 
+            label1.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label1.Location = new Point(35, 54);
+            label1.Name = "label1";
+            label1.Size = new Size(111, 42);
+            label1.TabIndex = 5;
+            label1.Text = "Username :";
+            // 
             // LoginButton
             // 
-            LoginButton.BackColor = Color.Gray;
+            LoginButton.BackColor = Color.Green;
             LoginButton.Location = new Point(131, 161);
             LoginButton.Name = "LoginButton";
             LoginButton.Size = new Size(138, 57);
@@ -134,6 +180,7 @@
             // 
             // tabATM
             // 
+            tabATM.Controls.Add(panel2);
             tabATM.Controls.Add(panel1);
             tabATM.Location = new Point(4, 24);
             tabATM.Name = "tabATM";
@@ -143,11 +190,72 @@
             tabATM.Text = "ATM";
             tabATM.UseVisualStyleBackColor = true;
             // 
+            // panel2
+            // 
+            panel2.Controls.Add(btnDownloadStatement);
+            panel2.Controls.Add(lblAN);
+            panel2.Controls.Add(lblUserName);
+            panel2.Controls.Add(label7);
+            panel2.Controls.Add(label6);
+            panel2.Location = new Point(8, 27);
+            panel2.Name = "panel2";
+            panel2.Size = new Size(381, 336);
+            panel2.TabIndex = 1;
+            // 
+            // btnDownloadStatement
+            // 
+            btnDownloadStatement.BackColor = Color.Gray;
+            btnDownloadStatement.Location = new Point(60, 250);
+            btnDownloadStatement.Name = "btnDownloadStatement";
+            btnDownloadStatement.Size = new Size(258, 40);
+            btnDownloadStatement.TabIndex = 17;
+            btnDownloadStatement.Text = "Download Statement";
+            btnDownloadStatement.UseVisualStyleBackColor = false;
+            btnDownloadStatement.Click += btnDownloadStatement_Click;
+            // 
+            // lblAN
+            // 
+            lblAN.AutoSize = true;
+            lblAN.Font = new Font("Segoe UI Black", 14.25F, FontStyle.Bold);
+            lblAN.Location = new Point(117, 158);
+            lblAN.Name = "lblAN";
+            lblAN.Size = new Size(0, 25);
+            lblAN.TabIndex = 3;
+            // 
+            // lblUserName
+            // 
+            lblUserName.AutoSize = true;
+            lblUserName.Font = new Font("Segoe UI Black", 14.25F, FontStyle.Bold);
+            lblUserName.Location = new Point(117, 67);
+            lblUserName.Name = "lblUserName";
+            lblUserName.Size = new Size(0, 25);
+            lblUserName.TabIndex = 2;
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Font = new Font("Segoe UI Black", 14.25F, FontStyle.Bold);
+            label7.Location = new Point(22, 112);
+            label7.Name = "label7";
+            label7.Size = new Size(180, 25);
+            label7.TabIndex = 1;
+            label7.Text = "Account Number :";
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Font = new Font("Segoe UI Black", 14.25F, FontStyle.Bold);
+            label6.Location = new Point(22, 26);
+            label6.Name = "label6";
+            label6.Size = new Size(78, 25);
+            label6.TabIndex = 0;
+            label6.Text = "Name :";
+            // 
             // panel1
             // 
+            panel1.Controls.Add(btnWithdraw);
             panel1.Controls.Add(btnDeposit);
             panel1.Controls.Add(btnLogout);
-            panel1.Controls.Add(btnWithdraw);
             panel1.Controls.Add(btnZero);
             panel1.Controls.Add(btnNine);
             panel1.Controls.Add(btnEight);
@@ -161,18 +269,28 @@
             panel1.Controls.Add(btnOne);
             panel1.Controls.Add(lblAmount);
             panel1.Controls.Add(lblBalance);
-            panel1.Controls.Add(lblUserName);
-            panel1.Location = new Point(99, 34);
+            panel1.Location = new Point(407, 6);
             panel1.Name = "panel1";
-            panel1.Size = new Size(547, 362);
+            panel1.Size = new Size(361, 395);
             panel1.TabIndex = 0;
+            panel1.Paint += panel1_Paint;
+            // 
+            // btnWithdraw
+            // 
+            btnWithdraw.BackColor = Color.Gray;
+            btnWithdraw.Location = new Point(189, 271);
+            btnWithdraw.Name = "btnWithdraw";
+            btnWithdraw.Size = new Size(126, 40);
+            btnWithdraw.TabIndex = 18;
+            btnWithdraw.Text = "Withdraw";
+            btnWithdraw.UseVisualStyleBackColor = false;
             // 
             // btnDeposit
             // 
             btnDeposit.BackColor = Color.Gray;
-            btnDeposit.Location = new Point(109, 271);
+            btnDeposit.Location = new Point(57, 271);
             btnDeposit.Name = "btnDeposit";
-            btnDeposit.Size = new Size(144, 40);
+            btnDeposit.Size = new Size(126, 40);
             btnDeposit.TabIndex = 17;
             btnDeposit.Text = "Deposit";
             btnDeposit.UseVisualStyleBackColor = false;
@@ -181,29 +299,18 @@
             // btnLogout
             // 
             btnLogout.BackColor = Color.Gray;
-            btnLogout.Location = new Point(108, 317);
+            btnLogout.Location = new Point(57, 317);
             btnLogout.Name = "btnLogout";
-            btnLogout.Size = new Size(317, 40);
+            btnLogout.Size = new Size(258, 40);
             btnLogout.TabIndex = 16;
             btnLogout.Text = "Log out";
             btnLogout.UseVisualStyleBackColor = false;
             btnLogout.Click += btnLogout_Click;
             // 
-            // btnWithdraw
-            // 
-            btnWithdraw.BackColor = Color.Gray;
-            btnWithdraw.Location = new Point(281, 271);
-            btnWithdraw.Name = "btnWithdraw";
-            btnWithdraw.Size = new Size(144, 40);
-            btnWithdraw.TabIndex = 15;
-            btnWithdraw.Text = "Withdraw";
-            btnWithdraw.UseVisualStyleBackColor = false;
-            btnWithdraw.Click += btnWithdraw_Click;
-            // 
             // btnZero
             // 
             btnZero.BackColor = Color.Gray;
-            btnZero.Location = new Point(365, 225);
+            btnZero.Location = new Point(255, 225);
             btnZero.Name = "btnZero";
             btnZero.Size = new Size(60, 40);
             btnZero.TabIndex = 13;
@@ -214,7 +321,7 @@
             // btnNine
             // 
             btnNine.BackColor = Color.Gray;
-            btnNine.Location = new Point(281, 225);
+            btnNine.Location = new Point(189, 225);
             btnNine.Name = "btnNine";
             btnNine.Size = new Size(60, 40);
             btnNine.TabIndex = 12;
@@ -225,7 +332,7 @@
             // btnEight
             // 
             btnEight.BackColor = Color.Gray;
-            btnEight.Location = new Point(193, 225);
+            btnEight.Location = new Point(123, 225);
             btnEight.Name = "btnEight";
             btnEight.Size = new Size(60, 40);
             btnEight.TabIndex = 11;
@@ -236,7 +343,7 @@
             // btnSeven
             // 
             btnSeven.BackColor = Color.Gray;
-            btnSeven.Location = new Point(108, 225);
+            btnSeven.Location = new Point(57, 225);
             btnSeven.Name = "btnSeven";
             btnSeven.Size = new Size(60, 40);
             btnSeven.TabIndex = 10;
@@ -247,7 +354,7 @@
             // btnSix
             // 
             btnSix.BackColor = Color.Gray;
-            btnSix.Location = new Point(281, 179);
+            btnSix.Location = new Point(189, 179);
             btnSix.Name = "btnSix";
             btnSix.Size = new Size(60, 40);
             btnSix.TabIndex = 9;
@@ -258,7 +365,7 @@
             // btnFive
             // 
             btnFive.BackColor = Color.Gray;
-            btnFive.Location = new Point(193, 179);
+            btnFive.Location = new Point(123, 179);
             btnFive.Name = "btnFive";
             btnFive.Size = new Size(60, 40);
             btnFive.TabIndex = 8;
@@ -269,7 +376,7 @@
             // btnFour
             // 
             btnFour.BackColor = Color.Gray;
-            btnFour.Location = new Point(108, 179);
+            btnFour.Location = new Point(57, 179);
             btnFour.Name = "btnFour";
             btnFour.Size = new Size(60, 40);
             btnFour.TabIndex = 7;
@@ -280,7 +387,7 @@
             // btnClear
             // 
             btnClear.BackColor = Color.Gray;
-            btnClear.Location = new Point(365, 133);
+            btnClear.Location = new Point(255, 133);
             btnClear.Name = "btnClear";
             btnClear.Size = new Size(60, 86);
             btnClear.TabIndex = 6;
@@ -291,7 +398,7 @@
             // btnThree
             // 
             btnThree.BackColor = Color.Gray;
-            btnThree.Location = new Point(281, 133);
+            btnThree.Location = new Point(189, 133);
             btnThree.Name = "btnThree";
             btnThree.Size = new Size(60, 40);
             btnThree.TabIndex = 5;
@@ -302,7 +409,7 @@
             // btn2
             // 
             btn2.BackColor = Color.Gray;
-            btn2.Location = new Point(193, 133);
+            btn2.Location = new Point(123, 133);
             btn2.Name = "btn2";
             btn2.Size = new Size(60, 40);
             btn2.TabIndex = 4;
@@ -313,7 +420,7 @@
             // btnOne
             // 
             btnOne.BackColor = Color.Gray;
-            btnOne.Location = new Point(108, 133);
+            btnOne.Location = new Point(57, 133);
             btnOne.Name = "btnOne";
             btnOne.Size = new Size(60, 40);
             btnOne.TabIndex = 3;
@@ -326,9 +433,9 @@
             lblAmount.BackColor = Color.Green;
             lblAmount.Font = new Font("Segoe UI", 15F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblAmount.ForeColor = SystemColors.Window;
-            lblAmount.Location = new Point(108, 86);
+            lblAmount.Location = new Point(57, 85);
             lblAmount.Name = "lblAmount";
-            lblAmount.Size = new Size(317, 31);
+            lblAmount.Size = new Size(258, 31);
             lblAmount.TabIndex = 2;
             lblAmount.Text = "0";
             lblAmount.TextAlign = ContentAlignment.TopCenter;
@@ -338,53 +445,151 @@
             lblBalance.BackColor = Color.Green;
             lblBalance.Font = new Font("Segoe UI", 15F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblBalance.ForeColor = SystemColors.Window;
-            lblBalance.Location = new Point(108, 44);
+            lblBalance.Location = new Point(57, 44);
             lblBalance.Name = "lblBalance";
-            lblBalance.Size = new Size(317, 32);
+            lblBalance.Size = new Size(258, 32);
             lblBalance.TabIndex = 1;
             lblBalance.Text = "Balance: 0";
             lblBalance.TextAlign = ContentAlignment.TopCenter;
             // 
-            // lblUserName
+            // tabPage1
             // 
-            lblUserName.Dock = DockStyle.Top;
-            lblUserName.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblUserName.Location = new Point(0, 0);
-            lblUserName.Name = "lblUserName";
-            lblUserName.Size = new Size(547, 23);
-            lblUserName.TabIndex = 0;
-            lblUserName.Text = "label3";
-            lblUserName.TextAlign = ContentAlignment.TopCenter;
+            tabPage1.Controls.Add(dgvTransactions);
+            tabPage1.Location = new Point(4, 24);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Padding = new Padding(3);
+            tabPage1.Size = new Size(792, 422);
+            tabPage1.TabIndex = 2;
+            tabPage1.Text = "Transaction History";
+            tabPage1.UseVisualStyleBackColor = true;
             // 
-            // label1
+            // dgvTransactions
             // 
-            label1.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label1.Location = new Point(35, 54);
-            label1.Name = "label1";
-            label1.Size = new Size(111, 42);
-            label1.TabIndex = 5;
-            label1.Text = "Username :";
+            dgvTransactions.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvTransactions.Dock = DockStyle.Fill;
+            dgvTransactions.Location = new Point(3, 3);
+            dgvTransactions.Name = "dgvTransactions";
+            dgvTransactions.Size = new Size(786, 416);
+            dgvTransactions.TabIndex = 0;
+            // 
+            // tabPage2
+            // 
+            tabPage2.Controls.Add(groupBox2);
+            tabPage2.Location = new Point(4, 24);
+            tabPage2.Name = "tabPage2";
+            tabPage2.Padding = new Padding(3);
+            tabPage2.Size = new Size(792, 422);
+            tabPage2.TabIndex = 3;
+            tabPage2.Text = "Register";
+            tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // groupBox2
+            // 
+            groupBox2.BackColor = Color.RosyBrown;
+            groupBox2.Controls.Add(btnRegister);
+            groupBox2.Controls.Add(tbxRegPassword);
+            groupBox2.Controls.Add(tbxRegUsername);
+            groupBox2.Controls.Add(tbxRegName);
+            groupBox2.Controls.Add(label5);
+            groupBox2.Controls.Add(label4);
+            groupBox2.Controls.Add(label3);
+            groupBox2.Location = new Point(34, 31);
+            groupBox2.Name = "groupBox2";
+            groupBox2.Size = new Size(725, 370);
+            groupBox2.TabIndex = 0;
+            groupBox2.TabStop = false;
+            groupBox2.Text = "Register";
+            // 
+            // btnRegister
+            // 
+            btnRegister.BackColor = Color.Green;
+            btnRegister.Location = new Point(134, 252);
+            btnRegister.Name = "btnRegister";
+            btnRegister.Size = new Size(193, 57);
+            btnRegister.TabIndex = 6;
+            btnRegister.Text = "Register";
+            btnRegister.UseVisualStyleBackColor = false;
+            btnRegister.Click += btnRegister_Click;
+            // 
+            // tbxRegPassword
+            // 
+            tbxRegPassword.Location = new Point(219, 200);
+            tbxRegPassword.Name = "tbxRegPassword";
+            tbxRegPassword.Size = new Size(281, 23);
+            tbxRegPassword.TabIndex = 5;
+            tbxRegPassword.UseSystemPasswordChar = true;
+            // 
+            // tbxRegUsername
+            // 
+            tbxRegUsername.Location = new Point(219, 140);
+            tbxRegUsername.Name = "tbxRegUsername";
+            tbxRegUsername.Size = new Size(281, 23);
+            tbxRegUsername.TabIndex = 4;
+            // 
+            // tbxRegName
+            // 
+            tbxRegName.Location = new Point(219, 82);
+            tbxRegName.Name = "tbxRegName";
+            tbxRegName.Size = new Size(281, 23);
+            tbxRegName.TabIndex = 3;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label5.Location = new Point(50, 195);
+            label5.Name = "label5";
+            label5.Size = new Size(100, 25);
+            label5.TabIndex = 2;
+            label5.Text = "Password :";
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label4.Location = new Point(50, 135);
+            label4.Name = "label4";
+            label4.Size = new Size(106, 25);
+            label4.TabIndex = 1;
+            label4.Text = "Username :";
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Segoe UI", 14.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label3.Location = new Point(50, 77);
+            label3.Name = "label3";
+            label3.Size = new Size(106, 25);
+            label3.TabIndex = 0;
+            label3.Text = "Full Name :";
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(tabControl1);
+            Controls.Add(tabRegister);
             Name = "Form1";
             Text = "ATM Bank";
-            tabControl1.ResumeLayout(false);
+            tabRegister.ResumeLayout(false);
             tabLogIn.ResumeLayout(false);
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             tabATM.ResumeLayout(false);
+            panel2.ResumeLayout(false);
+            panel2.PerformLayout();
             panel1.ResumeLayout(false);
+            tabPage1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvTransactions).EndInit();
+            tabPage2.ResumeLayout(false);
+            groupBox2.ResumeLayout(false);
+            groupBox2.PerformLayout();
             ResumeLayout(false);
         }
 
         #endregion
 
-        private TabControl tabControl1;
+        private TabControl tabRegister;
         private TabPage tabLogIn;
         private TabPage tabATM;
         private GroupBox groupBox1;
@@ -394,7 +599,6 @@
         private Button LoginButton;
         private Panel panel1;
         private Label lblBalance;
-        private Label lblUserName;
         private Label lblAmount;
         private Button btnZero;
         private Button btnNine;
@@ -408,8 +612,26 @@
         private Button btn2;
         private Button btnOne;
         private Button btnLogout;
-        private Button btnWithdraw;
         private Button btnDeposit;
         private Label label1;
+        private TabPage tabPage1;
+        private DataGridView dgvTransactions;
+        private TabPage tabPage2;
+        private GroupBox groupBox2;
+        private Button btnRegister;
+        private TextBox tbxRegPassword;
+        private TextBox tbxRegUsername;
+        private TextBox tbxRegName;
+        private Label label5;
+        private Label label4;
+        private Label label3;
+        private Button btnGoRegister;
+        private Button btnWithdraw;
+        private Panel panel2;
+        private Label lblAN;
+        private Label lblUserName;
+        private Label label7;
+        private Label label6;
+        private Button btnDownloadStatement;
     }
 }
