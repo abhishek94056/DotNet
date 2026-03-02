@@ -3,20 +3,20 @@
   "WorkspaceRootPath": "D:\\Dot Net\\WinForms\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|d:\\dot net\\winforms\\atm\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|solutionrelative:atm\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|d:\\dot net\\winforms\\atm\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|solutionrelative:atm\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|d:\\dot net\\winforms\\atm\\users.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|solutionrelative:atm\\users.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|d:\\dot net\\winforms\\atm\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|solutionrelative:atm\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
       "AbsoluteMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|d:\\dot net\\winforms\\atm\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|solutionrelative:atm\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|d:\\dot net\\winforms\\atm\\users.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|solutionrelative:atm\\users.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,21 +26,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 5,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Users.cs",
-              "DocumentMoniker": "D:\\Dot Net\\WinForms\\ATM\\Users.cs",
-              "RelativeDocumentMoniker": "ATM\\Users.cs",
-              "ToolTip": "D:\\Dot Net\\WinForms\\ATM\\Users.cs",
-              "RelativeToolTip": "ATM\\Users.cs",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAAABkAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-27T07:09:15.101Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
@@ -56,37 +43,50 @@
             {
               "$type": "Document",
               "DocumentIndex": 3,
+              "Title": "Users.cs",
+              "DocumentMoniker": "D:\\Dot Net\\WinForms\\ATM\\Users.cs",
+              "RelativeDocumentMoniker": "ATM\\Users.cs",
+              "ToolTip": "D:\\Dot Net\\WinForms\\ATM\\Users.cs",
+              "RelativeToolTip": "ATM\\Users.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABUAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-27T07:09:15.101Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "Form1.Designer.cs",
               "DocumentMoniker": "D:\\Dot Net\\WinForms\\ATM\\Form1.Designer.cs",
               "RelativeDocumentMoniker": "ATM\\Form1.Designer.cs",
               "ToolTip": "D:\\Dot Net\\WinForms\\ATM\\Form1.Designer.cs",
               "RelativeToolTip": "ATM\\Form1.Designer.cs",
-              "ViewState": "AgIAAAoAAAAAAAAAAAAAwFACAAAhAAAAAAAAAA==",
+              "ViewState": "AgIAAOQBAAAAAAAAAAAuwOkBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-27T06:24:50.901Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "Form1.cs",
               "DocumentMoniker": "D:\\Dot Net\\WinForms\\ATM\\Form1.cs",
               "RelativeDocumentMoniker": "ATM\\Form1.cs",
-              "ToolTip": "D:\\Dot Net\\WinForms\\ATM\\Form1.cs",
-              "RelativeToolTip": "ATM\\Form1.cs",
-              "ViewState": "AgIAABQBAAAAAAAAAAAowCQBAAAzAAAAAAAAAA==",
+              "ToolTip": "D:\\Dot Net\\WinForms\\ATM\\Form1.cs*",
+              "RelativeToolTip": "ATM\\Form1.cs*",
+              "ViewState": "AgIAAKMAAAAAAAAAAAAAAKcAAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-25T09:49:19.406Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Form1.cs [Design]",
               "DocumentMoniker": "D:\\Dot Net\\WinForms\\ATM\\Form1.cs",
               "RelativeDocumentMoniker": "ATM\\Form1.cs",
-              "ToolTip": "D:\\Dot Net\\WinForms\\ATM\\Form1.cs [Design]",
-              "RelativeToolTip": "ATM\\Form1.cs [Design]",
+              "ToolTip": "D:\\Dot Net\\WinForms\\ATM\\Form1.cs [Design]*",
+              "RelativeToolTip": "ATM\\Form1.cs [Design]*",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-25T09:25:09.861Z",
               "EditorCaption": " [Design]"

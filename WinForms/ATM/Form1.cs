@@ -21,6 +21,7 @@ namespace ATM
         {
             InitializeComponent();
             panel1.Enabled = false;
+            panel2.Enabled = false;
         }
 
         private void LoginButton_Click(object sender, EventArgs e)
@@ -64,6 +65,7 @@ namespace ATM
                     lblBalance.Text = wholsLogIn.Balance.ToString("0.00");
 
                     panel1.Enabled = true;
+                    panel2.Enabled = true;
 
                     LoadTransactions();
                 }
@@ -116,44 +118,104 @@ namespace ATM
             }
         }
 
-        private void AddTransaction(string type, double amountValue)
+        private void AddTransaction(string type, double amount, string description)
         {
             using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = "INSERT INTO Transactions (UserName, Type, Amount) VALUES (@username, @type, @amount)";
+                string query = @"INSERT INTO Transactions 
+                         (UserName, Type, Amount, Description) 
+                         VALUES 
+                         (@username, @type, @amount, @description)";
 
                 SqlCommand cmd = new SqlCommand(query, con);
+
                 cmd.Parameters.AddWithValue("@username", wholsLogIn.UserName);
                 cmd.Parameters.AddWithValue("@type", type);
-                cmd.Parameters.AddWithValue("@amount", amountValue);
+                cmd.Parameters.AddWithValue("@amount", amount);
+                cmd.Parameters.AddWithValue("@description", description);
 
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
         }
 
+        //private void LoadTransactions()
+        //{
+        //    using (SqlConnection con = new SqlConnection(connectionString))
+        //    {
+        //        string query = "SELECT Type, Amount, Description, TransactionDate FROM Transactions WHERE UserName=@username ORDER BY TransactionDate DESC";
+
+        //        SqlCommand cmd = new SqlCommand(query, con);
+        //        cmd.Parameters.AddWithValue("@username", wholsLogIn.UserName);
+
+        //        SqlDataAdapter da = new SqlDataAdapter(cmd);
+        //        DataTable dt = new DataTable();
+        //        da.Fill(dt);
+
+        //        dgvTransactions.DataSource = dt;
+        //        dgvTransactions.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+        //        dgvTransactions.ReadOnly = true;
+        //        dgvTransactions.AllowUserToAddRows = false;
+        //    }
+        //}
+
         private void LoadTransactions()
         {
+            lstTransactions.Items.Clear();
+
+           
+            lstTransactions.Items.Add(
+                $"{"Date",-31} | {"Description",-18} | {"Type",-4} | {"Amount",12} | {"Balance",12}");
+
+            lstTransactions.Items.Add(
+                new string('-', 75));  
+
+            double runningBalance = Convert.ToDouble(wholsLogIn.Balance);
+
             using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = "SELECT Type, Amount, TransactionDate FROM Transactions WHERE UserName=@username ORDER BY TransactionDate DESC";
+                string query = @"SELECT Id, Type, Amount, Description, TransactionDate
+                         FROM Transactions
+                         WHERE UserName = @username
+                         ORDER BY TransactionDate DESC, Id DESC";
 
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@username", wholsLogIn.UserName);
 
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
+                con.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
 
-                dgvTransactions.DataSource = dt;
-                dgvTransactions.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-                dgvTransactions.ReadOnly = true;
-                dgvTransactions.AllowUserToAddRows = false;
+                while (reader.Read())
+                {
+                    string type = reader["Type"].ToString();
+                    double amount = Convert.ToDouble(reader["Amount"]);
+                    DateTime date = Convert.ToDateTime(reader["TransactionDate"]);
+                    string description = reader["Description"]?.ToString() ?? "";
+
+                    string crdr = type == "Deposit" ? "CR" : "DR";
+
+                    string formattedAmount = type == "Deposit"
+                        ? $"+ ₹ {amount:0.00}"
+                        : $"- ₹ {amount:0.00}";
+
+                    string formattedLine =
+                        $"{date:dd-MM-yyyy HH:mm,-18} | {description,-15} | {crdr,-4} | {formattedAmount,12} | ₹ {runningBalance,10:0.00}";
+
+                    lstTransactions.Items.Add(formattedLine);
+
+                    if (type == "Deposit")
+                        runningBalance -= amount;
+                    else
+                        runningBalance += amount;
+                }
+
+                reader.Close();
             }
         }
 
         private void btnDeposit_Click(object sender, EventArgs e)
         {
+
             if (string.IsNullOrEmpty(amount)) return;
 
             double depositAmount = double.Parse(amount);
@@ -161,7 +223,14 @@ namespace ATM
             wholsLogIn.deposit(depositAmount);
 
             UpdateBalanceInDatabase();
-            AddTransaction("Deposit", depositAmount);
+            string description = txtDescription.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(description))
+            {
+                description = " via ATM";
+            }
+
+            AddTransaction("Deposit", depositAmount, description);
             LoadTransactions();
 
             lblBalance.Text = wholsLogIn.Balance.ToString("0.00");
@@ -169,7 +238,7 @@ namespace ATM
             amount = "";
         }
 
-        private void btnWithdraw_Click(object sender, EventArgs e)
+        private void btnWithdraw_Click_1(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(amount)) return;
 
@@ -184,14 +253,20 @@ namespace ATM
             }
 
             UpdateBalanceInDatabase();
-            AddTransaction("Withdraw", withdrawAmount);
+            string description = txtDescription.Text;
+
+            if (string.IsNullOrWhiteSpace(description))
+            {
+                description = " via ATM";
+            }
+
+            AddTransaction("Withdraw", withdrawAmount, description);
             LoadTransactions();
 
             lblBalance.Text = wholsLogIn.Balance.ToString("0.00");
             lblAmount.Text = "0";
             amount = "";
         }
-
         private void btnLogout_Click(object sender, EventArgs e)
         {
             lblUserName.Text = "";
@@ -204,6 +279,7 @@ namespace ATM
 
             tabRegister.SelectedTab = tabLogIn;
             panel1.Enabled = false;
+            panel2.Enabled = false;
         }
 
         private void btnRegister_Click(object sender, EventArgs e)
@@ -238,7 +314,6 @@ namespace ATM
 
                     MessageBox.Show("Registration Successful!");
 
-                    // Clear fields
                     tbxRegName.Clear();
                     tbxRegUsername.Clear();
                     tbxRegPassword.Clear();
@@ -252,77 +327,105 @@ namespace ATM
             }
         }
 
-
-
         private void btnGoRegister_Click_1(object sender, EventArgs e)
         {
             tabRegister.SelectedTab = tabPage2;
         }
 
-        private void panel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
         private void btnDownloadStatement_Click(object sender, EventArgs e)
         {
-            
-            if (wholsLogIn == null)
-            {
-                MessageBox.Show("Please login first.");
-                return;
-            }
-
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "PDF files (*.pdf)|*.pdf";
-            sfd.FileName = "BankStatement_" + wholsLogIn.Id + ".pdf";
+            sfd.FileName = "BankStatement_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".pdf";
 
-            if (sfd.ShowDialog() == DialogResult.OK)
+            if (sfd.ShowDialog() != DialogResult.OK)
+                return;
+
+            Document doc = new Document(PageSize.A4, 20, 20, 20, 20);
+            PdfWriter.GetInstance(doc, new FileStream(sfd.FileName, FileMode.Create));
+            doc.Open();
+
+            // Fonts
+            var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 16);
+            var headerFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 11);
+            var normalFont = FontFactory.GetFont(FontFactory.HELVETICA, 10);
+
+            // ===== TITLE =====
+            Paragraph title = new Paragraph("ATM BANK STATEMENT", titleFont);
+            title.Alignment = Element.ALIGN_CENTER;
+            doc.Add(title);
+            doc.Add(new Paragraph("\n"));
+
+            // ===== ACCOUNT INFO =====
+            doc.Add(new Paragraph("Account Holder : " + wholsLogIn.Name, normalFont));
+            doc.Add(new Paragraph("Account Number : " + wholsLogIn.Id, normalFont));
+            doc.Add(new Paragraph("Statement Date : " + DateTime.Now.ToString("dd-MM-yyyy"), normalFont));
+            doc.Add(new Paragraph("Current Balance : ₹ " + wholsLogIn.Balance.ToString("0.00"), normalFont));
+            doc.Add(new Paragraph("\n"));
+
+            // ===== TABLE =====
+            PdfPTable table = new PdfPTable(5);
+            table.WidthPercentage = 100;
+            table.SetWidths(new float[] { 20f, 30f, 10f, 20f, 20f });
+
+            // Header Row
+            table.AddCell(new PdfPCell(new Phrase("Date", headerFont)));
+            table.AddCell(new PdfPCell(new Phrase("Description", headerFont)));
+            table.AddCell(new PdfPCell(new Phrase("Type", headerFont)));
+            table.AddCell(new PdfPCell(new Phrase("Amount", headerFont)));
+            table.AddCell(new PdfPCell(new Phrase("Balance", headerFont)));
+
+            double runningBalance = wholsLogIn.Balance;
+
+            using (SqlConnection con = new SqlConnection(connectionString))
             {
-                Document doc = new Document(PageSize.A4);
-                PdfWriter.GetInstance(doc, new FileStream(sfd.FileName, FileMode.Create));
-                doc.Open();
+                string query = @"SELECT Id, Type, Amount, Description, TransactionDate
+                     FROM Transactions
+                     WHERE UserName = @username
+                     ORDER BY TransactionDate DESC, Id DESC";
 
-                doc.Add(new Paragraph("BANK STATEMENT\n\n"));
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@username", wholsLogIn.UserName);
 
-                doc.Add(new Paragraph("Account Holder: " + wholsLogIn.Name));
-                doc.Add(new Paragraph("Account Number: " + wholsLogIn.Id));
-                doc.Add(new Paragraph("Current Balance: ₹ " + wholsLogIn.Balance.ToString("0.00")));
-                doc.Add(new Paragraph("\n"));
+                con.Open();
+                SqlDataReader reader = cmd.ExecuteReader();
 
-                PdfPTable table = new PdfPTable(3);
-                table.WidthPercentage = 100;
-
-                table.AddCell("Date");
-                table.AddCell("Type");
-                table.AddCell("Amount");
-
-                using (SqlConnection con = new SqlConnection(connectionString))
+                while (reader.Read())
                 {
-                    string query = "SELECT Type, Amount, TransactionDate FROM Transactions WHERE UserName=@username ORDER BY TransactionDate";
+                    string type = reader["Type"].ToString();
+                    double amount = Convert.ToDouble(reader["Amount"]);
 
-                    SqlCommand cmd = new SqlCommand(query, con);
-                    cmd.Parameters.AddWithValue("@username", wholsLogIn.UserName);
+                    // Print row
+                    table.AddCell(new Phrase(
+                        Convert.ToDateTime(reader["TransactionDate"])
+                        .ToString("dd-MM-yyyy HH:mm"), normalFont));
 
-                    con.Open();
-                    SqlDataReader reader = cmd.ExecuteReader();
+                    table.AddCell(new Phrase(reader["Description"].ToString(), normalFont));
+                    table.AddCell(new Phrase(type == "Deposit" ? "CR" : "DR", normalFont));
 
-                    while (reader.Read())
-                    {
-                        table.AddCell(Convert.ToDateTime(reader["TransactionDate"]).ToString("dd-MM-yyyy HH:mm"));
-                        table.AddCell(reader["Type"].ToString());
-                        table.AddCell(Convert.ToDecimal(reader["Amount"]).ToString("0.00"));
-                    }
+                    // Show + or - sign
+                    string formattedAmount = type == "Deposit"
+                        ? "+ ₹ " + amount.ToString("0.00")
+                        : "- ₹ " + amount.ToString("0.00");
 
-                    reader.Close();
+                    table.AddCell(new Phrase(formattedAmount, normalFont));
+                    table.AddCell(new Phrase("₹ " + runningBalance.ToString("0.00"), normalFont));
+
+                    // Reverse balance logic (because DESC)
+                    if (type == "Deposit")
+                        runningBalance -= amount;
+                    else
+                        runningBalance += amount;
                 }
 
-                doc.Add(table);
-                doc.Close();
-
-                MessageBox.Show("Statement Downloaded Successfully!");
+                reader.Close();
             }
+
+            doc.Add(table);
+            doc.Add(new Paragraph("\n\nThis is a computer generated statement.", normalFont));
+            doc.Close();
+
+            MessageBox.Show("Statement Downloaded Successfully!");
         }
-   
     }
 }
