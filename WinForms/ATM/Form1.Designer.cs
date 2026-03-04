@@ -64,6 +64,7 @@
             btnOne = new Button();
             lblAmount = new Label();
             tabPage1 = new TabPage();
+            lstTransactions = new ListBox();
             tabPage2 = new TabPage();
             groupBox2 = new GroupBox();
             btnRegister = new Button();
@@ -73,7 +74,6 @@
             label5 = new Label();
             label4 = new Label();
             label3 = new Label();
-            lstTransactions = new ListBox();
             tabRegister.SuspendLayout();
             tabLogIn.SuspendLayout();
             groupBox1.SuspendLayout();
@@ -169,6 +169,7 @@
             // 
             tbxPassword.Location = new Point(218, 111);
             tbxPassword.Name = "tbxPassword";
+            tbxPassword.PasswordChar = '*';
             tbxPassword.Size = new Size(195, 23);
             tbxPassword.TabIndex = 1;
             // 
@@ -487,6 +488,16 @@
             tabPage1.Text = "Transaction History";
             tabPage1.UseVisualStyleBackColor = true;
             // 
+            // lstTransactions
+            // 
+            lstTransactions.Dock = DockStyle.Fill;
+            lstTransactions.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lstTransactions.FormattingEnabled = true;
+            lstTransactions.Location = new Point(3, 3);
+            lstTransactions.Name = "lstTransactions";
+            lstTransactions.Size = new Size(786, 416);
+            lstTransactions.TabIndex = 0;
+            // 
             // tabPage2
             // 
             tabPage2.Controls.Add(groupBox2);
@@ -577,16 +588,6 @@
             label3.Size = new Size(106, 25);
             label3.TabIndex = 0;
             label3.Text = "Full Name :";
-            // 
-            // lstTransactions
-            // 
-            lstTransactions.Dock = DockStyle.Fill;
-            lstTransactions.Font = new Font("Segoe UI", 11.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lstTransactions.FormattingEnabled = true;
-            lstTransactions.Location = new Point(3, 3);
-            lstTransactions.Name = "lstTransactions";
-            lstTransactions.Size = new Size(786, 416);
-            lstTransactions.TabIndex = 0;
             // 
             // Form1
             // 

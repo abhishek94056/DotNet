@@ -7,7 +7,7 @@
       "RelativeMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|solutionrelative:atm\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|d:\\dot net\\winforms\\atm\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|D:\\Dot Net\\WinForms\\atm\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{B1432B9D-4E35-41A7-85B1-95167A44EB31}|ATM\\ATM.csproj|solutionrelative:atm\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
@@ -50,8 +50,7 @@
               "RelativeToolTip": "ATM\\Users.cs",
               "ViewState": "AgIAAAwAAAAAAAAAAAAAABUAAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-27T07:09:15.101Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-02-27T07:09:15.101Z"
             },
             {
               "$type": "Document",
@@ -59,9 +58,9 @@
               "Title": "Form1.Designer.cs",
               "DocumentMoniker": "D:\\Dot Net\\WinForms\\ATM\\Form1.Designer.cs",
               "RelativeDocumentMoniker": "ATM\\Form1.Designer.cs",
-              "ToolTip": "D:\\Dot Net\\WinForms\\ATM\\Form1.Designer.cs",
-              "RelativeToolTip": "ATM\\Form1.Designer.cs",
-              "ViewState": "AgIAAOQBAAAAAAAAAAAuwOkBAAAAAAAAAAAAAA==",
+              "ToolTip": "D:\\Dot Net\\WinForms\\ATM\\Form1.Designer.cs*",
+              "RelativeToolTip": "ATM\\Form1.Designer.cs*",
+              "ViewState": "AgIAAAsCAAAAAAAAAAAYwB4CAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-27T06:24:50.901Z",
               "EditorCaption": ""
@@ -74,7 +73,7 @@
               "RelativeDocumentMoniker": "ATM\\Form1.cs",
               "ToolTip": "D:\\Dot Net\\WinForms\\ATM\\Form1.cs*",
               "RelativeToolTip": "ATM\\Form1.cs*",
-              "ViewState": "AgIAAKMAAAAAAAAAAAAAAKcAAAAzAAAAAAAAAA==",
+              "ViewState": "AgIAAA8BAAAAAAAAAAAAAF4AAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-25T09:49:19.406Z",
               "EditorCaption": ""
