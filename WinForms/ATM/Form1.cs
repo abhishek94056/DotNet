@@ -150,7 +150,7 @@ namespace ATM
                     cmd.ExecuteNonQuery();
 
                     MessageBox.Show("Registration Successful!");
-
+                    
                     tbxRegName.Clear();
                     tbxRegUsername.Clear();
                     tbxRegPassword.Clear();
