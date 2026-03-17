@@ -1,0 +1,12 @@
+# Visual Studio folders
+.vs/
+bin/
+obj/
+
+# User files
+*.user
+*.suo
+
+# Build outputs
+*.exe
+*.dll

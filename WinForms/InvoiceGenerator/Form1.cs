@@ -1,8 +1,8 @@
 ﻿using iTextSharp.text;
 using iTextSharp.text.pdf;
+using Microsoft.Data.SqlClient;
 using System.Configuration;
 using System.Data;
-using Microsoft.Data.SqlClient;
 
 namespace InvoiceGenerator
 {
@@ -13,9 +13,10 @@ namespace InvoiceGenerator
         public Form1()
         {
             InitializeComponent();
+
         }
 
-        private void btnGeneratePDF_Click(object sender, EventArgs e)
+        private void btnPrint_Click(object sender, EventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "PDF files (*.pdf)|*.pdf";
@@ -27,26 +28,23 @@ namespace InvoiceGenerator
                 PdfWriter.GetInstance(doc, new FileStream(sfd.FileName, FileMode.Create));
                 doc.Open();
 
-                // ===================== FONTS =====================
                 iTextSharp.text.Font companyFont = FontFactory.GetFont("Garamond", 35, iTextSharp.text.Font.NORMAL);
                 iTextSharp.text.Font headerFont = FontFactory.GetFont("Verdana", 9, iTextSharp.text.Font.ITALIC);
-                iTextSharp.text.Font titleFont = FontFactory.GetFont(FontFactory.COURIER, 16, iTextSharp.text.Font.BOLD | iTextSharp.text.Font.UNDERLINE);    
-                iTextSharp.text.Font subtitleFont = FontFactory.GetFont("Verdana", 12, iTextSharp.text.Font.BOLD);  
+                iTextSharp.text.Font titleFont = FontFactory.GetFont(FontFactory.COURIER, 16, iTextSharp.text.Font.BOLD | iTextSharp.text.Font.UNDERLINE);
+                iTextSharp.text.Font subtitleFont = FontFactory.GetFont("Verdana", 12, iTextSharp.text.Font.BOLD);
                 iTextSharp.text.Font boldFont = FontFactory.GetFont("Verdana", 10, iTextSharp.text.Font.BOLD);
-                iTextSharp.text.Font normalFont = FontFactory.GetFont("Verdana", 10);      
+                iTextSharp.text.Font normalFont = FontFactory.GetFont("Verdana", 10);
                 iTextSharp.text.Font declarationFont = FontFactory.GetFont("Verdana", 12, iTextSharp.text.Font.UNDERLINE);
 
-                // ===================== "ORIGINAL FOR BUYER" =====================
                 Paragraph originalText = new Paragraph("ORIGINAL FOR BUYER", headerFont);//verdana 10 courier new 
                 originalText.Alignment = Element.ALIGN_RIGHT;
                 doc.Add(originalText);
                 doc.Add(new Paragraph("\n"));
 
-
-                // ===================== HEADER TABLE =====================
                 PdfPTable headerTable = new PdfPTable(2);
                 headerTable.WidthPercentage = 100;
                 headerTable.SetWidths(new float[] { 0.15f, 0.85f });
+
 
                 // --- LOGO CELL ---
                 string logoPath = @"D:\Dot Net\WinForms\InvoiceGenerator\Logo.png";
@@ -78,6 +76,8 @@ namespace InvoiceGenerator
                 headerTable.AddCell(companyCell);
 
                 // --- TAX INVOICE CELL (spans both columns) ---
+
+
                 PdfPCell titleCell = new PdfPCell(new Phrase("TAX INVOICE", titleFont));
                 titleCell.Colspan = 2;  // ← spans full width
                 titleCell.HorizontalAlignment = Element.ALIGN_CENTER;
@@ -106,7 +106,7 @@ namespace InvoiceGenerator
                                 | iTextSharp.text.Rectangle.TOP_BORDER
                                 | iTextSharp.text.Rectangle.RIGHT_BORDER;
                 leftCell.BorderWidth = 0.7f;
-                leftCell.PaddingTop =  - 4f;
+                leftCell.PaddingTop = -4f;
 
                 Paragraph companyPara = new Paragraph("M/S CodNow Technologies", subtitleFont);
                 companyPara.Alignment = Element.ALIGN_CENTER;
@@ -195,14 +195,32 @@ namespace InvoiceGenerator
                     rightInnerTable.AddCell(vc);
                 }
 
-                AddRow("Invoice No : ", "FY2526/CNT/261", boldFont);
-                AddRow("Invoice Date : ", "02.02.2026", normalFont);
-                AddRow("Date of Supply : ", "02.02.2026", normalFont);
-                AddRow("Purchase Order No : ", "MUM/1141/17587/895", boldFont);
-                AddRow("Purchase Order Dt : ", "05-Dec-25", normalFont);
-                AddRow("DC No : ", "FY2526/CNT/DC046", boldFont);
-                AddRow("DC Date : ", "27.12.2025", normalFont);
-                AddRow("Vehicle No : ", "MH20FP9876", normalFont);
+                string invoiceText = lblID.Text;
+                int invoiceNo = Convert.ToInt32(invoiceText.Split('/')[2]);
+                DataRow master = null;
+
+                using (SqlConnection con = new SqlConnection(connectionstring))
+                using (SqlCommand cmd = new SqlCommand("SP_GetInvoiceMaster", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@InvoiceNo", invoiceNo);
+                    con.Open();
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    if (dt.Rows.Count == 0) { MessageBox.Show("Invoice not found!"); return; }
+                    master = dt.Rows[0];
+                }
+
+                AddRow("Invoice No : ", "FY2526/CNT/" + master["InvoiceNo"].ToString(), boldFont);
+                AddRow("Invoice Date : ", Convert.ToDateTime(master["InvoiceDate"]).ToString("dd.MM.yyyy"), normalFont);
+                AddRow("Date of Supply : ", Convert.ToDateTime(master["DateOfSupply"]).ToString("dd.MM.yyyy"), normalFont);
+                AddRow("Purchase Order No : ", master["PurchaseOrderNo"].ToString(), boldFont);
+                AddRow("Purchase Order Dt : ", Convert.ToDateTime(master["PurchaseOrderDt"]).ToString("dd-MMM-yy"), normalFont);
+                AddRow("DC No : ", master["DCNo"].ToString(), boldFont);
+                AddRow("DC Date : ", Convert.ToDateTime(master["DCDate"]).ToString("dd.MM.yyyy"), normalFont);
+                AddRow("Vehicle No : ", master["VehicleNo"].ToString(), normalFont);
+
 
                 rightCell.AddElement(rightInnerTable);
                 mainTable.AddCell(rightCell);
@@ -236,8 +254,46 @@ namespace InvoiceGenerator
                 rightCell2.AddElement(shipPara);
 
                 mainTable.AddCell(rightCell2);
-                
-                // ---------- LEFT CELL 3 (Invoice To Details) ----------
+
+                string invoiceTo = master["InvoiceTo"].ToString();
+                string shippingTo = master["ShippingTo"].ToString();
+
+                DataRow invoiceToData = null;
+                DataRow shippingToData = null;
+
+                using (SqlConnection con = new SqlConnection(connectionstring))
+                {
+                    con.Open();
+
+                    // Invoice To
+                    using (SqlCommand cmd = new SqlCommand("SP_GetCompanyDetails", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@CompanyName", invoiceTo);
+
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        DataTable dt = new DataTable();
+                        da.Fill(dt);
+
+                        if (dt.Rows.Count > 0)
+                            invoiceToData = dt.Rows[0];
+                    }
+
+                    // Shipping To
+                    using (SqlCommand cmd = new SqlCommand("SP_GetCompanyDetails", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@CompanyName", shippingTo);
+
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        DataTable dt = new DataTable();
+                        da.Fill(dt);
+
+                        if (dt.Rows.Count > 0)
+                            shippingToData = dt.Rows[0];
+                    }
+                }
+
                 PdfPCell leftCell3 = new PdfPCell();
                 leftCell3.Border = iTextSharp.text.Rectangle.LEFT_BORDER
                                  | iTextSharp.text.Rectangle.RIGHT_BORDER
@@ -245,42 +301,41 @@ namespace InvoiceGenerator
                 leftCell3.BorderWidth = 0.7f;
                 leftCell3.PaddingTop = -4f;
 
-                Paragraph inv2Para = new Paragraph("Procam Logistics Private Limited", boldFont);
+                Paragraph inv2Para = new Paragraph(invoiceToData["CompanyName"].ToString(), boldFont);
                 inv2Para.Alignment = Element.ALIGN_CENTER;
-                inv2Para.SpacingAfter = -4f;           // ← added
+                inv2Para.SpacingAfter = -4f;
                 leftCell3.AddElement(inv2Para);
 
                 Phrase addressPhrase3 = new Phrase();
                 addressPhrase3.Add(new Chunk("Address : ", boldFont));
-                addressPhrase3.Add(new Chunk("Waluj MIDC, Chh. Sambhajinagar - 431 136", normalFont));
+                addressPhrase3.Add(new Chunk(invoiceToData["Address"].ToString(), normalFont));
                 Paragraph addressPara3 = new Paragraph(addressPhrase3);
-                addressPara3.SpacingAfter = 6f;       // ← added
+                addressPara3.SpacingAfter = 6f;
                 leftCell3.AddElement(addressPara3);
 
                 Phrase scPhrase = new Phrase();
                 scPhrase.Add(new Chunk("State Code : ", boldFont));
-                scPhrase.Add(new Chunk("27                            ", normalFont));
+                scPhrase.Add(new Chunk(invoiceToData["StateCode"].ToString() + "    ", normalFont));
                 scPhrase.Add(new Chunk("State : ", boldFont));
-                scPhrase.Add(new Chunk("Maharashtra", normalFont));
+                scPhrase.Add(new Chunk(invoiceToData["State"].ToString(), normalFont));
                 Paragraph scPara = new Paragraph(scPhrase);
-                scPara.SpacingAfter = -4f;             // ← added
+                scPara.SpacingAfter = -4f;
                 leftCell3.AddElement(scPara);
 
                 Phrase GSTINPhrase = new Phrase();
                 GSTINPhrase.Add(new Chunk("GSTIN : ", boldFont));
-                GSTINPhrase.Add(new Chunk("27AAFCP6574J1ZW", boldFont));
+                GSTINPhrase.Add(new Chunk(invoiceToData["GSTIN"].ToString(), boldFont));
                 Paragraph gstinPara = new Paragraph(GSTINPhrase);
-                gstinPara.SpacingAfter = -4f;          // ← added
+                gstinPara.SpacingAfter = -4f;
                 leftCell3.AddElement(gstinPara);
 
                 Phrase ptPhrase = new Phrase();
                 ptPhrase.Add(new Chunk("Payment Term : ", boldFont));
-                ptPhrase.Add(new Chunk("AS PER PO", boldFont));
-                leftCell3.AddElement(new Paragraph(ptPhrase)); // ← no spacing on last item
+                ptPhrase.Add(new Chunk(invoiceToData["PaymentTerm"].ToString(), boldFont));
+                leftCell3.AddElement(new Paragraph(ptPhrase));
 
                 mainTable.AddCell(leftCell3);
 
-                // ---------- RIGHT CELL 3 (Shipping To Details) ----------
                 PdfPCell rightCell3 = new PdfPCell();
                 rightCell3.Border = iTextSharp.text.Rectangle.LEFT_BORDER
                                   | iTextSharp.text.Rectangle.RIGHT_BORDER
@@ -288,51 +343,34 @@ namespace InvoiceGenerator
                 rightCell3.BorderWidth = 0.7f;
                 rightCell3.PaddingTop = -4f;
 
-                Paragraph ship2Para = new Paragraph("Procam Logistics Private Limited", boldFont);
+                Paragraph ship2Para = new Paragraph(shippingToData["CompanyName"].ToString(), boldFont);
                 ship2Para.Alignment = Element.ALIGN_CENTER;
-                ship2Para.SpacingAfter = -4f;          // ← added
+                ship2Para.SpacingAfter = -4f;
                 rightCell3.AddElement(ship2Para);
 
                 Phrase addressPhrase4 = new Phrase();
                 addressPhrase4.Add(new Chunk("Address : ", boldFont));
-                addressPhrase4.Add(new Chunk("Waluj MIDC, Chh. Sambhajinagar - 431 136", normalFont));
+                addressPhrase4.Add(new Chunk(shippingToData["Address"].ToString(), normalFont));
                 Paragraph addressPara4 = new Paragraph(addressPhrase4);
-                addressPara4.SpacingAfter = 6f;       // ← added
+                addressPara4.SpacingAfter = 6f;
                 rightCell3.AddElement(addressPara4);
 
                 Phrase scPhrase4 = new Phrase();
                 scPhrase4.Add(new Chunk("State Code : ", boldFont));
-                scPhrase4.Add(new Chunk("27                            ", normalFont));
+                scPhrase4.Add(new Chunk(shippingToData["StateCode"].ToString() + "    ", normalFont));
                 scPhrase4.Add(new Chunk("State : ", boldFont));
-                scPhrase4.Add(new Chunk("Maharashtra", normalFont));
+                scPhrase4.Add(new Chunk(shippingToData["State"].ToString(), normalFont));
                 Paragraph scPara4 = new Paragraph(scPhrase4);
-                scPara4.SpacingAfter = -4f;            // ← added
+                scPara4.SpacingAfter = -4f;
                 rightCell3.AddElement(scPara4);
 
                 Phrase GSTINPhrase4 = new Phrase();
                 GSTINPhrase4.Add(new Chunk("GSTIN : ", boldFont));
-                GSTINPhrase4.Add(new Chunk("27AAFCP6574J1ZW", boldFont));
-                rightCell3.AddElement(new Paragraph(GSTINPhrase4)); // ← no spacing on last item
+                GSTINPhrase4.Add(new Chunk(shippingToData["GSTIN"].ToString(), boldFont));
+                rightCell3.AddElement(new Paragraph(GSTINPhrase4));
 
                 mainTable.AddCell(rightCell3);
-                //// ---------- BLANK BOTTOM ROW (closes mainTable box) ----------
-                PdfPCell blankLeft = new PdfPCell(new Phrase(" "));
-                blankLeft.Border = iTextSharp.text.Rectangle.LEFT_BORDER
-                                      | iTextSharp.text.Rectangle.RIGHT_BORDER
-                                      | iTextSharp.text.Rectangle.TOP_BORDER
-                                      | iTextSharp.text.Rectangle.BOTTOM_BORDER;
-                blankLeft.BorderWidth = 0.7f;
-                blankLeft.FixedHeight = 4f;
-                mainTable.AddCell(blankLeft);
 
-                PdfPCell blankRight = new PdfPCell(new Phrase(" "));
-                blankRight.Border = iTextSharp.text.Rectangle.LEFT_BORDER
-                                       | iTextSharp.text.Rectangle.RIGHT_BORDER
-                                       | iTextSharp.text.Rectangle.TOP_BORDER
-                                       | iTextSharp.text.Rectangle.BOTTOM_BORDER;
-                blankRight.BorderWidth = 0.7f;
-                blankRight.FixedHeight = 4f;
-                mainTable.AddCell(blankRight);
 
                 doc.Add(mainTable);
 
@@ -386,7 +424,7 @@ namespace InvoiceGenerator
                     using (SqlCommand cmd = new SqlCommand("SP_GetInvoiceItems", con))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@InvoiceNo", tbxpdf.Text);
+                        cmd.Parameters.AddWithValue("@InvoiceNo", invoiceNo);  //"tbxpdf.Text"
 
                         con.Open();
                         SqlDataReader reader = cmd.ExecuteReader();
@@ -407,20 +445,18 @@ namespace InvoiceGenerator
                         reader.Close();
                     }
                 }
-
                 doc.Add(table);
 
                 // ===================== TOTALS + BANK DETAILS TABLE =====================
-                decimal cgst = taxableValue * 0.09m;
-                decimal sgst = taxableValue * 0.09m;
-                decimal igst = cgst + sgst;
-                decimal total = taxableValue + cgst + sgst;
+                decimal cgst = Convert.ToDecimal(tbxCGST.Text);
+                decimal sgst = Convert.ToDecimal(tbxSGST.Text);
+                decimal igst = Convert.ToDecimal(tbxIGST.Text);
+                decimal total = Convert.ToDecimal(tbxTotalValue.Text);
 
                 PdfPTable finalTable = new PdfPTable(4);
                 finalTable.WidthPercentage = 100;
-                finalTable.SetWidths(new float[] { 50f,20f, 15f, 15f });
+                finalTable.SetWidths(new float[] { 50f, 20f, 15f, 15f });
 
-                
                 // --- Bank Details Cell ---
                 PdfPCell bankCell = new PdfPCell();
                 bankCell.Padding = 2;
@@ -431,7 +467,7 @@ namespace InvoiceGenerator
                 PdfPTable bankInnerTable = new PdfPTable(2);
                 bankInnerTable.WidthPercentage = 100;
                 bankInnerTable.PaddingTop = 0;
-                bankInnerTable.SetWidths(new float[] { 1f, 1f }); 
+                bankInnerTable.SetWidths(new float[] { 1f, 1f });
 
                 void AddBankRow(string label, string value)
                 {
@@ -443,7 +479,7 @@ namespace InvoiceGenerator
 
                     PdfPCell vc = new PdfPCell(new Phrase(value, normalFont));
                     vc.Border = iTextSharp.text.Rectangle.NO_BORDER;
-                    vc.HorizontalAlignment = Element.ALIGN_LEFT; 
+                    vc.HorizontalAlignment = Element.ALIGN_LEFT;
                     vc.Padding = 2;
                     bankInnerTable.AddCell(vc);
                 }
@@ -534,14 +570,13 @@ namespace InvoiceGenerator
                 declarationCell.BorderWidth = 0.7f;
                 //declarationCell.Padding = 5;
                 declarationCell.PaddingTop = 0;
-                
-
 
                 declarationCell.AddElement(new Paragraph("E. & O.E.", normalFont) { Alignment = Element.ALIGN_RIGHT });
                 declarationCell.AddElement(new Paragraph("In Words : " + ConvertToWords(total), boldFont));
-                declarationCell.AddElement(new Paragraph("Transport Mode : BY ROAD", boldFont));
+                //declarationCell.AddElement(new Paragraph("Transport Mode : BY ROAD", boldFont));
+                declarationCell.AddElement(new Paragraph("Transport Mode : " + cbTransportMode.Text, boldFont));
                 declarationCell.AddElement(new Paragraph("Transporter Name : CodNow Technologies", boldFont));
-                declarationCell.AddElement(new Paragraph("Remark : E-Waybill No: 2021 3110 7878 & Date : 02/02/2026", boldFont));
+                declarationCell.AddElement(new Paragraph("Remark : " + tbxRemark.Text, boldFont));
                 declarationCell.AddElement(new Paragraph("Declaration", declarationFont));
                 declarationCell.AddElement(new Paragraph(
                     "I/We here certify that my/our Reg.certi under the GST ACT 2017 is in force & dated on which the sale of goods " +
@@ -572,33 +607,37 @@ namespace InvoiceGenerator
 
                 PdfPCell authCell = new PdfPCell();
                 authCell.Border = iTextSharp.text.Rectangle.LEFT_BORDER
-                                     | iTextSharp.text.Rectangle.RIGHT_BORDER
-                                     | iTextSharp.text.Rectangle.TOP_BORDER
-                                     | iTextSharp.text.Rectangle.BOTTOM_BORDER;
+                                   | iTextSharp.text.Rectangle.RIGHT_BORDER
+                                   | iTextSharp.text.Rectangle.TOP_BORDER
+                                   | iTextSharp.text.Rectangle.BOTTOM_BORDER;
                 authCell.BorderWidth = 0.7f;
-                //authCell.Padding = 5;
                 authCell.PaddingTop = -4;
-                authCell.FixedHeight = 66f;
+                authCell.FixedHeight = 90f;
+
                 Paragraph forPara = new Paragraph("For , CodNow Technologies", boldFont);
                 forPara.Alignment = Element.ALIGN_RIGHT;
                 authCell.AddElement(forPara);
-                authCell.AddElement(new Paragraph("\n\n"));
+
+                authCell.AddElement(new Paragraph(" "));
+
+                // static signature image
+                string signPath = @"D:\Dot Net\WinForms\InvoiceGenerator\Signature.png";
+
+                iTextSharp.text.Image signImg = iTextSharp.text.Image.GetInstance(signPath);
+                signImg.ScaleToFit(120f, 40f);
+                signImg.Alignment = Element.ALIGN_MIDDLE;
+
+                authCell.AddElement(signImg);
 
                 Paragraph authPara = new Paragraph("Authorised Signatory", normalFont);
                 authPara.Alignment = Element.ALIGN_RIGHT;
+
                 authCell.AddElement(authPara);
                 signatureTable.AddCell(authCell);
-
                 doc.Add(signatureTable);
-
                 doc.Close();
-
                 MessageBox.Show("Invoice PDF generated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-        }
-
-        private void dgvItems_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
         }
 
         private string ConvertToWords(decimal amount)
@@ -628,47 +667,328 @@ namespace InvoiceGenerator
             result += " ONLY";
             return result;
         }
-
-        private void btnSubmit_Click(object sender, EventArgs e)
+        private void Form1_Load_1(object sender, EventArgs e)
         {
-            decimal rate = Convert.ToDecimal(tbxRate.Text);
-            int qty = Convert.ToInt32(tbxQty.Text);
-            decimal amount = rate * qty;
+            tabControl1.Appearance = TabAppearance.FlatButtons;
+            tabControl1.ItemSize = new Size(0, 1);
+            tabControl1.SizeMode = TabSizeMode.Fixed;
+
+            LoadInvoiceNo();
+            LoadCompanies();
+            LoadItems();
+            CalculateTotal();
+            CalculateGST();//load company name
+            LoadTransportModes();
+            dgvItems.AllowUserToAddRows = false;
+            dgvItems.RowHeadersVisible = false;
+            dgvItems.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvItems.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            dgvItems.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+
+            dgvItems.Columns.Clear();
+
+            dgvItems.Columns.Add("SrNo", "Sr No");
+
+            DataGridViewComboBoxColumn cmbItem = new DataGridViewComboBoxColumn();
+            cmbItem.Name = "ItemDescription";
+            cmbItem.HeaderText = "Item Description";
+            cmbItem.DataSource = itemTable;
+            cmbItem.DisplayMember = "ItemName";
+            cmbItem.ValueMember = "ItemName";
+            dgvItems.Columns.Add(cmbItem);
+
+            dgvItems.Columns.Add("HSN", "HSN Code");
+            dgvItems.Columns.Add("Rate", "Rate");
+            dgvItems.Columns.Add("Qty", "Qty");
+            dgvItems.Columns.Add("Amount", "Amount");
+
+            dgvItems.Columns["HSN"].ReadOnly = true;
+            dgvItems.Columns["Rate"].ReadOnly = true;
+            dgvItems.Columns["Amount"].ReadOnly = true;
+
+            dgvItems.CellEndEdit += dgvItems_CellEndEdit_1;
+            dgvItems.RowsAdded += dgvItems_RowsAdded;
+
+            dgvItems.Rows.Add();
+        }
+        private void dgvItems_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            for (int i = 0; i < dgvItems.Rows.Count; i++)
+            {
+                dgvItems.Rows[i].Cells["SrNo"].Value = i + 1;
+            }
+
+        }
+        private void dgvItems_CellEndEdit_1(object sender, DataGridViewCellEventArgs e)
+        {
+            DataGridViewRow row = dgvItems.Rows[e.RowIndex];
+
+            if (row.IsNewRow)
+                return;
+
+            // When Item is selected
+            if (dgvItems.Columns[e.ColumnIndex].Name == "ItemDescription")
+            {
+                string itemName = Convert.ToString(row.Cells["ItemDescription"].Value);
+
+                DataRow[] rows = itemTable.Select($"ItemName = '{itemName}'");
+
+                if (rows.Length > 0)
+                {
+                    row.Cells["HSN"].Value = rows[0]["HSNCode"];
+                    row.Cells["Rate"].Value = rows[0]["Rate"];
+                }
+            }
+
+            // When Qty is entered
+            if (dgvItems.Columns[e.ColumnIndex].Name == "Qty")
+            {
+                decimal qty = 0;
+                decimal.TryParse(Convert.ToString(row.Cells["Qty"].Value), out qty);
+
+                decimal rate = 0;
+                decimal.TryParse(Convert.ToString(row.Cells["Rate"].Value), out rate);
+
+                decimal amount = qty * rate;
+
+                row.Cells["Amount"].Value = amount;
+
+                // 🔹 Add new row automatically
+                if (e.RowIndex == dgvItems.Rows.Count - 1 && qty > 0)
+                {
+                    dgvItems.Rows.Add();
+
+                    dgvItems.CurrentCell =
+                        dgvItems.Rows[dgvItems.Rows.Count - 1].Cells["ItemDescription"];
+                }
+
+                CalculateTotal();
+            }
+        }
+        private void CalculateTotal()
+        {
+            decimal total = 0;
+
+            foreach (DataGridViewRow row in dgvItems.Rows)
+            {
+                if (!row.IsNewRow && row.Cells["Amount"].Value != null)
+                {
+                    decimal value;
+                    decimal.TryParse(row.Cells["Amount"].Value.ToString(), out value);
+                    total += value;
+                }
+            }
+
+            txtTaxableValue.Text = total.ToString("0.00");
+
+            CalculateGST();
+        }
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            //string dcSeq = "FY2526/CNT/DC";
 
             using (SqlConnection con = new SqlConnection(connectionstring))
             {
-                using (SqlCommand cmd = new SqlCommand("SP_InsertInvoiceItem", con))
+                con.Open();
+
+                // ---------------- SAVE MASTER ----------------
+                SqlCommand cmd = new SqlCommand("SP_InsertInvoiceMaster", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@InvoiceDate", dtID.Value.Date);
+                cmd.Parameters.AddWithValue("@DateOfSupply", DTds.Value.Date);
+                cmd.Parameters.AddWithValue("@PurchaseOrderNo", "MUM/1141/17587/" + tbxPON.Text);
+                cmd.Parameters.AddWithValue("@PurchaseOrderDt", dtPOD.Value.Date);
+                cmd.Parameters.AddWithValue("@DCNo", "FY2526/CNT/DC" + tbxDC.Text);
+                cmd.Parameters.AddWithValue("@DCDate", dtDC.Value.Date);
+                cmd.Parameters.AddWithValue("@VehicleNo", tbxVN.Text.Trim());
+                cmd.Parameters.AddWithValue("@InvoiceTo", cbIT.Text);
+                cmd.Parameters.AddWithValue("@ShippingTo", cbST.Text);
+                cmd.Parameters.AddWithValue("@TaxableValue", txtTaxableValue.Text);
+                cmd.Parameters.AddWithValue("@CGST", tbxCGST.Text);
+                cmd.Parameters.AddWithValue("@SGST", tbxSGST.Text);
+                cmd.Parameters.AddWithValue("@IGST", tbxIGST.Text);
+                cmd.Parameters.AddWithValue("@TotalValue", tbxTotalValue.Text);
+                cmd.Parameters.AddWithValue("@TransportMode", cbTransportMode.Text);
+                cmd.Parameters.AddWithValue("@Remark", tbxRemark.Text);
+                object result = cmd.ExecuteScalar();
+
+                MessageBox.Show($"Master saved! ID: FY2526/CNT/{result}");
+
+                // ---------------- SAVE ITEMS ----------------
+                foreach (DataGridViewRow row in dgvItems.Rows)
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    if (row.IsNewRow) continue;
+                    if (row.Cells["ItemDescription"].Value == null)
+                        continue;
+                    SqlCommand cmdItem = new SqlCommand("SP_InsertInvoiceItem", con);
+                    cmdItem.CommandType = CommandType.StoredProcedure;
 
-                    cmd.Parameters.AddWithValue("@InvoiceNo", tbxIN.Text);
-                    cmd.Parameters.AddWithValue("@SrNo", Convert.ToInt32(tbxSN.Text));
-                    cmd.Parameters.AddWithValue("@ItemDescription", tbxID.Text);
-                    cmd.Parameters.AddWithValue("@HSNCode", tbxHC.Text);
-                    cmd.Parameters.AddWithValue("@Rate", rate);
-                    cmd.Parameters.AddWithValue("@Qty", qty);
-                    cmd.Parameters.AddWithValue("@Amount", amount);
+                    cmdItem.Parameters.AddWithValue("@InvoiceNo", result);  //lblID.Text
+                    cmdItem.Parameters.AddWithValue("@SrNo", row.Cells["SrNo"].Value);
+                    cmdItem.Parameters.AddWithValue("@ItemDescription", row.Cells["ItemDescription"].Value);
+                    cmdItem.Parameters.AddWithValue("@HSNCode", row.Cells["HSN"].Value);
+                    cmdItem.Parameters.AddWithValue("@Rate", row.Cells["Rate"].Value);
+                    cmdItem.Parameters.AddWithValue("@Qty", row.Cells["Qty"].Value);
+                    cmdItem.Parameters.AddWithValue("@Amount", row.Cells["Amount"].Value);
 
-                    con.Open();
-                    cmd.ExecuteNonQuery();
-                    con.Close();
+                    cmdItem.ExecuteNonQuery();
                 }
             }
-
-            MessageBox.Show("Item Saved Successfully!");
         }
-
-        private void btnClear_Click(object sender, EventArgs e)
+        private DataTable itemTable;
+        private void LoadItems()
         {
-            foreach (Control ctrl in tabPage1.Controls)
+            using (SqlConnection con = new SqlConnection(connectionstring))
+            using (SqlCommand cmd = new SqlCommand("SP_GetItems", con))
             {
-                if (ctrl is TextBox)
-                {
-                    ((TextBox)ctrl).Clear();
-                }
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                itemTable = new DataTable();
+                da.Fill(itemTable);
+            }
+        }
+        private void LoadInvoiceNo()
+        {
+            using (SqlConnection con = new SqlConnection(connectionstring))
+            using (SqlCommand cmd = new SqlCommand("SELECT ISNULL(MAX(InvoiceNo),0) + 1 FROM InvoiceMaster", con))
+            {
+                con.Open();
+                int nextInvoiceNo = Convert.ToInt32(cmd.ExecuteScalar());
+                //string invoiceSeq = "FY2526/CNT/";  // e.g. FY2526/CNT/261
+                lblID.Text = "FY2526/CNT/" + nextInvoiceNo.ToString();
+            }
+        }
+        private void LoadCompanies()
+        {
+            using (SqlConnection con = new SqlConnection(connectionstring))
+            using (SqlCommand cmd = new SqlCommand("SP_GetCompanies", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                // Invoice To
+                cbIT.DataSource = dt.Copy();
+                cbIT.DisplayMember = "CompanyName";
+                cbIT.ValueMember = "CompanyName";
+
+                // Shipping To
+                cbST.DataSource = dt.Copy();
+                cbST.DisplayMember = "CompanyName";
+                cbST.ValueMember = "CompanyName";
+            }
+        }
+        private void CalculateGST()
+        {
+            decimal taxableValue = 0;
+            decimal.TryParse(txtTaxableValue.Text, out taxableValue);
+
+            int stateCode = 0;
+            int.TryParse(lblITSC.Text, out stateCode);   // StateCode label
+
+            decimal cgst = 0;
+            decimal sgst = 0;
+            decimal igst = 0;
+
+            if (stateCode == 27)
+            {
+                cgst = taxableValue * 0.09m;
+                sgst = taxableValue * 0.09m;
+            }
+            else
+            {
+                igst = taxableValue * 0.18m;
             }
 
-            tbxIN.Focus();
+            tbxCGST.Text = cgst.ToString("0.00");
+            tbxSGST.Text = sgst.ToString("0.00");
+            tbxIGST.Text = igst.ToString("0.00");
+
+            decimal total = taxableValue + cgst + sgst + igst;
+
+            tbxTotalValue.Text = total.ToString("0.00");
+            // Convert total into words
+            lblTotalValueWord.Text = ConvertToWords(total);
         }
+        private void cbIT_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+            if (cbIT.SelectedIndex == -1)
+                return;
+
+            using (SqlConnection con = new SqlConnection(connectionstring))
+            using (SqlCommand cmd = new SqlCommand("SP_GetCompanyDetails", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                // Correct parameter name
+                cmd.Parameters.AddWithValue("@CompanyName", cbIT.Text);
+
+                con.Open();
+
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                if (dr.Read())
+                {
+                    lblITAdd.Text = dr["Address"].ToString();
+                    lblITSC.Text = dr["StateCode"].ToString();
+                    lblITS.Text = dr["State"].ToString();
+                    lblITGSTIN.Text = dr["GSTIN"].ToString();
+                    lblITPT.Text = dr["PaymentTerm"].ToString();
+                }
+
+                con.Close();
+
+            }
+            CalculateGST();
+        }
+
+        private void cbST_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cbST.SelectedIndex == -1)
+                return;
+
+            using (SqlConnection con = new SqlConnection(connectionstring))
+            using (SqlCommand cmd = new SqlCommand("SP_GetCompanyDetails", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@CompanyName", cbST.Text);
+
+                con.Open();
+
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                if (dr.Read())
+                {
+                    lblSTAdd.Text = dr["Address"].ToString();
+                    lblSTSC.Text = dr["StateCode"].ToString();
+                    lblSTS.Text = dr["State"].ToString();
+                    lblSTGSTIN.Text = dr["GSTIN"].ToString();
+                }
+            }
+            CalculateGST();
+        }
+        private void LoadTransportModes()
+        {
+            using (SqlConnection con = new SqlConnection(connectionstring))
+            using (SqlCommand cmd = new SqlCommand("SP_GetTransportModes", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                cbTransportMode.DataSource = dt;
+                cbTransportMode.DisplayMember = "ModeName";
+                cbTransportMode.ValueMember = "ModeName";
+            }
+        }
+
     }
 }
+

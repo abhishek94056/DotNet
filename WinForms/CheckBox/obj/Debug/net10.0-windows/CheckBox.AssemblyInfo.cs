@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CheckBox")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+da45aec50b5aa173a5a7873d7d44843cc18a75d9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b8a81c513d230f6965bb3da7a07f989179dc81e2")]
 [assembly: System.Reflection.AssemblyProductAttribute("CheckBox")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CheckBox")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
