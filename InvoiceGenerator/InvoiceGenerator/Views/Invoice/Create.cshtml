@@ -1,0 +1,770 @@
+﻿@using InvoiceGenerator
+@using InvoiceGenerator.Models
+@using InvoiceGenerator.ViewModels
+@using InvoiceGenerator.Services
+@using Microsoft.AspNetCore.Mvc.Rendering
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model InvoiceViewModel
+@{
+    ViewData["Title"] = "Create Invoice";
+}
+
+<!-- Hidden options template (Razor renders once on server, JS clones for new rows) -->
+<select id="itemOptionsTemplate" style="display:none">
+    <option value="">-- Select --</option>
+    @foreach (var i in Model.ItemsList)
+    {
+        <option>@i.Text</option>
+    }
+</select>
+
+<div class="container-fluid mt-0">
+    <div class="card shadow-sm">
+
+        <!-- ===== HEADER ===== -->
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">🧾 TAX INVOICE</h5>
+            @* <strong id="invoiceLabel">@Model.NextInvoiceLabel</strong> *@
+        </div>
+
+        <div class="card-body py-1">
+
+            <!-- ===================== ROW 1: Company Info + PO/DC Details ===================== -->
+          
+            <div class="row g-1 mb-1">
+
+                <!-- LEFT: CodNow Company Info -->
+                <div class="col-md-6">
+                    <div class="card border-secondary h-100">
+
+                        <div class="card-header fw-bold text-center py-1 small">
+                            M/S CodNow Technologies
+                        </div>
+
+                        <div class="card-body py-2 px-2">
+
+                           
+                            <div class="row mb-1">
+                                <label class="col-sm-4 col-form-label fw-bold">Address :</label>
+                                <div class="col-sm-8">
+                                    <p class="form-control-plaintext">
+                                        Plot No.32, Gut No.83, Renuka Nagar, Opp. Vinayak Park,
+                                        Deolai Road, Chhatrapati Sambhajinagar - 431001
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="row mb-1">
+                                <label class="col-sm-4 col-form-label fw-bold">Phone :</label>
+                                <div class="col-sm-8">
+                                    <p class="form-control-plaintext">+91 9923 8888 91 / +91 7972 3815 80</p>
+                                </div>
+                            </div>
+
+                            <div class="row mb-1">
+                                <label class="col-sm-4 col-form-label fw-bold">State Code :</label>
+                                <div class="col-sm-8">
+                                    <p class="form-control-plaintext">27 &nbsp;&nbsp; <strong>State :</strong> Maharashtra</p>
+                                </div>
+                            </div>
+
+                            <div class="row mb-1">
+                                <label class="col-sm-4 col-form-label fw-bold">GSTIN :</label>
+                                <div class="col-sm-8">
+                                    <p class="form-control-plaintext fw-bold">27FAEPS7663Q1ZK</p>
+                                </div>
+                            </div>
+
+                            <div class="row mb-1">
+                                <label class="col-sm-4 col-form-label fw-bold">PAN :</label>
+                                <div class="col-sm-8">
+                                    <p class="form-control-plaintext">FAEPS7663Q</p>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Invoice / PO / DC Details -->
+                <div class="col-md-6">
+                    <div class="card border-secondary h-100">
+
+                        <div class="card-header fw-bold text-center py-1 small">
+                            Invoice / PO / DC Details
+                        </div>
+
+                        <div class="card-body py-1 px-2">
+
+                            <div class="row mb-1">
+                                <label class="col-sm-4 col-form-label py-1 small fw-bold">Invoice No :</label>
+                                <div class="col-sm-8 d-flex align-items-center small">
+                                    <strong id="invoiceNoDisplay">@Model.NextInvoiceLabel</strong>
+                                </div>
+                            </div>
+
+                            <div class="row mb-1">
+                                <label class="col-sm-4 col-form-label py-1 small fw-bold">Invoice Date :</label>
+                                <div class="col-sm-8">
+                                    <input type="date" id="invoiceDate" class="form-control form-control-sm" value="@(DateTime.Now.ToString("yyyy-MM-dd"))" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-1">
+                                <label class="col-sm-4 col-form-label py-1 small fw-bold">Date of Supply :</label>
+                                <div class="col-sm-8">
+                                    <input type="date" id="dateOfSupply" class="form-control form-control-sm" value="@(DateTime.Now.ToString("yyyy-MM-dd"))" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-1">
+                                <label class="col-sm-4 col-form-label py-1 small fw-bold">Purchase Order No  :</label>
+                                <div class="col-sm-8">
+                                    <input type="text" id="poNo" class="form-control form-control-sm" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-1">
+                                <label class="col-sm-4 col-form-label py-1 small fw-bold">Purchase Order Date :</label>
+                                <div class="col-sm-8">
+                                    <input type="date" id="poDate" class="form-control form-control-sm" value="@(DateTime.Now.ToString("yyyy-MM-dd"))" />
+                                </div>
+                            </div>
+
+                            @* <div class="row mb-1">
+                                <label class="col-sm-4 col-form-label py-1 small fw-bold">DC No :</label>
+                                <div class="col-sm-8">
+                                    <input type="text" id="dcNo" class="form-control form-control-sm" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-1">
+
+
+
+                                <label class="col-sm-4 col-form-label py-1 small fw-bold">DC Date :</label>
+                                <div class="col-sm-8">
+                                    <input type="date" id="dcDate" class="form-control form-control-sm" />
+                                </div>
+                            </div> *@
+
+                            <div class="row mb-1">
+                                <label class="col-sm-4 col-form-label py-1 small fw-bold">Vehicle No :</label>
+                                <div class="col-sm-8">
+                                    <input type="text" id="vehicleNo" class="form-control form-control-sm" />
+                                </div>
+                            </div>
+
+
+                            <div class="row mb-1">
+                                <label class="col-sm-4 col-form-label py-1 small fw-bold">ASN No. :</label>
+                                <div class="col-sm-8">
+                                    <input type="text" id="ASNNo" class="form-control form-control-sm" />
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- ===================== ROW 2: Invoice To + Shipping To ===================== -->
+           
+            <div class="row g-2 mb-2">
+
+                <!-- LEFT: Invoice To -->
+                <div class="col-md-6">
+                    <div class="card border-secondary h-100">
+
+                        <div class="card-header fw-bold text-center py-1 small">
+                            Invoice To
+                        </div>
+
+                        <div class="card-body py-2 px-2">
+
+                            <!-- Select Company -->
+                            <div class="row mb-1">
+                                <label class="col-sm-4 col-form-label py-1 small fw-bold">
+                                    Select Company :
+                                </label>
+                                <div class="col-sm-8">
+                                    <select id="invoiceTo" class="form-select form-select-sm"
+                                            onchange="loadCompanyDetails('invoiceTo')">
+                                        @foreach (var c in Model.Companies)
+                                        {
+                                            <option>@c.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Details -->
+                            <table class="table table-sm table-borderless mb-0">
+                                <tr>
+                                    <td colspan="2" class="fw-bold text-center small" id="it_CompanyName"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold" style="width:35%">Address :</td>
+                                    <td id="it_Address"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">State Code :</td>
+                                    <td id="it_StateCode"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">State :</td>
+                                    <td id="it_State"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">GSTIN :</td>
+                                    <td id="it_GSTIN" class="fw-bold"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Payment Term :</td>
+                                    <td id="it_PaymentTerm" class="fw-bold"></td>
+                                </tr>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Shipping To -->
+                <div class="col-md-6">
+                    <div class="card border-secondary h-100">
+
+                        <div class="card-header fw-bold text-center py-1 small">
+                            Shipping To
+                        </div>
+
+                        <div class="card-body py-2 px-2">
+
+                            <!-- Select Company -->
+                            <div class="row mb-1">
+                                <label class="col-sm-4 col-form-label py-1 small fw-bold">
+                                    Select Company :
+                                </label>
+                                <div class="col-sm-8">
+                                    <select id="shippingTo" class="form-select form-select-sm"
+                                            onchange="loadCompanyDetails('shippingTo')">
+                                        @foreach (var c in Model.Companies)
+                                        {
+                                            <option>@c.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Details -->
+                            <table class="table table-sm table-borderless mb-0">
+                                <tr>
+                                    <td colspan="2" class="fw-bold text-center small" id="st_CompanyName"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold" style="width:35%">Address :</td>
+                                    <td id="st_Address"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">State Code :</td>
+                                    <td id="st_StateCode"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">State :</td>
+                                    <td id="st_State"></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">GSTIN :</td>
+                                    <td id="st_GSTIN" class="fw-bold"></td>
+                                </tr>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- ===================== ITEMS TABLE ===================== --> 
+           
+            <div class="card border-secondary mb-2">
+
+                <div class="card-header fw-bold py-1 small">
+                    Items
+                </div>
+
+                <div class="card-body p-0">
+
+                    <table class="table table-bordered table-sm mb-0 align-middle" id="itemsTable">
+
+                        <thead class="table-light small">
+                            <tr>
+                                <th class="text-center py-1" style="width:5%">Sr</th>
+                                <th class="py-1" style="width:35%">Item Description</th>
+                                <th class="text-center py-1" style="width:15%">HSN</th>
+                                <th class="text-center py-1" style="width:13%">Rate</th>
+                                <th class="text-center py-1" style="width:10%">Qty</th>
+                                <th class="text-center py-1" style="width:14%">Amount</th>
+                                <th class="text-center py-1" style="width:5%"></th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="itemsBody" class="small">
+                            <tr>
+                                <td class="text-center">1</td>
+
+                                <td>
+                                    <select class="form-select form-select-sm item-select"
+                                            onchange="onItemChange(this)">
+                                        <option value="">-- Select --</option>
+                                        @foreach (var i in Model.ItemsList)
+                                        {
+                                            <option>@i.Text</option>
+                                        }
+                                    </select>
+                                </td>
+
+                                <td class="hsn text-center"></td>
+
+                                <td class="rate text-center"></td>
+
+                                <td>
+                                    <input type="number"
+                                           class="form-control form-control-sm qty text-center"
+                                           oninput="calcRow(this)" min="0" step="any" />
+                                </td>
+
+                                <td class="amount text-center">0.00</td>
+
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-danger py-0 px-2"
+                                            onclick="removeRow(this)">
+                                        ×
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                </div>
+
+                <div class="card-footer py-1 px-2">
+                    <button class="btn btn-secondary btn-sm py-0 px-2"
+                            onclick="addRow()">
+                        + Row
+                    </button>
+                </div>
+
+            </div>
+         
+            <!-- ===================== BANK DETAILS + TOTALS ===================== -->
+            <div class="row mb-2">
+
+                <!-- LEFT: Bank Details -->
+                <div class="col-md-8">
+                    <div class="fw-bold small mb-1">NEFT / RTGS BANK DETAILS:</div>
+
+                    <div class="small">
+                        <div><b>BANK :</b> IDBI BANK</div>
+                        <div><b>A/C NAME :</b> CODNOW TECHNOLOGIES</div>
+                        <div><b>A/C NO :</b> 0076102000048736</div>
+                        <div><b>IFSC :</b> IBKL0000076</div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Totals -->
+                <div class="col-md-4">
+                    <table class="table table-sm table-bordered mb-0 small">
+                        <tr>
+                            <td class="py-1">Taxable Value</td>
+                            <td class="text-end fw-bold py-1" id="taxableValue">0.00</td>
+                        </tr>
+                        <tr>
+                            <td class="py-1">CGST 9%</td>
+                            <td class="text-end py-1" id="cgst">0.00</td>
+                        </tr>
+                        <tr>
+                            <td class="py-1">SGST 9%</td>
+                            <td class="text-end py-1" id="sgst">0.00</td>
+                        </tr>
+                        <tr>
+                            <td class="py-1">IGST 18%</td>
+                            <td class="text-end py-1" id="igst">0.00</td>
+                        </tr>
+                        <tr class="table-primary fw-bold">
+                            <td class="py-1">Total Value</td>
+                            <td class="text-end py-1" id="totalValue">0.00</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===================== DECLARATION ===================== -->
+            <div class="mb-2 small">
+
+                <!-- In Words -->
+                <div class="mb-1">
+                    <span class="fw-bold">In Words :</span>
+                    <span id="totalWords"></span>
+                </div>
+
+                <!-- Transport Mode -->
+                <div class="mb-1 d-flex align-items-center gap-1">
+                    <span class="fw-bold">Transport Mode :</span>
+                    <select id="transportMode" class="form-select form-select-sm w-auto"
+                            onchange="recalcTotal()">
+                        @foreach (var m in Model.TransportModes)
+                        {
+                            <option>@m.Text</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Transporter -->
+                <div class="mb-1">
+                    <span class="fw-bold">Transporter :</span>
+                    <span>CodNow Technologies</span>
+                </div>
+
+                <!-- Remark -->
+                <div class="mb-1 d-flex align-items-center gap-1 ">
+                    <span class="fw-bold">Remark :</span>
+                    <input type="text" id="remark"
+                           class="form-control form-control-sm w-auto"
+                           style="min-width:200px" />
+                </div>
+
+            </div>
+
+            <!-- ===================== ACTION BUTTONS ===================== -->
+            <div class="d-flex justify-content-center gap-2 mt-1">
+                <button class="btn btn-primary btn-sm px-3" onclick="saveInvoice()">
+                    💾 Save
+                </button>
+
+                <button class="btn btn-success btn-sm px-3" id="btnPdf"
+                        style="display:none" onclick="downloadPdf()">
+                    📄 PDF
+                </button>
+            </div>
+        </div><!-- /card-body -->
+    </div><!-- /card -->
+</div><!-- /container -->
+
+@section Scripts {
+<script>
+    // ── State Variables ──
+    let savedInvoiceNo   = null;
+    let currentStateCode = 27; // Default: Maharashtra
+
+    // ════════════════════════════════════════════════
+    // PAGE LOAD
+    // ════════════════════════════════════════════════
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCompanyDetails('invoiceTo');
+        loadCompanyDetails('shippingTo');
+        recalcTotal();
+    });
+
+    // ════════════════════════════════════════════════
+    // LOAD COMPANY DETAILS via AJAX
+    // ════════════════════════════════════════════════
+    async function loadCompanyDetails(selectId) {
+        const name = document.getElementById(selectId).value;
+        if (!name) return;
+
+        try {
+            const r = await fetch(`/Invoice/GetCompanyDetails?name=${encodeURIComponent(name)}`);
+            if (!r.ok) throw new Error('Network error');
+            const d = await r.json();
+            if (!d) return;
+
+            if (selectId === 'invoiceTo') {
+                document.getElementById('it_CompanyName').textContent = d.companyName || '';
+                document.getElementById('it_Address').textContent     = d.address     || '';
+                document.getElementById('it_StateCode').textContent   = d.stateCode   || '';
+                document.getElementById('it_State').textContent       = d.state       || '';
+                document.getElementById('it_GSTIN').textContent       = d.gstin       || '';
+                document.getElementById('it_PaymentTerm').textContent = d.paymentTerm || '—';
+
+                currentStateCode = parseInt(d.stateCode) || 0;
+                recalcTotal();
+            }
+            else if (selectId === 'shippingTo') {
+                document.getElementById('st_CompanyName').textContent = d.companyName || '';
+                document.getElementById('st_Address').textContent     = d.address     || '';
+                document.getElementById('st_StateCode').textContent   = d.stateCode   || '';
+                document.getElementById('st_State').textContent       = d.state       || '';
+                document.getElementById('st_GSTIN').textContent       = d.gstin       || '';
+            }
+        } catch (err) {
+            console.error('loadCompanyDetails error:', err);
+        }
+    }
+
+    // ════════════════════════════════════════════════
+    // ITEM DROPDOWN CHANGE - fetch HSN + Rate
+    // ════════════════════════════════════════════════
+    async function onItemChange(sel) {
+        const row = sel.closest('tr');
+
+        if (!sel.value) {
+            row.querySelector('.hsn').textContent    = '';
+            row.querySelector('.rate').textContent   = '';
+            row.querySelector('.amount').textContent = '0.00';
+            recalcTotal();
+            return;
+        }
+
+        try {
+            const r = await fetch(`/Invoice/GetItemDetails?itemName=${encodeURIComponent(sel.value)}`);
+            if (!r.ok) throw new Error('Network error');
+            const d = await r.json();
+            if (!d) return;
+
+            // Handle both camelCase and PascalCase property names from server
+            const hsn  = d.hsnCode  || d.HSNCode  || d.HsnCode  || '';
+            const rate = d.rate     || d.Rate      || 0;
+
+            row.querySelector('.hsn').textContent  = hsn;
+            row.querySelector('.rate').textContent = parseFloat(rate).toFixed(2);
+
+            // Reset qty
+            row.querySelector('.qty').value          = '';
+            row.querySelector('.amount').textContent = '0.00';
+            recalcTotal();
+        } catch (err) {
+            console.error('onItemChange error:', err);
+        }
+    }
+
+    // ════════════════════════════════════════════════
+    // CALCULATE ROW AMOUNT
+    // ════════════════════════════════════════════════
+    function calcRow(qtyInput) {
+        const row  = qtyInput.closest('tr');
+        const rate = parseFloat(row.querySelector('.rate').textContent) || 0;
+        const qty  = parseFloat(qtyInput.value) || 0;
+        row.querySelector('.amount').textContent = (rate * qty).toFixed(2);
+        recalcTotal();
+    }
+
+    // ════════════════════════════════════════════════
+    // RECALCULATE ALL TOTALS + GST
+    // ════════════════════════════════════════════════
+    function recalcTotal() {
+        let taxable = 0;
+        document.querySelectorAll('#itemsBody .amount')
+            .forEach(el => taxable += parseFloat(el.textContent) || 0);
+
+        document.getElementById('taxableValue').textContent = taxable.toFixed(2);
+
+        let cgst = 0, sgst = 0, igst = 0;
+
+        if (currentStateCode === 27) {
+            // Intra-state: CGST + SGST
+            cgst = taxable * 0.09;
+            sgst = taxable * 0.09;
+        } else {
+            // Inter-state: IGST
+            igst = taxable * 0.18;
+        }
+
+        document.getElementById('cgst').textContent = cgst.toFixed(2);
+        document.getElementById('sgst').textContent = sgst.toFixed(2);
+        document.getElementById('igst').textContent = igst.toFixed(2);
+
+        const total = taxable + cgst + sgst + igst;
+        document.getElementById('totalValue').textContent = total.toFixed(2);
+
+        // Update In Words
+        document.getElementById('totalWords').textContent =
+            total > 0 ? convertToWords(total) : '';
+    }
+
+    // ════════════════════════════════════════════════
+    // ADD NEW ROW
+    // ════════════════════════════════════════════════
+    function addRow() {
+        const tbody   = document.getElementById('itemsBody');
+        const count   = tbody.rows.length + 1;
+        const options = document.getElementById('itemOptionsTemplate').innerHTML;
+
+        tbody.insertAdjacentHTML('beforeend', `
+            <tr>
+                <td class="text-center align-middle">${count}</td>
+                <td>
+                    <select class="form-select form-select-sm item-select"
+                            onchange="onItemChange(this)">
+                        ${options}
+                    </select>
+                </td>
+                <td class="hsn text-center align-middle"></td>
+                <td class="rate text-center align-middle"></td>
+                <td>
+                    <input type="number" class="form-control form-control-sm qty"
+                           oninput="calcRow(this)" min="0" step="any" />
+                </td>
+                <td class="amount text-center align-middle">0.00</td>
+                <td class="text-center align-middle">
+                    <button class="btn btn-sm btn-outline-danger"
+                            onclick="removeRow(this)">✕</button>
+                </td>
+            </tr>`);
+    }
+
+    // ════════════════════════════════════════════════
+    // REMOVE ROW
+    // ════════════════════════════════════════════════
+    function removeRow(btn) {
+        const tbody = document.getElementById('itemsBody');
+        if (tbody.rows.length === 1) {
+                    alert('At least one item row is required.');
+            return;
+        }
+        btn.closest('tr').remove();
+
+        // Re-number Sr column
+        Array.from(tbody.rows).forEach((row, i) => {
+            row.cells[0].textContent = i + 1;
+        });
+        recalcTotal();
+    }
+
+    // ════════════════════════════════════════════════
+    // SAVE INVOICE
+    // ════════════════════════════════════════════════
+    async function saveInvoice() {
+
+        // Validation
+        if (!document.getElementById('invoiceDate').value) {
+                    alert('Please select the Invoice Date.'); return;
+        }
+        if (!document.getElementById('dateOfSupply').value) {
+            alert('Please select the Date of Supply.'); return;
+        }
+        if (!document.getElementById('poDate').value) {
+            alert('Please select the Purchase Order Date.'); return;
+        }
+        // if (!document.getElementById('dcDate').value) {
+        //     alert('Please select the DC Date.'); return;
+
+
+        // }
+        if (!document.getElementById('invoiceTo').value) {
+            alert('Please select the Invoice To company.'); return;
+        }
+        if (!document.getElementById('shippingTo').value) {
+            alert('Please select the Shipping To company.'); return;
+        }
+
+        // Collect Items
+        const items = [];
+        let hasError = false;
+
+        document.querySelectorAll('#itemsBody tr').forEach((row, i) => {
+            const desc = row.querySelector('.item-select')?.value;
+            const qty  = parseFloat(row.querySelector('.qty').value) || 0;
+
+            if (!desc || desc === '') { hasError = true; return; }
+            if (qty <= 0)             { hasError = true; return; }
+
+            items.push({
+                srNo:            i + 1,
+                itemDescription: desc,
+                hsnCode:         row.querySelector('.hsn').textContent.trim(),
+                rate:            parseFloat(row.querySelector('.rate').textContent) || 0,
+                qty:             qty,
+                amount:          parseFloat(row.querySelector('.amount').textContent) || 0
+            });
+        });
+
+        if (hasError || items.length === 0) {
+                   alert('Please fill all item rows completely (Item + Qty).');
+        return;
+        }
+
+        // Build Payload
+        const payload = {
+            master: {
+                invoiceDate:     document.getElementById('invoiceDate').value,
+                dateOfSupply:    document.getElementById('dateOfSupply').value,
+                purchaseOrderNo: document.getElementById('poNo').value.trim(),
+                purchaseOrderDt: document.getElementById('poDate').value,
+                // dcNo:            document.getElementById('dcNo').value.trim(),
+                // dcDate:          document.getElementById('dcDate').value,
+                vehicleNo:       document.getElementById('vehicleNo').value.trim(),
+                ASNNo:       document.getElementById('ASNNo').value,
+                invoiceTo:       document.getElementById('invoiceTo').value,
+                shippingTo:      document.getElementById('shippingTo').value,
+                taxableValue:    parseFloat(document.getElementById('taxableValue').textContent) || 0,
+                transportMode:   document.getElementById('transportMode').value,
+                remark:          document.getElementById('remark').value.trim()
+            },
+            items: items
+        };
+
+        // POST to Server
+        try {
+            const r = await fetch('/Invoice/Save', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify(payload)
+            });
+
+            if (!r.ok) throw new Error(`Server error: ${r.status}`);
+            const d = await r.json();
+
+            if (d.success) {
+                savedInvoiceNo = d.invoiceNo;
+                alert(`✅ Saved! Invoice No: FY2526/CNT/${d.invoiceNo}`);
+                document.getElementById('btnPdf').style.display = 'inline-block';
+            } else {
+                alert('❌ Save failed: ' + (d.message || 'Unknown error'));
+            }
+        } catch (err) {
+            alert('❌ Error: ' + err.message);
+        }
+    }
+
+    // ════════════════════════════════════════════════
+    // DOWNLOAD PDF
+    // ════════════════════════════════════════════════
+    function downloadPdf() {
+        if (!savedInvoiceNo) {
+                alert('Please save the invoice first.');
+            return;
+        }
+        window.open(`/Invoice/Pdf/${savedInvoiceNo}`, '_blank');
+    }
+
+    // ════════════════════════════════════════════════
+    // CONVERT AMOUNT TO WORDS (Indian number system)
+    // ════════════════════════════════════════════════
+    function convertToWords(amount) {
+        const ones = ['', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN',
+                      'EIGHT', 'NINE', 'TEN', 'ELEVEN', 'TWELVE', 'THIRTEEN',
+                      'FOURTEEN', 'FIFTEEN', 'SIXTEEN', 'SEVENTEEN', 'EIGHTEEN', 'NINETEEN'];
+        const tens = ['', '', 'TWENTY', 'THIRTY', 'FORTY', 'FIFTY',
+                      'SIXTY', 'SEVENTY', 'EIGHTY', 'NINETY'];
+
+        function n2w(n) {
+            n = Math.floor(n);
+            if (n === 0)      return '';
+            if (n < 20)       return ones[n] + ' ';
+            if (n < 100)      return tens[Math.floor(n / 10)] + ' ' + ones[n % 10] + ' ';
+            if (n < 1000)     return ones[Math.floor(n / 100)] + ' HUNDRED ' + n2w(n % 100);
+            if (n < 100000)   return n2w(Math.floor(n / 1000)) + 'THOUSAND ' + n2w(n % 1000);
+            if (n < 10000000) return n2w(Math.floor(n / 100000)) + 'LAKH ' + n2w(n % 100000);
+            return n2w(Math.floor(n / 10000000)) + 'CRORE ' + n2w(n % 10000000);
+        }
+
+        const rupees = Math.floor(amount);
+        const paise  = Math.round((amount - rupees) * 100);
+
+        let result = 'RUPEES ' + n2w(rupees).trim();
+        if (paise > 0) result += ' AND ' + n2w(paise).trim() + ' PAISE';
+        result += ' ONLY';
+        return result;
+    }
+</script>
+}

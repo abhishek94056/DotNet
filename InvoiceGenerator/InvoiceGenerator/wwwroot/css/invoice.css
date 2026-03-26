@@ -1,0 +1,220 @@
+﻿namespace InvoiceGenerator.wwwroot.css {
+    body {
+        background: #f0f2f5;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        color: #fff;
+        border-radius: 12px 12px 0 0 !important;
+        padding: 14px 20px;
+    }
+
+        .card-header h6 {
+            margin: 0;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+    .section-badge {
+        background: #e8f4fd;
+        color: #0d6efd;
+        border-left: 4px solid #0d6efd;
+        padding: 6px 12px;
+        border-radius: 0 6px 6px 0;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 14px;
+    }
+
+    .form-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 3px;
+    }
+
+    .form-control, .form-select {
+        font-size: 0.85rem;
+        border-radius: 7px;
+        border: 1px solid #dce1e7;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 3px rgba(13,110,253,0.12);
+        }
+    /* Items Table */
+    #itemsTable thead th {
+        background: #1a1a2e;
+        color: #fff;
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-align: center;
+        padding: 10px 8px;
+        border: none;
+    }
+
+    #itemsTable tbody tr {
+        vertical-align: middle;
+    }
+
+    #itemsTable tbody td {
+        font-size: 0.83rem;
+        padding: 6px 8px;
+        background: #fff;
+        border-bottom: 1px solid #f0f2f5;
+    }
+
+    #itemsTable tbody tr:hover td {
+        background: #f8f9ff;
+    }
+
+    .item-select, .qty-input {
+        border: 1px solid #dce1e7;
+        border-radius: 6px;
+        font-size: 0.83rem;
+        padding: 4px 8px;
+        width: 100%;
+    }
+
+    .cell-readonly {
+        background: #f8f9fa;
+        color: #555;
+        text-align: center;
+        font-weight: 500;
+    }
+    /* Totals */
+    .totals-table td {
+        font-size: 0.85rem;
+        padding: 5px 10px;
+    }
+
+    .totals-table .total-row td {
+        font-weight: 700;
+        font-size: 0.95rem;
+        background: #1a1a2e;
+        color: #fff;
+        border-radius: 4px;
+    }
+
+    .total-words {
+        background: #fff8e1;
+        border: 1px dashed #ffc107;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #856404;
+    }
+    /* Invoice label */
+    .invoice-id-badge {
+        background: linear-gradient(135deg, #0d6efd, #0a58ca);
+        color: #fff;
+        padding: 6px 18px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+    }
+    /* Action buttons */
+    .btn-save {
+        background: #1a1a2e;
+        color: #fff;
+        border-radius: 8px;
+        padding: 10px 28px;
+        font-weight: 600;
+    }
+
+        .btn-save:hover {
+            background: #0d6efd;
+            color: #fff;
+        }
+
+    .btn-pdf {
+        background: #198754;
+        color: #fff;
+        border-radius: 8px;
+        padding: 10px 28px;
+        font-weight: 600;
+    }
+
+        .btn-pdf:hover {
+            background: #157347;
+            color: #fff;
+        }
+    /* Company info preview */
+    .company-preview {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 0.78rem;
+        color: #444;
+        border: 1px solid #e9ecef;
+        min-height: 72px;
+    }
+
+        .company-preview strong {
+            color: #0d6efd;
+            display: block;
+            margin-bottom: 2px;
+        }
+}
+/* Company detail preview box */
+.company-detail-box {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.83rem;
+    margin-top: 4px;
+}
+
+    .company-detail-box table td {
+        padding: 3px 6px;
+        vertical-align: top;
+        font-size: 0.82rem;
+        color: #333;
+    }
+
+    .company-detail-box .label-col {
+        width: 110px;
+        color: #555;
+        white-space: nowrap;
+    }
+
+    .company-detail-box .fw-bold.text-center {
+        color: #1a1a2e;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 5px;
+        margin-bottom: 4px;
+    }
+
+```
+
+---
+
+## Result
+
+When you select a company it will show exactly like the PDF:
+```
+┌─────────────────────────────────────────┐
+│ TechNova Systems │ ← company name centered bold
+├──────────────┬──────────────────────────┤
+│ Address │ Sector 62 Noida IT Hub │
+│ State Code │ 9 │
+│ State │ Uttar Pradesh │
+│ GSTIN │ 09RSTUV3456W4Z8 │
+│ Payment Term │ 45 Days │ ← Invoice To only
+└──────────────┴──────────────────────────┘
