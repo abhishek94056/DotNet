@@ -1,11 +1,12 @@
 ﻿// Services/InvoiceService.cs
+using InvoiceGenerator.Interfaces;
 using InvoiceGenerator.Models;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace InvoiceGenerator.Services
 {
-    public class InvoiceService
+    public class InvoiceService : IInvoiceService
     {
         private readonly string _conn;
 
@@ -69,7 +70,7 @@ namespace InvoiceGenerator.Services
             while (dr.Read())
                 list.Add(new InvoiceItem
                 {
-                    ItemDescription = dr["ItemName"].ToString()!,
+                    ItemDescription = dr["ItemDescription"].ToString()!,
                     HSNCode = dr["HSNCode"].ToString()!,
                     Rate = Convert.ToDecimal(dr["Rate"])
                 });
@@ -95,7 +96,7 @@ namespace InvoiceGenerator.Services
         }
 
         // ── Save invoice + items, return new InvoiceNo ───────────────
-        public int SaveInvoice(InvoiceMaster master, List<InvoiceItem> items)
+        public int SaveInvoice(InvoiceModel master, List<InvoiceItem> items)
         {
             using var con = new SqlConnection(_conn);
             con.Open();
@@ -145,9 +146,9 @@ namespace InvoiceGenerator.Services
         }
 
         // ── Get invoice + items for PDF ──────────────────────────────
-        public (InvoiceMaster? master, List<InvoiceItem> items) GetInvoiceForPdf(int invoiceNo)
+        public (InvoiceModel? master, List<InvoiceItem> items) GetInvoiceForPdf(int invoiceNo)
         {
-            InvoiceMaster? master = null;
+            InvoiceModel? master = null;
 
             using (var con = new SqlConnection(_conn))
             {
@@ -162,7 +163,7 @@ namespace InvoiceGenerator.Services
                 if (dt.Rows.Count == 0) return (null, new List<InvoiceItem>());
 
                 var r = dt.Rows[0];
-                master = new InvoiceMaster
+                master = new InvoiceModel
                 {
                     InvoiceNo = Convert.ToInt32(r["InvoiceNo"]),
                     InvoiceDate = Convert.ToDateTime(r["InvoiceDate"]),

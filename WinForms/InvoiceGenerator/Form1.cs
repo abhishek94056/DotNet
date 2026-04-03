@@ -989,6 +989,10 @@ namespace InvoiceGenerator
             }
         }
 
+        private void dgvItems_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
     }
 }
 

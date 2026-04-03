@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LogicBuilding")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+82e5dfe6dd3a6100c55a1fea69afefc4eddd5f36")]
 [assembly: System.Reflection.AssemblyProductAttribute("LogicBuilding")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LogicBuilding")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

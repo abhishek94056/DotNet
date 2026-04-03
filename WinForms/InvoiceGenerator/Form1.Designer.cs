@@ -648,6 +648,7 @@
             dgvItems.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvItems.Size = new Size(1336, 81);
             dgvItems.TabIndex = 8;
+            dgvItems.CellContentClick += dgvItems_CellContentClick;
             // 
             // panel9
             // 

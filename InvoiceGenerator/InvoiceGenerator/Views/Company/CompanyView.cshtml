@@ -1,0 +1,378 @@
+﻿@model List<CompanyModel>
+@{
+    ViewData["Title"] = "Company Master";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="mb-0 fw-bold">
+        <i class="bi bi-building me-2 text-primary"></i>Company Master
+    </h5>
+    <button class="btn btn-primary btn-sm" onclick="openModal()">
+        <i class="bi bi-plus-lg me-1"></i>Add Company
+    </button>
+</div>
+
+<!-- ── GRID ── -->
+<div class="table-responsive">
+    <table class="table table-bordered table-hover table-sm align-middle" id="companyTable">
+        <thead class="table-dark text-center">
+            <tr>
+                <th>#</th>
+                <th>Company Name</th>
+                <th>Address</th>
+                <th>State Code</th>
+                <th>State</th>
+                <th>GSTIN</th>
+                <th>Payment Term</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var c in Model)
+            {
+                <tr id="row-@c.CompanyId">
+                    <td class="text-center">@c.CompanyId</td>
+                    <td>@c.CompanyName</td>
+                    <td>@c.Address</td>
+                    <td class="text-center">@c.StateCode</td>
+                    <td>@c.State</td>
+                    <td>@c.GSTIN</td>
+                    <td>@c.PaymentTerm</td>
+                    <td class="text-center">
+                        <button class="btn btn-outline-primary btn-sm"
+                                onclick="editCompany(@c.CompanyId)"
+                                title="Edit">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm"
+                                onclick="deleteCompany(@c.CompanyId, '@c.CompanyName')"
+                                title="Delete">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- ── ADD / EDIT MODAL ── -->
+<div class="modal fade" id="companyModal" tabindex="-1"
+     aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-dark text-white">
+                <h6 class="modal-title" id="modalTitle">
+                    <i class="bi bi-building me-2"></i>
+                    <span id="modalTitleText">Add Company</span>
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="companyForm" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="companyId" name="CompanyId" value="0" />
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Company Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" id="companyName" name="CompanyName"
+                                   class="form-control" maxlength="100"
+                                   placeholder="e.g. ABC Pvt Ltd" />
+                            <div class="invalid-feedback" id="err-companyName"></div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                GSTIN <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" id="gstin" name="GSTIN"
+                                   class="form-control" maxlength="15"
+                                   placeholder="e.g. 27ABCDE1234F1Z5"
+                                   style="text-transform:uppercase" />
+                            <div class="invalid-feedback" id="err-gstin"></div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                                Address <span class="text-danger">*</span>
+                            </label>
+                            <textarea id="address" name="Address"
+                                      class="form-control" rows="2"
+                                      maxlength="250"
+                                      placeholder="Full address"></textarea>
+                            <div class="invalid-feedback" id="err-address"></div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">
+                                State Code <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" id="stateCode" name="StateCode"
+                                   class="form-control" min="1" max="99"
+                                   placeholder="e.g. 27" />
+                            <div class="invalid-feedback" id="err-stateCode"></div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                State <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" id="state" name="State"
+                                   class="form-control" maxlength="50"
+                                   placeholder="e.g. Maharashtra" />
+                            <div class="invalid-feedback" id="err-state"></div>
+                        </div>
+
+                        <div class="col-md-5">
+                            <label class="form-label fw-semibold">
+                                Payment Term <span class="text-danger">*</span>
+                            </label>
+                            <select id="paymentTerm" name="PaymentTerm"
+                                    class="form-select">
+                                <option value="">-- Select --</option>
+                                <option>Immediate</option>
+                                <option>Net 7</option>
+                                <option>Net 15</option>
+                                <option>Net 30</option>
+                                <option>Net 45</option>
+                                <option>Net 60</option>
+                            </select>
+                            <div class="invalid-feedback d-block"
+                                 id="err-paymentTerm"></div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary btn-sm"
+                        onclick="saveCompany()">
+                    <i class="bi bi-floppy me-1"></i>Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ── DELETE CONFIRM MODAL ── -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h6 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="mb-1">Are you sure you want to delete</p>
+                <strong id="deleteCompanyName"></strong>?
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Cancel
+                </button>
+                <button class="btn btn-danger btn-sm" id="btnConfirmDelete">
+                    <i class="bi bi-trash3 me-1"></i>Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+    <div id="toast" class="toast align-items-center text-white border-0"
+         role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMsg"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const modal       = new bootstrap.Modal(document.getElementById('companyModal'));
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        const toastEl     = document.getElementById('toast');
+        const bsToast     = new bootstrap.Toast(toastEl, { delay: 3000 });
+        let   pendingDeleteId = null;
+
+        // ── Open blank Add form ──
+        function openModal() {
+            clearForm();
+            document.getElementById('modalTitleText').textContent = 'Add Company';
+            modal.show();
+        }
+
+        // ── Load record into Edit form ──
+        async function editCompany(id) {
+            const r = await fetch(`/Company/GetById?id=${id}`);
+            const d = await r.json();
+            document.getElementById('modalTitleText').textContent = 'Edit Company';
+            document.getElementById('companyId').value   = d.companyId;
+            document.getElementById('companyName').value = d.companyName;
+            document.getElementById('address').value     = d.address;
+            document.getElementById('stateCode').value   = d.stateCode;
+            document.getElementById('state').value       = d.state;
+            document.getElementById('gstin').value       = d.gstin;
+            document.getElementById('paymentTerm').value = d.paymentTerm;
+            clearErrors();
+            modal.show();
+        }
+
+        // ── Save (Insert / Update) ──
+        async function saveCompany() {
+            clearErrors();
+
+            // Read values
+            const companyName = document.getElementById('companyName').value.trim();
+            const gstin       = document.getElementById('gstin').value.trim();
+            const address     = document.getElementById('address').value.trim();
+            const stateCode   = document.getElementById('stateCode').value.trim();
+            const state       = document.getElementById('state').value.trim();
+            const paymentTerm = document.getElementById('paymentTerm').value;
+
+            // Client-side validation
+            let valid = true;
+
+            if (!companyName) {
+                showError('companyName', 'err-companyName', 'Company Name is required.');
+                valid = false;
+            }
+            if (!gstin) {
+                showError('gstin', 'err-gstin', 'GSTIN is required.');
+                valid = false;
+            } else if (gstin.length !== 15) {
+                showError('gstin', 'err-gstin', 'GSTIN must be exactly 15 characters.');
+                valid = false;
+            }
+            if (!address) {
+                showError('address', 'err-address', 'Address is required.');
+                valid = false;
+            }
+            if (!stateCode || parseInt(stateCode) < 1 || parseInt(stateCode) > 99) {
+                showError('stateCode', 'err-stateCode', 'Enter a valid State Code (1–99).');
+                valid = false;
+            }
+            if (!state) {
+                showError('state', 'err-state', 'State is required.');
+                valid = false;
+            }
+            if (!paymentTerm) {
+                showError('paymentTerm', 'err-paymentTerm', 'Please select a Payment Term.');
+                valid = false;
+            }
+
+            if (!valid) return;
+
+            // POST to server
+            const token = document.querySelector(
+                '#companyForm input[name="__RequestVerificationToken"]').value;
+
+            const payload = new URLSearchParams({
+                CompanyId:   document.getElementById('companyId').value,
+                CompanyName: companyName,
+                Address:     address,
+                StateCode:   stateCode,
+                State:       state,
+                GSTIN:       gstin,
+                PaymentTerm: paymentTerm,
+                __RequestVerificationToken: token
+            });
+
+            const r = await fetch('/Company/Save', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body:    payload
+            });
+            const d = await r.json();
+
+            if (!d.success) {
+                d.errors?.forEach(e => showToast(e, 'danger'));
+                return;
+            }
+
+            modal.hide();
+            showToast('Company saved successfully!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        }
+
+        // ── Delete: show confirm modal ──
+        function deleteCompany(id, name) {
+            pendingDeleteId = id;
+            document.getElementById('deleteCompanyName').textContent = name;
+            deleteModal.show();
+        }
+
+        // ── Delete: confirmed ──
+        document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
+            const token = document.querySelector(
+                'input[name="__RequestVerificationToken"]').value;
+            const r = await fetch('/Company/Delete', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body:    new URLSearchParams({
+                    id: pendingDeleteId,
+                    __RequestVerificationToken: token
+                })
+            });
+            const d = await r.json();
+            deleteModal.hide();
+            if (d.success) {
+                document.getElementById(`row-${pendingDeleteId}`)?.remove();
+                showToast('Company deleted.', 'success');
+            } else {
+                showToast('Delete failed.', 'danger');
+            }
+        });
+
+        // ── Helpers ──
+        function clearForm() {
+            document.getElementById('companyId').value   = '0';
+            document.getElementById('companyName').value = '';
+            document.getElementById('address').value     = '';
+            document.getElementById('stateCode').value   = '';
+            document.getElementById('state').value       = '';
+            document.getElementById('gstin').value       = '';
+            document.getElementById('paymentTerm').value = '';
+            clearErrors();
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.invalid-feedback')
+                .forEach(el => { el.textContent = ''; });
+            document.querySelectorAll('.form-control, .form-select')
+                .forEach(el => el.classList.remove('is-invalid'));
+        }
+
+        function showError(fieldId, errId, msg) {
+            document.getElementById(fieldId)?.classList.add('is-invalid');
+            document.getElementById(errId).textContent = msg;
+        }
+
+        function showToast(msg, type = 'success') {
+            toastEl.className =
+                `toast align-items-center text-white border-0 bg-${type}`;
+            document.getElementById('toastMsg').textContent = msg;
+            bsToast.show();
+        }
+    </script>
+}

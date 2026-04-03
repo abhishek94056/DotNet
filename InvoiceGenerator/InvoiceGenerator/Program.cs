@@ -1,4 +1,5 @@
 using InvoiceGenerator.Services;
+using InvoiceGenerator.Interfaces;
 
 namespace InvoiceGenerator
 {
@@ -6,38 +7,42 @@ namespace InvoiceGenerator
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            var builder = WebApplication.CreateBuilder(args);     //Builder (Setup Phase)
 
             // ── Services ──────────────────────────────────────────────
-            builder.Services.AddControllersWithViews();
-            builder.Services.AddScoped<InvoiceService>();
+            builder.Services.AddControllersWithViews();         //(Model-View-Controller) enable
+            builder.Services.AddScoped<IInvoiceService, InvoiceService>();       //Custom Services (Dependency Injection) 
             builder.Services.AddScoped<PdfService>();
-
-            var app = builder.Build();
+            builder.Services.AddScoped<ICompanyService, CompanyService>();
+            builder.Services.AddScoped<IItemService, ItemService>();
+            builder.Services.AddScoped<ITransportService, TransportService>();
+            var app = builder.Build();                          //Build Application
 
             // ── Middleware Pipeline ───────────────────────────────────
-            if (!app.Environment.IsDevelopment())
+            if (!app.Environment.IsDevelopment())              //Middleware Pipeline(Production environment check)
             {
-                app.UseExceptionHandler("/Invoice/Error");
-                app.UseHsts();
+                app.UseExceptionHandler("/Invoice/Error");    //Error Handling(if error occure redirect to /Invoice/Error)
+                app.UseHsts();    //enforce to use HTTPS not HTTP
             }
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            app.UseRouting();
-            app.UseAuthorization();
+            app.UseHttpsRedirection(); // HTTP → HTTPS
+            app.UseStaticFiles();      // CSS, JS, images
+            app.UseRouting();          // URL → Controller mapping
+            app.UseAuthorization();    // Security check
 
-            // ── Routes ────────────────────────────────────────────────
-            app.MapControllerRoute(
-                name: "pdf",
-                pattern: "Invoice/Pdf/{invoiceNo:int}");
-                //defaults: new { controller = "Invoice", action = "Pdf" });
+            // ── Attribute Routing ────────────────────────────────────────────────
+            app.MapControllers();
+
+            // ── Conventional Routing ────────────────────────────────────────────────
+            //app.MapControllerRoute(
+            //    name: "pdf",
+            //    pattern: "Invoice/Pdf/{invoiceNo:int}");
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Invoice}/{action=Create}/{id?}");
+                pattern: "{controller=Invoice}/{action=InvoiceView}/{id?}");
 
-            app.Run();
+            app.Run();   //Run Application
         }
     }
 }

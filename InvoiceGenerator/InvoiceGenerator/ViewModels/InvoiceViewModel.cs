@@ -5,7 +5,7 @@ namespace InvoiceGenerator.ViewModels
     // ViewModels/InvoiceViewModel.cs
     public class InvoiceViewModel
     {
-        public InvoiceMaster Master { get; set; } = new();
+        public InvoiceModel Master { get; set; } = new();
         public List<InvoiceItem> Items { get; set; } = new();
 
         // Dropdowns

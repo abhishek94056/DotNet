@@ -1,28 +1,29 @@
 ﻿using InvoiceGenerator.Services;
+using InvoiceGenerator.Interfaces;
 using InvoiceGenerator.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-
+//[Route("Invoice")]    //Attribute Routing
 namespace InvoiceGenerator.Controllers
 {
     // Controllers/InvoiceController.cs
     public class InvoiceController : Controller
     {
-        private readonly InvoiceService _svc;
+        private readonly IInvoiceService _svc;
         private readonly PdfService _pdf;
 
-        public InvoiceController(InvoiceService svc, PdfService pdf)
+        public InvoiceController(IInvoiceService svc, PdfService pdf)
             => (_svc, _pdf) = (svc, pdf);
 
         [HttpGet]
-        public IActionResult Create()
+        public IActionResult InvoiceView()
         {
             var vm = BuildViewModel();
             return View(vm);
         }
 
         [HttpPost]
-        public IActionResult Save([FromBody] InvoiceViewModel vm)
+        public IActionResult Save([FromBody] InvoiceViewModel vm)  //AJAX accept JSON data 
         {
             // Compute GST server-side (never trust client)
             var invoiceTo = _svc.GetCompanyDetails(vm.Master.InvoiceTo);
@@ -34,7 +35,7 @@ namespace InvoiceGenerator.Controllers
             return Json(new { success = true, invoiceNo });
         }
 
-        [HttpGet("Invoice/Pdf/{invoiceNo}")]
+        [HttpGet("Invoice/Pdf/{invoiceNo}")]  //Attribute Routing
         public IActionResult Pdf(int invoiceNo)
         {
             var (master, items) = _svc.GetInvoiceForPdf(invoiceNo);
@@ -58,10 +59,11 @@ namespace InvoiceGenerator.Controllers
         public IActionResult GetCompanyDetails(string name)
             => Json(_svc.GetCompanyDetails(name));
 
-        private InvoiceViewModel BuildViewModel() => new()
+        private InvoiceViewModel BuildViewModel() => new()  //ViewModel
         {
             NextInvoiceLabel = "FY2526/CNT/" + _svc.GetNextInvoiceNo(),
             Companies = _svc.GetCompanies()
+            //----------Dropdown------------------
                 .Select(c => new SelectListItem(c.CompanyName, c.CompanyName)).ToList(),
             TransportModes = _svc.GetTransportModes()
                 .Select(m => new SelectListItem(m, m)).ToList(),
