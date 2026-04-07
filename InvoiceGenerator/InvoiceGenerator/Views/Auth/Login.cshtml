@@ -1,0 +1,157 @@
+﻿@model InvoiceGenerator.ViewModels.LoginViewModel
+@{ ViewData["Title"] = "Login"; Layout = null; }
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login — Invoice Generator</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+    <style>
+        body { background: #f0f2f5; }
+        .login-card {
+            max-width: 420px;
+            margin: 40px auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,.10);
+        }
+        .login-header {
+            background: #212529;
+            color: #fff;
+            border-radius: 12px 12px 0 0;
+            padding: 24px;
+            text-align: center;
+        }
+        .login-header img { height: 48px; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+
+<div class="login-card card border-0">
+
+    <div class="login-header">
+        <img src="~/images/Logo.png" alt="Logo" />
+        <h5 class="mb-0 mt-1">Invoice Generator</h5>
+        <small class="text-secondary">CodNow Technologies</small>
+    </div>
+
+    <div class="card-body p-4">
+
+        <h6 class="fw-bold mb-3 text-center">
+            <i class="bi bi-box-arrow-in-right me-1"></i>Sign In
+        </h6>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show py-2 small">
+                @TempData["Success"]
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+
+        <form asp-action="Login" method="post">
+            @Html.AntiForgeryToken()
+
+            @* <div asp-validation-summary="All"
+                 class="alert alert-danger py-2 small"></div> *@
+                 @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+{
+    <div class="alert alert-danger alert-dismissible fade show py-2 small">
+        @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+            <div class="mb-3">
+                <label asp-for="Email"
+                       class="form-label fw-semibold small">Email</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-envelope"></i>
+                    </span>
+                    <input asp-for="Email"
+                           class="form-control"
+                           placeholder="you@example.com"
+                           autocomplete="email" />
+                </div>
+                <span asp-validation-for="Email"
+                      class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password"
+                       class="form-label fw-semibold small">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-lock"></i>
+                    </span>
+                    <input asp-for="Password" type="password"
+                           class="form-control"
+                           placeholder="••••••••"
+                           autocomplete="current-password"
+                           id="passwordInput" />
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            onclick="togglePwd()">
+                        <i class="bi bi-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+                <span asp-validation-for="Password"
+                      class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3 form-check">
+                <input asp-for="RememberMe"
+                       class="form-check-input" type="checkbox" />
+                <label asp-for="RememberMe"
+                       class="form-check-label small">Remember me</label>
+            </div>
+
+            <button type="submit" class="btn btn-dark w-100">
+                <i class="bi bi-box-arrow-in-right me-1"></i>Login
+            </button>
+        </form>
+
+        <hr class="my-3" />
+
+        <div class="text-center small">
+            Don't have an account?
+            <a asp-action="Register" class="fw-bold">Register</a>
+        </div>
+
+    </div>
+</div>
+<div class="position-fixed top-0 start-0 p-3" style="z-index:9999">
+    <div id="toast" class="toast align-items-center text-white border-0 bg-success"
+         role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMsg"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function togglePwd() {
+        const inp  = document.getElementById('passwordInput');
+        const icon = document.getElementById('eyeIcon');
+        if (inp.type === 'password') {
+            inp.type = 'text';
+            icon.className = 'bi bi-eye-slash';
+        } else {
+            inp.type = 'password';
+            icon.className = 'bi bi-eye';
+        }
+    }
+    <script>
+</script>
+</script>
+</body>
+</html>

@@ -6,7 +6,7 @@ namespace InvoiceGenerator.ViewModels
     public class InvoiceViewModel
     {
         public InvoiceModel Master { get; set; } = new();
-        public List<InvoiceItem> Items { get; set; } = new();
+        public List<ItemModel> Items { get; set; } = new();
 
         // Dropdowns
         public List<SelectListItem> Companies { get; set; } = new();
@@ -15,7 +15,7 @@ namespace InvoiceGenerator.ViewModels
 
         // Display
         public string NextInvoiceLabel { get; set; }
-        public CompanyDetails InvoiceToDetails { get; set; }
-        public CompanyDetails ShippingToDetails { get; set; }
+        public CompanyModel InvoiceToDetails { get; set; }
+        public CompanyModel ShippingToDetails { get; set; }
     }
 }

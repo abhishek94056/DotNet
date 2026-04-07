@@ -1,0 +1,502 @@
+﻿@{
+    ViewData["Title"] = "Production & Inventory Master";
+}
+
+<style>
+    #prodTable {
+        font-size: 0.70rem;
+    }
+    #prodTable thead tr:first-child th {
+        font-size: 0.68rem;
+        padding: 4px 5px;
+        white-space: nowrap;
+        text-align: center;
+        vertical-align: middle;
+        background-color: #1a1a2e;
+        color: #fff;
+    }
+    #prodTable thead tr:last-child th {
+        font-size: 0.65rem;
+        padding: 3px 4px;
+        white-space: nowrap;
+        text-align: center;
+        background-color: #16213e;
+        color: #e0e0e0;
+    }
+    #prodTable tbody td {
+        padding: 3px 5px;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    /* Alternating rows */
+    #prodTable tbody tr:nth-child(odd)  { background-color: #f8f9fa; }
+    #prodTable tbody tr:nth-child(even) { background-color: #eef2ff; }
+
+    /* Hover */
+    #prodTable tbody tr:hover {
+        background-color: #cfe2ff !important;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+
+    /* Column group colors */
+    .col-identity  { background-color: #e8f4fd !important; }
+    .col-weight    { background-color: #fef9e7 !important; }
+    .col-qty       { background-color: #eafaf1 !important; }
+    .col-alert     { background-color: #fdf2f8 !important; }
+    .col-fg        { background-color: #fef5e4 !important; }
+    .col-cost      { background-color: #f0f4ff !important; }
+
+    /* Row hover overrides column color */
+    #prodTable tbody tr:hover td { background-color: #cfe2ff !important; }
+
+    /* Status badges */
+    .badge-ok      { background-color: #198754; color:#fff; }
+    .badge-low     { background-color: #dc3545; color:#fff; }
+    .badge-warn    { background-color: #ffc107; color:#000; }
+    .badge-high    { background-color: #0d6efd; color:#fff; }
+
+    /* Numeric cells right-align */
+    .num { text-align: right; padding-right: 8px !important; }
+
+    /* Sticky first 3 columns */
+    #prodTable thead th:nth-child(1),
+    #prodTable thead th:nth-child(2),
+    #prodTable thead th:nth-child(3),
+    #prodTable tbody td:nth-child(1),
+    #prodTable tbody td:nth-child(2),
+    #prodTable tbody td:nth-child(3) {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background-color: inherit;
+    }
+    #prodTable thead th:nth-child(2),
+    #prodTable tbody td:nth-child(2) { left: 38px; }
+    #prodTable thead th:nth-child(3),
+    #prodTable tbody td:nth-child(3) { left: 110px; }
+
+    /* Pagination */
+    .pagination-bar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 5px;
+        margin-top: 8px;
+        font-size: 0.75rem;
+    }
+    .pagination-bar button {
+        min-width: 28px;
+        height: 26px;
+        font-size: 0.70rem;
+        padding: 0 5px;
+        border-radius: 4px;
+    }
+    .pagination-bar button.active-page {
+        background-color: #0d6efd;
+        color: #fff;
+        border-color: #0d6efd;
+    }
+
+    /* Summary cards */
+    .summary-card {
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.72rem;
+    }
+    .summary-card .val {
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+</style>
+
+<!-- ══════════ PAGE HEADER ══════════ -->
+<div class="d-flex align-items-center justify-content-between mb-2">
+    <h6 class="mb-0 fw-bold">
+        <i class="bi bi-kanban me-2 text-primary"></i>
+        Production &amp; Inventory Master
+        <span class="badge bg-secondary ms-1" style="font-size:0.65rem">CodNow</span>
+    </h6>
+    <div class="d-flex align-items-center gap-2">
+        <!-- Department filter -->
+        <select id="deptFilter" class="form-select form-select-sm"
+                style="width:150px" onchange="filterTable()">
+            <option value="">All Departments</option>
+            <option>Hardware</option>
+            <option>Software</option>
+            <option>Networking</option>
+            <option>Assembly</option>
+            <option>QA / Testing</option>
+        </select>
+        <!-- Search -->
+        <input type="text" id="searchInput"
+               class="form-control form-control-sm"
+               placeholder="🔍 Search..."
+               style="width:160px"
+               oninput="filterTable()" />
+        <!-- Export hint -->
+        <button class="btn btn-outline-success btn-sm"
+                onclick="exportCSV()" title="Export to CSV">
+            <i class="bi bi-download me-1"></i>CSV
+        </button>
+    </div>
+</div>
+
+<!-- ══════════ SUMMARY CARDS ══════════ -->
+<div class="row g-2 mb-2" id="summaryCards">
+    <div class="col-6 col-md-2">
+        <div class="summary-card border border-primary bg-white shadow-sm">
+            <div class="text-muted">Total Items</div>
+            <div class="val text-primary" id="cardTotal">0</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="summary-card border border-success bg-white shadow-sm">
+            <div class="text-muted">Total Produce Qty</div>
+            <div class="val text-success" id="cardProduced">0</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="summary-card border border-danger bg-white shadow-sm">
+            <div class="text-muted">Total Reject Qty</div>
+            <div class="val text-danger" id="cardReject">0</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="summary-card border border-warning bg-white shadow-sm">
+            <div class="text-muted">Pending Production</div>
+            <div class="val text-warning" id="cardPending">0</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="summary-card border border-info bg-white shadow-sm">
+            <div class="text-muted">Inventory Cost</div>
+            <div class="val text-info" id="cardCost">₹0</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-2">
+        <div class="summary-card border border-secondary bg-white shadow-sm">
+            <div class="text-muted">Basic Cost</div>
+            <div class="val text-secondary" id="cardBasic">₹0</div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════ TABLE ══════════ -->
+<div class="table-responsive border rounded shadow-sm"
+     style="max-height:500px; overflow-y:auto;">
+    <table class="table table-bordered mb-0" id="prodTable">
+        <thead>
+            <!-- GROUP HEADER ROW -->
+            <tr>
+                <th colspan="3">Identity</th>
+                <th colspan="2">Product Info</th>
+                <th colspan="1">Rate</th>
+                <th colspan="5">Quantity Tracking</th>
+                <th colspan="2">Stock Limits</th>
+                <th colspan="2">FG Status</th>
+                <th colspan="2">Costing</th>
+            </tr>
+            <!-- COLUMN HEADER ROW -->
+            <tr>
+    <th>Sr</th>
+    <th>Dept</th>
+    <th>Item Code</th>
+    <th>Description</th>
+    <th>Shot Wt/ps (g)</th>
+    <th>Sale Rate (₹)</th>
+    <th>Open FG</th>
+    <th>Schedule</th>
+    <th>Plan Qty</th>
+    <th>Produce</th>
+    <th>Reject</th>
+    <th>Dispatch</th>
+    <th>MIN</th>
+    <th>MAX</th>
+    <th>FG Qty</th>
+    <th>To Produce</th>
+    <th>Pending Prod.</th>
+    <th>Inv. Cost (₹)</th>
+    <th>Basic Cost (₹)</th>
+</tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- JS renders rows here -->
+        </tbody>
+        <!-- TOTALS FOOTER -->
+        <tfoot>
+            <tr style="font-size:0.68rem; font-weight:700;
+                       background:#1a1a2e; color:#fff;">
+                <td colspan="6" class="text-end pe-2">Totals :</td>
+                <td class="num" id="fOpenFG"></td>
+                <td class="num" id="fSchedule"></td>
+                <td class="num" id="fPlan"></td>
+                <td class="num" id="fProduce"></td>
+                <td class="num" id="fReject"></td>
+                <td class="num" id="fDispatch"></td>
+                <td></td>
+                <td></td>
+                <td class="num" id="fFGQty"></td>
+                <td class="num" id="fToProduce"></td>
+                <td class="num" id="fPending"></td>
+                <td class="num" id="fInvCost"></td>
+                <td class="num" id="fBasicCost"></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<!-- ══════════ PAGINATION ══════════ -->
+<div class="pagination-bar">
+    <span id="pageInfo" class="text-muted me-1"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnFirst" onclick="goToPage(1)">«</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnPrev"  onclick="goToPage(currentPage-1)">‹</button>
+    <span id="pageNumbers" class="d-flex gap-1"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnNext"  onclick="goToPage(currentPage+1)">›</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnLast"  onclick="goToPage(totalPages)">»</button>
+    <select id="rppSelect" class="form-select form-select-sm"
+            style="width:75px" onchange="changeRPP()">
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+    </select>
+    <span class="text-muted">/ page</span>
+</div>
+
+@section Scripts {
+<script>
+// ══════════════════════════════════════════════════════
+// SAMPLE DATA — IT Industry
+// ══════════════════════════════════════════════════════
+const rawData = [
+    { dept:"Hardware",    code:"HW-001", desc:"Intel Core i7-13700K Processor",    shotWt:280,  saleRate:32000, openFG:15, schedule:50, plan:50, produce:48, reject:2, dispatch:40, min:10, max:100 },
+    { dept:"Hardware",    code:"HW-002", desc:"DDR5 16GB RAM Module",               shotWt:35,   saleRate:5500,  openFG:80, schedule:200,plan:200,produce:195,reject:5, dispatch:180,min:50, max:300 },
+    { dept:"Hardware",    code:"HW-003", desc:"Samsung 1TB NVMe SSD",               shotWt:60,   saleRate:8200,  openFG:30, schedule:80, plan:80, produce:78, reject:2, dispatch:70, min:20, max:150 },
+    { dept:"Hardware",    code:"HW-004", desc:"NVIDIA RTX 4060 GPU",                shotWt:890,  saleRate:38000, openFG:8,  schedule:25, plan:25, produce:24, reject:1, dispatch:20, min:5,  max:50  },
+    { dept:"Hardware",    code:"HW-005", desc:"650W SMPS Power Supply",             shotWt:1200, saleRate:4800,  openFG:25, schedule:60, plan:60, produce:58, reject:2, dispatch:55, min:10, max:80  },
+    { dept:"Hardware",    code:"HW-006", desc:"ATX Mid Tower Cabinet",              shotWt:3500, saleRate:3200,  openFG:12, schedule:40, plan:40, produce:39, reject:1, dispatch:35, min:8,  max:60  },
+    { dept:"Hardware",    code:"HW-007", desc:"24\" FHD IPS Monitor",               shotWt:2800, saleRate:12500, openFG:20, schedule:45, plan:45, produce:44, reject:1, dispatch:40, min:5,  max:70  },
+    { dept:"Hardware",    code:"HW-008", desc:"Mechanical Keyboard RGB",            shotWt:950,  saleRate:3800,  openFG:35, schedule:100,plan:100,produce:98, reject:2, dispatch:90, min:15, max:120 },
+    { dept:"Hardware",    code:"HW-009", desc:"Optical Wireless Mouse",             shotWt:130,  saleRate:1200,  openFG:60, schedule:150,plan:150,produce:148,reject:2, dispatch:140,min:20, max:200 },
+    { dept:"Hardware",    code:"HW-010", desc:"USB-C Hub 7-in-1",                  shotWt:180,  saleRate:2200,  openFG:40, schedule:120,plan:120,produce:118,reject:2, dispatch:110,min:20, max:180 },
+    { dept:"Networking",  code:"NW-001", desc:"Cisco 24-Port Gigabit Switch",       shotWt:2200, saleRate:18000, openFG:10, schedule:30, plan:30, produce:29, reject:1, dispatch:25, min:5,  max:40  },
+    { dept:"Networking",  code:"NW-002", desc:"TP-Link WiFi 6 Router AX3000",       shotWt:480,  saleRate:6500,  openFG:18, schedule:50, plan:50, produce:49, reject:1, dispatch:45, min:8,  max:80  },
+    { dept:"Networking",  code:"NW-003", desc:"CAT6 UTP Cable 305m Box",            shotWt:8000, saleRate:3800,  openFG:5,  schedule:20, plan:20, produce:20, reject:0, dispatch:18, min:3,  max:30  },
+    { dept:"Networking",  code:"NW-004", desc:"RJ45 Keystone Jack (Pack 24)",       shotWt:40,   saleRate:850,   openFG:100,schedule:300,plan:300,produce:298,reject:2, dispatch:280,min:50, max:500 },
+    { dept:"Networking",  code:"NW-005", desc:"Fiber Patch Panel 24-Port",          shotWt:1800, saleRate:9500,  openFG:6,  schedule:18, plan:18, produce:17, reject:1, dispatch:15, min:3,  max:25  },
+    { dept:"Software",    code:"SW-001", desc:"Windows 11 Pro OEM License",         shotWt:0,    saleRate:14500, openFG:50, schedule:100,plan:100,produce:100,reject:0, dispatch:90, min:20, max:200 },
+    { dept:"Software",    code:"SW-002", desc:"MS Office 2021 Home & Business",     shotWt:0,    saleRate:22000, openFG:30, schedule:60, plan:60, produce:60, reject:0, dispatch:55, min:10, max:100 },
+    { dept:"Software",    code:"SW-003", desc:"Antivirus 1Yr 3PC License",          shotWt:0,    saleRate:1800,  openFG:200,schedule:400,plan:400,produce:400,reject:0, dispatch:380,min:50, max:600 },
+    { dept:"Software",    code:"SW-004", desc:"AutoCAD 2024 Annual Subscription",   shotWt:0,    saleRate:85000, openFG:5,  schedule:10, plan:10, produce:10, reject:0, dispatch:8,  min:2,  max:15  },
+    { dept:"Software",    code:"SW-005", desc:"Adobe Creative Cloud 1Yr",           shotWt:0,    saleRate:54000, openFG:8,  schedule:15, plan:15, produce:15, reject:0, dispatch:12, min:2,  max:20  },
+    { dept:"Assembly",    code:"AS-001", desc:"Desktop PC i5-13400 / 8GB / 512SSD", shotWt:5500, saleRate:42000, openFG:10, schedule:30, plan:30, produce:28, reject:2, dispatch:25, min:5,  max:50  },
+    { dept:"Assembly",    code:"AS-002", desc:"Desktop PC i7-13700 / 16GB / 1TB",   shotWt:6200, saleRate:65000, openFG:6,  schedule:20, plan:20, produce:19, reject:1, dispatch:16, min:3,  max:30  },
+    { dept:"Assembly",    code:"AS-003", desc:"Gaming PC RTX4060 / i7 / 32GB",      shotWt:7800, saleRate:115000,openFG:4,  schedule:12, plan:12, produce:11, reject:1, dispatch:9,  min:2,  max:20  },
+    { dept:"Assembly",    code:"AS-004", desc:"Workstation Xeon / 64GB / 2TB",      shotWt:9500, saleRate:195000,openFG:2,  schedule:5,  plan:5,  produce:5,  reject:0, dispatch:4,  min:1,  max:10  },
+    { dept:"Assembly",    code:"AS-005", desc:"Mini PC Intel N100 / 8GB / 256SSD",  shotWt:820,  saleRate:18500, openFG:15, schedule:40, plan:40, produce:39, reject:1, dispatch:35, min:8,  max:60  },
+    { dept:"QA / Testing",code:"QA-001", desc:"Network Cable Tester",               shotWt:220,  saleRate:2800,  openFG:8,  schedule:20, plan:20, produce:20, reject:0, dispatch:18, min:3,  max:30  },
+    { dept:"QA / Testing",code:"QA-002", desc:"Digital Multimeter",                 shotWt:310,  saleRate:1500,  openFG:12, schedule:25, plan:25, produce:24, reject:1, dispatch:22, min:5,  max:40  },
+    { dept:"QA / Testing",code:"QA-003", desc:"POST Diagnostic Card PCI",           shotWt:85,   saleRate:950,   openFG:20, schedule:50, plan:50, produce:49, reject:1, dispatch:45, min:10, max:80  },
+    { dept:"QA / Testing",code:"QA-004", desc:"Thermal Paste Syringe 5g",           shotWt:8,    saleRate:350,   openFG:150,schedule:400,plan:400,produce:398,reject:2, dispatch:380,min:50, max:600 },
+    { dept:"QA / Testing",code:"QA-005", desc:"ESD Anti-Static Wrist Strap",        shotWt:35,   saleRate:280,   openFG:80, schedule:200,plan:200,produce:200,reject:0, dispatch:190,min:30, max:300 },
+];
+
+// ── Derive computed columns ──
+const data = rawData.map((r, i) => {
+    const fgQty      = r.openFG + r.produce - r.dispatch - r.reject;
+    const toProduce  = Math.max(0, r.schedule - r.produce);
+    const pending    = Math.max(0, r.plan - r.produce);
+    // Basic cost = Shot Wt (g) × 0.08/g (approx resin/component cost)
+    const basicCost  = r.shotWt > 0
+        ? Math.round(r.shotWt * 0.08 * fgQty)
+        : Math.round(r.saleRate * 0.45 * fgQty); // software: 45% of sale
+    const invCost    = Math.round(r.saleRate * fgQty);
+
+    return { ...r, srNo: i+1, fgQty, toProduce, pending, basicCost, invCost };
+});
+
+// ════════════════════════════════════════════
+// PAGINATION STATE
+// ════════════════════════════════════════════
+let currentPage  = 1;
+let rowsPerPage  = 10;
+let totalPages   = 1;
+let filteredData = [...data];
+
+// ════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════
+function fmt(n)  { return n.toLocaleString('en-IN'); }
+function fmtC(n) { return '₹' + n.toLocaleString('en-IN'); }
+
+function statusBadge(val, min, max) {
+    if (val <= 0)    return `<span class="badge badge-low">Empty</span>`;
+    if (val < min)   return `<span class="badge badge-warn">Low</span>`;
+    if (val > max)   return `<span class="badge badge-high">Excess</span>`;
+    return `<span class="badge badge-ok">OK</span>`;
+}
+
+function renderTable() {
+    const tbody  = document.getElementById('tableBody');
+    const start  = (currentPage - 1) * rowsPerPage;
+    const end    = Math.min(start + rowsPerPage, filteredData.length);
+    const slice  = filteredData.slice(start, end);
+
+    tbody.innerHTML = slice.map(r => `
+        <tr>
+            <td class="text-center col-identity">${r.srNo}</td>
+            <td class="col-identity">
+                <span class="badge rounded-pill bg-dark"
+                      style="font-size:0.60rem">${r.dept}</span>
+            </td>
+            <td class="col-identity fw-bold text-primary">${r.code}</td>
+            <td>${r.desc}</td>
+            <td class="num col-weight">${r.shotWt > 0 ? fmt(r.shotWt) : '—'}</td>
+            <td class="num col-weight">${fmtC(r.saleRate)}</td>
+            <td class="num col-qty">${fmt(r.openFG)}</td>
+            <td class="num col-qty">${fmt(r.schedule)}</td>
+            <td class="num col-qty">${fmt(r.plan)}</td>
+            <td class="num col-qty">${fmt(r.produce)}</td>
+            <td class="num col-qty text-danger fw-bold">${fmt(r.reject)}</td>
+            <td class="num col-qty">${fmt(r.dispatch)}</td>
+            <td class="num col-alert text-danger">${fmt(r.min)}</td>
+            <td class="num col-alert text-success">${fmt(r.max)}</td>
+            <td class="num col-fg fw-bold">
+                ${fmt(r.fgQty)}
+                <br>${statusBadge(r.fgQty, r.min, r.max)}
+            </td>
+            <td class="num col-fg text-warning fw-bold">${fmt(r.toProduce)}</td>
+            <td class="num col-fg ${r.pending > 0 ? 'text-danger fw-bold' : 'text-success'}">
+                ${fmt(r.pending)}
+            </td>
+            <td class="num col-cost">${fmtC(r.invCost)}</td>
+            <td class="num col-cost">${fmtC(r.basicCost)}</td>
+        </tr>`).join('');
+
+    updateFooter();
+    updatePagination(start, end);
+    updateSummaryCards();
+}
+
+function updateFooter() {
+    const sum = (key) => filteredData.reduce((a, r) => a + r[key], 0);
+    document.getElementById('fOpenFG').textContent    = fmt(sum('openFG'));
+    document.getElementById('fSchedule').textContent  = fmt(sum('schedule'));
+    document.getElementById('fPlan').textContent      = fmt(sum('plan'));
+    document.getElementById('fProduce').textContent   = fmt(sum('produce'));
+    document.getElementById('fReject').textContent    = fmt(sum('reject'));
+    document.getElementById('fDispatch').textContent  = fmt(sum('dispatch'));
+    document.getElementById('fFGQty').textContent     = fmt(sum('fgQty'));
+    document.getElementById('fToProduce').textContent = fmt(sum('toProduce'));
+    document.getElementById('fPending').textContent   = fmt(sum('pending'));
+    document.getElementById('fInvCost').textContent   = fmtC(sum('invCost'));
+    document.getElementById('fBasicCost').textContent = fmtC(sum('basicCost'));
+}
+
+function updateSummaryCards() {
+    const sum = (key) => filteredData.reduce((a, r) => a + r[key], 0);
+    document.getElementById('cardTotal').textContent   = filteredData.length;
+    document.getElementById('cardProduced').textContent= fmt(sum('produce'));
+    document.getElementById('cardReject').textContent  = fmt(sum('reject'));
+    document.getElementById('cardPending').textContent = fmt(sum('pending'));
+    document.getElementById('cardCost').textContent    = fmtC(sum('invCost'));
+    document.getElementById('cardBasic').textContent   = fmtC(sum('basicCost'));
+}
+
+function updatePagination(start, end) {
+    totalPages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    document.getElementById('pageInfo').textContent =
+        filteredData.length === 0
+            ? 'No records'
+            : `${start + 1}–${end} of ${filteredData.length}`;
+
+    document.getElementById('btnFirst').disabled = currentPage === 1;
+    document.getElementById('btnPrev').disabled  = currentPage === 1;
+    document.getElementById('btnNext').disabled  = currentPage === totalPages;
+    document.getElementById('btnLast').disabled  = currentPage === totalPages;
+
+    const container  = document.getElementById('pageNumbers');
+    container.innerHTML = '';
+    const maxVis = 5;
+    let sp = Math.max(1, currentPage - Math.floor(maxVis / 2));
+    let ep = Math.min(totalPages, sp + maxVis - 1);
+    if (ep - sp < maxVis - 1) sp = Math.max(1, ep - maxVis + 1);
+
+    for (let p = sp; p <= ep; p++) {
+        const btn = document.createElement('button');
+        btn.textContent = p;
+        btn.className   = 'btn btn-outline-secondary btn-sm'
+                        + (p === currentPage ? ' active-page' : '');
+        btn.onclick     = () => goToPage(p);
+        container.appendChild(btn);
+    }
+}
+
+function goToPage(p) {
+    if (p < 1 || p > totalPages) return;
+    currentPage = p;
+    renderTable();
+}
+
+function changeRPP() {
+    rowsPerPage = parseInt(document.getElementById('rppSelect').value);
+    currentPage = 1;
+    renderTable();
+}
+
+// ════════════════════════════════════════════
+// FILTER
+// ════════════════════════════════════════════
+function filterTable() {
+    const q    = document.getElementById('searchInput').value.toLowerCase().trim();
+    const dept = document.getElementById('deptFilter').value;
+
+    filteredData = data.filter(r => {
+        const matchDept = !dept || r.dept === dept;
+        const matchQ    = !q
+            || r.code.toLowerCase().includes(q)
+            || r.desc.toLowerCase().includes(q)
+            || r.dept.toLowerCase().includes(q);
+        return matchDept && matchQ;
+    });
+
+    currentPage = 1;
+    renderTable();
+}
+
+// ════════════════════════════════════════════
+// CSV EXPORT
+// ════════════════════════════════════════════
+function exportCSV() {
+    const headers = [
+        'Sr','Dept','Item Code','Description','Shot Wt/ps(g)',
+        'Sale Rate','Open FG','Schedule','Plan','Produce',
+        'Reject','Dispatch','MIN','MAX','FG Qty',
+        'To Produce','Pending','Inv Cost','Basic Cost'
+    ];
+    const rows = filteredData.map(r => [
+        r.srNo, r.dept, r.code, `"${r.desc}"`, r.shotWt,
+        r.saleRate, r.openFG, r.schedule, r.plan, r.produce,
+        r.reject, r.dispatch, r.min, r.max, r.fgQty,
+        r.toProduce, r.pending, r.invCost, r.basicCost
+    ]);
+    const csv  = [headers, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a    = document.createElement('a');
+    a.href     = URL.createObjectURL(blob);
+    a.download = 'ProductionInventory.csv';
+    a.click();
+}
+
+// ── Init ──
+document.addEventListener('DOMContentLoaded', renderTable);
+</script>
+}

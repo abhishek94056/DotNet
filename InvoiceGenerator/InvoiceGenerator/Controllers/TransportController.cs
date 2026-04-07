@@ -1,10 +1,12 @@
 ﻿// Controllers/TransportController.cs
-using Microsoft.AspNetCore.Mvc;
-using InvoiceGenerator.Models;
+using InvoiceGenerator.Filters;
 using InvoiceGenerator.Interfaces;
+using InvoiceGenerator.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace InvoiceGenerator.Controllers
 {
+    [RequireAdmin]
     public class TransportController : Controller
     {
         private readonly ITransportService _svc;
@@ -27,6 +29,28 @@ namespace InvoiceGenerator.Controllers
             return Json(mode);
         }
 
+        //// POST: Save (Insert or Update)
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public IActionResult Save(TransportModel model)
+        //{
+        //    if (!ModelState.IsValid)
+        //        return Json(new
+        //        {
+        //            success = false,
+        //            errors = ModelState.Values
+        //                .SelectMany(v => v.Errors)
+        //                .Select(e => e.ErrorMessage)
+        //        });
+
+        //    if (model.Id == 0)
+        //        _svc.Insert(model);
+        //    else
+        //        _svc.Update(model);
+
+        //    return Json(new { success = true });
+        //}
+
         // POST: Save (Insert or Update)
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -42,11 +66,28 @@ namespace InvoiceGenerator.Controllers
                 });
 
             if (model.Id == 0)
-                _svc.Insert(model);
-            else
-                _svc.Update(model);
+            {
+                int result = _svc.Insert(model);
 
-            return Json(new { success = true });
+                if (result == -1)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Transport mode already exists."
+                    });
+                }
+            }
+            else
+            {
+                _svc.Update(model);
+            }
+
+            return Json(new
+            {
+                success = true,
+                message = "Saved successfully."
+            });
         }
 
         // POST: Delete

@@ -1,29 +1,31 @@
-﻿using InvoiceGenerator.Models;
+﻿using InvoiceGenerator.Filters;
 using InvoiceGenerator.Interfaces;
+using InvoiceGenerator.Models;
 using iText.Commons.Utils;
-using Microsoft.AspNetCore.Mvc;   //Controller functionality
+using Microsoft.AspNetCore.Mvc;   
 
 namespace InvoiceGenerator.Controllers
-{          
-    public class CompanyController : Controller  //(C) Controller -> Base class for MVC controllers
+{
+    [RequireAdmin]
+    public class CompanyController : Controller  
     {
-        //Dependency Injection (Service)
+        
         private readonly ICompanyService _svc;
         public CompanyController(ICompanyService svc) => _svc = svc;
 
         // GET: company records
-        public IActionResult CompanyView()    //(I) IActionResult -> Represents action result
+        public IActionResult CompanyView()    
         {
             var list = _svc.GetAll();
-            return View(list);       //(M) View()	-> Returns UI view
+            return View(list);       
         }
 
         // POST: Save (Insert or Update)
-        [HttpPost]  //form submit
-        [ValidateAntiForgeryToken]  //security (CSRF protection)
+        [HttpPost] 
+        [ValidateAntiForgeryToken] 
         public IActionResult Save(CompanyModel model)
         {
-            if (!ModelState.IsValid)   //if ModelState is fail return error
+            if (!ModelState.IsValid)
                 return Json(new
                 {
                     success = false,
@@ -31,15 +33,30 @@ namespace InvoiceGenerator.Controllers
                         .SelectMany(v => v.Errors)
                         .Select(e => e.ErrorMessage)
                 });
+            if (model.CompanyId == 0)
+            {
+                int result = _svc.Insert(model); 
 
-            if (model.CompanyId == 0)     //New record (Insert)
-                _svc.Insert(model);
-            else                          //Existing record (Update)
+                if (result == -1)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "GSTIN already exists." 
+                    });
+                }
+            }
+            else
+            {
                 _svc.Update(model);
+            }
 
-            return Json(new { success = true });  //Response to AJAX in JSON format
+            return Json(new
+            {
+                success = true,
+                message = "Company saved successfully."
+            });
         }
-
         // GET:
         // one record for Edit modal
         [HttpGet]

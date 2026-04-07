@@ -6,16 +6,21 @@ namespace InvoiceGenerator.Interfaces
     {
         int GetNextInvoiceNo();
 
-        List<CompanyDetails> GetCompanies();
-        CompanyDetails? GetCompanyDetails(string name);
+        // Company
+        List<CompanyModel> GetCompanies();
+        CompanyModel? GetCompanyDetails(string name);
 
-        List<InvoiceItem> GetAllItems();
-        InvoiceItem? GetItemByName(string name);
+        // Items (Dropdown)
+        List<ItemModel> GetAllItems();
+        ItemModel? GetItemByName(string name);
 
+        // Transport
         List<string> GetTransportModes();
 
-        int SaveInvoice(InvoiceModel master, List<InvoiceItem> items);
+        // Save Invoice
+        int SaveInvoice(InvoiceModel master, List<ItemModel> items);
 
-        (InvoiceModel? master, List<InvoiceItem> items) GetInvoiceForPdf(int invoiceNo);
+        // PDF
+        (InvoiceModel? master, List<ItemModel> items) GetInvoiceForPdf(int invoiceNo);
     }
 }

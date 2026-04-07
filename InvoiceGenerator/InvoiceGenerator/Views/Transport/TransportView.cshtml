@@ -2,44 +2,103 @@
 @{
     ViewData["Title"] = "Transport Master";
 }
-@* <style>
-    body {
-        background: url('/images/Transport.jpg') no-repeat center center fixed;
-        background-size: cover;
+
+<style>
+    /* ── Table font & density ── */
+    #transportTable {
+        font-size: 0.75rem;
+    }
+    #transportTable thead th {
+        font-size: 0.72rem;
+        padding: 5px 6px;
+        white-space: nowrap;
+    }
+    #transportTable tbody td {
+        padding: 4px 6px;
+        vertical-align: middle;
     }
 
-    .table-container {
-        background: rgba(255, 255, 255, 0.9);
-        padding: 15px;
-        border-radius: 10px;
+    #transportTable tbody tr:nth-child(odd) td {
+    background-color: #f8f9fa !important;
+}
+
+#transportTable tbody tr:nth-child(even) td {
+    background-color: #eef2ff !important;
+}
+
+#transportTable tbody tr:hover td {
+    background-color: #cfe2ff !important;
+    cursor: pointer;
+}
+
+    /* ── Action buttons tiny ── */
+    #transportTable .btn-sm {
+        padding: 1px 5px;
+        font-size: 0.7rem;
     }
-</style> *@
-<div class="d-flex align-items-center justify-content-between mb-3">
-    <h5 class="mb-0 fw-bold">
+
+    /* ── Pagination ── */
+    .pagination-bar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        font-size: 0.78rem;
+    }
+    .pagination-bar .page-info { color: #555; }
+    .pagination-bar button {
+        min-width: 30px;
+        height: 28px;
+        font-size: 0.72rem;
+        padding: 0 6px;
+        border-radius: 4px;
+    }
+    .pagination-bar button.active-page {
+        background-color: #0d6efd;
+        color: #fff;
+        border-color: #0d6efd;
+    }
+</style>
+
+<!-- ── PAGE HEADER ── -->
+<div class="d-flex align-items-center justify-content-between mb-2">
+    <h6 class="mb-0 fw-bold">
         <i class="bi bi-truck me-2 text-primary"></i>Transport Master
-    </h5>
-    <button class="btn btn-primary btn-sm" onclick="openModal()">
-        <i class="bi bi-plus-lg me-1"></i>Add Mode
-    </button>
+    </h6>
+    <div class="d-flex align-items-center gap-2">
+        <input type="text" id="searchInput"
+               class="form-control form-control-sm"
+               placeholder="🔍 Search..."
+               style="width:180px"
+               oninput="filterTable()" />
+        <button class="btn btn-primary btn-sm" onclick="openModal()">
+            <i class="bi bi-plus-lg me-1"></i>Add Mode
+        </button>
+    </div>
 </div>
 
 <!-- ── GRID ── -->
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="table-responsive">
-            <table class="table table-bordered table-hover table-sm align-middle">
+            <table class="table table-bordered table-sm align-middle mb-0"
+                   id="transportTable">
                 <thead class="table-dark text-center">
                     <tr>
-                        <th style="width:60px">#</th>
+                        @* <th style="width:40px">#</th> *@
+                         <th>#</th>
                         <th>Mode Name</th>
-                        <th style="width:100px">Actions</th>
+                        @* <th style="width:80px">Actions</th> *@
+                        <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="transportTableBody">
+                    @{ int sr = 1; }
                     @foreach (var t in Model)
                     {
                         <tr id="row-@t.Id">
-                            <td class="text-center">@t.Id</td>
+                            <td class="text-center">@sr</td>
                             <td>@t.ModeName</td>
                             <td class="text-center">
                                 <button class="btn btn-outline-primary btn-sm"
@@ -54,47 +113,77 @@
                                 </button>
                             </td>
                         </tr>
+                        sr++;
                     }
                 </tbody>
             </table>
         </div>
+
+        <!-- ── PAGINATION BAR ── -->
+        <div class="pagination-bar">
+            <span class="page-info" id="pageInfo"></span>
+            <button class="btn btn-outline-secondary btn-sm"
+                    id="btnFirst" onclick="goToPage(1)"
+                    title="First">«</button>
+            <button class="btn btn-outline-secondary btn-sm"
+                    id="btnPrev" onclick="goToPage(currentPage - 1)"
+                    title="Previous">‹</button>
+            <span id="pageNumbers" class="d-flex gap-1"></span>
+            <button class="btn btn-outline-secondary btn-sm"
+                    id="btnNext" onclick="goToPage(currentPage + 1)"
+                    title="Next">›</button>
+            <button class="btn btn-outline-secondary btn-sm"
+                    id="btnLast" onclick="goToPage(totalPages)"
+                    title="Last">»</button>
+            <select id="rowsPerPageSelect"
+                    class="form-select form-select-sm"
+                    style="width:80px"
+                    onchange="changeRowsPerPage()">
+                <option value="15" selected>15</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+            <span class="page-info">/ page</span>
+        </div>
     </div>
 </div>
 
-<!-- ── ADD / EDIT MODAL ── -->
+<!-- ══════════════════════════════════════════════
+     ADD / EDIT MODAL
+══════════════════════════════════════════════ -->
 <div class="modal fade" id="transportModal" tabindex="-1"
      aria-labelledby="transportModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
 
-            <div class="modal-header bg-dark text-white">
-                <h6 class="modal-title" id="transportModalLabel">
+            <div class="modal-header bg-dark text-white py-2">
+                <h6 class="modal-title mb-0" id="transportModalLabel">
                     <i class="bi bi-truck me-2"></i>
                     <span id="modalTitleText">Add Transport Mode</span>
                 </h6>
                 <button type="button" class="btn-close btn-close-white"
-                        data-bs-dismiss="modal" aria-label="Close"></button>
+                        data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
                 <form id="transportForm" novalidate>
                     @Html.AntiForgeryToken()
-                    <input type="hidden" id="Id" name="Id" value="0" />
+                    <input type="hidden" id="Id" value="0" />
 
                     <div class="mb-2">
-                        <label class="form-label fw-semibold">
+                        <label class="form-label fw-semibold small">
                             Mode Name <span class="text-danger">*</span>
                         </label>
-                        <input type="text" id="modeName" name="ModeName"
-                               class="form-control" maxlength="50"
+                        <input type="text" id="modeName"
+                               class="form-control form-control-sm"
+                               maxlength="50"
                                placeholder="e.g. By Road" />
                         <div class="invalid-feedback" id="err-modeName"></div>
                     </div>
-
                 </form>
             </div>
 
-            <div class="modal-footer">
+            <div class="modal-footer py-2">
                 <button type="button" class="btn btn-secondary btn-sm"
                         data-bs-dismiss="modal">
                     <i class="bi bi-x-lg me-1"></i>Cancel
@@ -109,22 +198,24 @@
     </div>
 </div>
 
-<!-- ── DELETE CONFIRM MODAL ── -->
+<!-- ══════════════════════════════════════════════
+     DELETE CONFIRM MODAL
+══════════════════════════════════════════════ -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h6 class="modal-title">
+            <div class="modal-header bg-danger text-white py-2">
+                <h6 class="modal-title mb-0">
                     <i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete
                 </h6>
                 <button type="button" class="btn-close btn-close-white"
                         data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body text-center">
+            <div class="modal-body text-center small">
                 <p class="mb-1">Are you sure you want to delete</p>
                 <strong id="deleteModeLabel"></strong>?
             </div>
-            <div class="modal-footer justify-content-center">
+            <div class="modal-footer justify-content-center py-2">
                 <button class="btn btn-secondary btn-sm"
                         data-bs-dismiss="modal">
                     <i class="bi bi-x-lg me-1"></i>Cancel
@@ -138,10 +229,11 @@
 </div>
 
 <!-- ── TOAST ── -->
-<div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
-    <div id="toast" class="toast align-items-center text-white border-0" role="alert">
+<div class="position-fixed top-0 end-0 p-3" style="z-index:9999">
+    <div id="toast" class="toast align-items-center text-white border-0"
+         role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
-            <div class="toast-body" id="toastMsg"></div>
+            <div class="toast-body small" id="toastMsg"></div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto"
                     data-bs-dismiss="toast"></button>
         </div>
@@ -149,51 +241,145 @@
 </div>
 
 @section Scripts {
-    <script>
-        const modal       = new bootstrap.Modal(document.getElementById('transportModal'));
-        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-        const toastEl     = document.getElementById('toast');
-        const bsToast     = new bootstrap.Toast(toastEl, { delay: 3000 });
-        let   pendingDeleteId = null;
+<script>
+    // ════════════════════════════════════════════
+    // PAGINATION STATE
+    // ════════════════════════════════════════════
+    let currentPage  = 1;
+    let rowsPerPage  = 15;
+    let totalPages   = 1;
+    let filteredRows = [];
 
-        // ── Open blank Add form ──
-        function openModal() {
-            clearForm();
-            document.getElementById('modalTitleText').textContent = 'Add Transport Mode';
-            modal.show();
+    const modal       = new bootstrap.Modal(document.getElementById('transportModal'));
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const toastEl     = document.getElementById('toast');
+    const bsToast     = new bootstrap.Toast(toastEl, { delay: 4000 });
+    let   pendingDeleteId = null;
+
+    // ════════════════════════════════════════════
+    // PAGINATION FUNCTIONS
+    // ════════════════════════════════════════════
+    function getAllRows() {
+        return Array.from(document.querySelectorAll('#transportTableBody tr'));
+    }
+
+    function filterTable() {
+        const q = document.getElementById('searchInput').value.toLowerCase().trim();
+        filteredRows = getAllRows().filter(row =>
+            !q || row.textContent.toLowerCase().includes(q));
+        currentPage = 1;
+        renderPage();
+    }
+
+    function renderPage() {
+        getAllRows().forEach(row => row.style.display = 'none');
+
+        totalPages = Math.max(1, Math.ceil(filteredRows.length / rowsPerPage));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end   = Math.min(start + rowsPerPage, filteredRows.length);
+
+        for (let i = start; i < end; i++)
+            filteredRows[i].style.display = '';
+
+        updatePaginationUI(start, end);
+    }
+
+    function updatePaginationUI(start, end) {
+        document.getElementById('pageInfo').textContent =
+            filteredRows.length === 0
+                ? 'No records'
+                : `${start + 1}–${end} of ${filteredRows.length}`;
+
+        document.getElementById('btnFirst').disabled = currentPage === 1;
+        document.getElementById('btnPrev').disabled  = currentPage === 1;
+        document.getElementById('btnNext').disabled  = currentPage === totalPages;
+        document.getElementById('btnLast').disabled  = currentPage === totalPages;
+
+        const container  = document.getElementById('pageNumbers');
+        container.innerHTML = '';
+        const maxVisible = 3;
+        let   startPage  = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let   endPage    = Math.min(totalPages, startPage + maxVisible - 1);
+        if (endPage - startPage < maxVisible - 1)
+            startPage = Math.max(1, endPage - maxVisible + 1);
+
+        for (let p = startPage; p <= endPage; p++) {
+            const btn = document.createElement('button');
+            btn.textContent = p;
+            btn.className   = 'btn btn-outline-secondary btn-sm'
+                            + (p === currentPage ? ' active-page' : '');
+            btn.onclick     = () => goToPage(p);
+            container.appendChild(btn);
         }
+    }
 
-        // ── Load record into Edit form ──
-        async function editMode(Id) {
-            const r = await fetch(`/Transport/GetById?Id=${Id}`);
+    function goToPage(page) {
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        renderPage();
+    }
+
+    function changeRowsPerPage() {
+        rowsPerPage = parseInt(
+            document.getElementById('rowsPerPageSelect').value);
+        currentPage = 1;
+        renderPage();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        filteredRows = getAllRows();
+        renderPage();
+    });
+
+    // ════════════════════════════════════════════
+    // CRUD
+    // ════════════════════════════════════════════
+
+    // ── Open Add Modal ──
+    function openModal() {
+        clearForm();
+        document.getElementById('modalTitleText').textContent = 'Add Transport Mode';
+        modal.show();
+    }
+
+    // ── Edit ──
+    async function editMode(id) {
+        try {
+            const r = await fetch(`/Transport/GetById?Id=${id}`);
             const d = await r.json();
             document.getElementById('modalTitleText').textContent = 'Edit Transport Mode';
-            document.getElementById('Id').value   = d.id;
+            document.getElementById('Id').value       = d.id;
             document.getElementById('modeName').value = d.modeName;
             clearErrors();
             modal.show();
+        } catch (err) {
+            showToast('Failed to load transport data.', 'danger');
+        }
+    }
+
+    // ── Save ──
+    async function saveMode() {
+        clearErrors();
+
+        const modeName = document.getElementById('modeName').value.trim();
+
+        if (!modeName) {
+            showError('modeName', 'err-modeName', 'Mode Name is required.');
+            return;
         }
 
-        // ── Save (Insert / Update) ──
-        async function saveMode() {
-            clearErrors();
+        const token = document.querySelector(
+            '#transportForm input[name="__RequestVerificationToken"]').value;
 
-            const modeName = document.getElementById('modeName').value.trim();
+        const payload = new URLSearchParams({
+            Id:       document.getElementById('Id').value,
+            ModeName: modeName,
+            __RequestVerificationToken: token
+        });
 
-            if (!modeName) {
-                showError('modeName', 'err-modeName', 'Mode Name is required.');
-                return;
-            }
-
-            const token = document.querySelector(
-                '#transportForm input[name="__RequestVerificationToken"]').value;
-
-            const payload = new URLSearchParams({
-                Id:   document.getElementById('Id').value,
-                ModeName: modeName,
-                __RequestVerificationToken: token
-            });
-
+        try {
             const r = await fetch('/Transport/Save', {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -202,26 +388,30 @@
             const d = await r.json();
 
             if (!d.success) {
-                d.errors?.forEach(e => showToast(e, 'danger'));
+                if (d.errors) d.errors.forEach(e => showToast(e, 'danger'));
+                else showToast(d.message || 'Save failed.', 'danger');
                 return;
             }
 
             modal.hide();
-            showToast('Transport mode saved successfully!', 'success');
-            setTimeout(() => location.reload(), 1000);
+            showToast(d.message || 'Transport mode saved successfully!', 'success');
+            setTimeout(() => location.reload(), 1200);
+        } catch (err) {
+            showToast('Network error. Please try again.', 'danger');
         }
+    }
 
-        // ── Delete: show confirm modal ──
-        function deleteMode(Id, name) {
-            pendingDeleteId = Id;
-            document.getElementById('deleteModeLabel').textContent = name;
-            deleteModal.show();
-        }
+    // ── Delete confirm ──
+    function deleteMode(id, name) {
+        pendingDeleteId = id;
+        document.getElementById('deleteModeLabel').textContent = name;
+        deleteModal.show();
+    }
 
-        // ── Delete: confirmed ──
-        document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
-            const token = document.querySelector(
-                'input[name="__RequestVerificationToken"]').value;
+    document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
+        const token = document.querySelector(
+            'input[name="__RequestVerificationToken"]').value;
+        try {
             const r = await fetch('/Transport/Delete', {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -234,36 +424,44 @@
             deleteModal.hide();
             if (d.success) {
                 document.getElementById(`row-${pendingDeleteId}`)?.remove();
-                showToast('Transport mode deleted.', 'success');
+                filteredRows = filteredRows.filter(
+                    row => row.id !== `row-${pendingDeleteId}`);
+                renderPage();
+                showToast('Transport mode deleted successfully.', 'success');
             } else {
                 showToast('Delete failed.', 'danger');
             }
-        });
-
-        // ── Helpers ──
-        function clearForm() {
-            document.getElementById('Id').value   = '0';
-            document.getElementById('modeName').value = '';
-            clearErrors();
+        } catch (err) {
+            showToast('Network error.', 'danger');
         }
+    });
 
-        function clearErrors() {
-            document.querySelectorAll('.invalid-feedback')
-                .forEach(el => { el.textContent = ''; });
-            document.querySelectorAll('.form-control')
-                .forEach(el => el.classList.remove('is-invalid'));
-        }
+    // ════════════════════════════════════════════
+    // HELPERS
+    // ════════════════════════════════════════════
+    function clearForm() {
+        document.getElementById('Id').value       = '0';
+        document.getElementById('modeName').value = '';
+        clearErrors();
+    }
 
-        function showError(fieldId, errId, msg) {
-            document.getElementById(fieldId).classList.add('is-invalid');
-            document.getElementById(errId).textContent = msg;
-        }
+    function clearErrors() {
+        document.querySelectorAll('.invalid-feedback')
+            .forEach(el => { el.textContent = ''; });
+        document.querySelectorAll('.form-control, .form-select')
+            .forEach(el => el.classList.remove('is-invalid'));
+    }
 
-        function showToast(msg, type = 'success') {
-            toastEl.className =
-                `toast align-items-center text-white border-0 bg-${type}`;
-            document.getElementById('toastMsg').textContent = msg;
-            bsToast.show();
-        }
-    </script>
+    function showError(fieldId, errId, msg) {
+        document.getElementById(fieldId)?.classList.add('is-invalid');
+        document.getElementById(errId).textContent = msg;
+    }
+
+    function showToast(msg, type = 'success') {
+        toastEl.className =
+            `toast align-items-center text-white border-0 bg-${type}`;
+        document.getElementById('toastMsg').textContent = msg;
+        bsToast.show();
+    }
+</script>
 }

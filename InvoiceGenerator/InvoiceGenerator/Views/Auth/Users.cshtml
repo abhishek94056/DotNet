@@ -1,0 +1,376 @@
+﻿@model List<InvoiceGenerator.Models.UserModel>
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<style>
+    /* ── Table font & density ── */
+    #userTable {
+        font-size: 0.75rem;
+    }
+    #userTable thead th {
+        font-size: 0.72rem;
+        padding: 5px 6px;
+        white-space: nowrap;
+    }
+    #userTable tbody td {
+        padding: 4px 6px;
+        vertical-align: middle;
+    }
+#userTable tbody tr:nth-child(odd) td {
+    background-color: #f8f9fa !important;
+}
+
+#userTable tbody tr:nth-child(even) td {
+    background-color: #eef2ff !important;
+}
+
+#userTable tbody tr:hover td {
+    background-color: #cfe2ff !important;
+    cursor: pointer;
+}
+
+    /* ── Action buttons tiny ── */
+    #userTable .btn-sm {
+        padding: 1px 5px;
+        font-size: 0.7rem;
+    }
+
+    /* ── Badge size ── */
+    #userTable .badge {
+        font-size: 0.68rem;
+    }
+
+    /* ── Pagination ── */
+    .pagination-bar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        font-size: 0.78rem;
+    }
+    .pagination-bar .page-info {
+        color: #555;
+    }
+    .pagination-bar button {
+        min-width: 30px;
+        height: 28px;
+        font-size: 0.72rem;
+        padding: 0.6px;
+        border-radius: 4px;
+    }
+    .pagination-bar button.active-page {
+        background-color: #dc3545;
+        color: #fff;
+        border-color: #dc3545;
+    }
+</style>
+
+<!-- ── PAGE HEADER ── -->
+<div class="d-flex align-items-center justify-content-between mb-2">
+    <h6 class="mb-0 fw-bold">
+        <i class="bi bi-people me-2 text-danger"></i>User Master
+    </h6>
+    <div class="d-flex align-items-center gap-2">
+        <!-- Search -->
+        <input type="text" id="searchInput"
+               class="form-control form-control-sm"
+               placeholder="🔍 Search..."
+               style="width:180px"
+               oninput="filterTable()" />
+        <a asp-action="Register" class="btn btn-primary btn-sm">
+            <i class="bi bi-person-plus me-1"></i>Add User
+        </a>
+    </div>
+</div>
+
+<!-- ── GRID ── -->
+<div class="table-responsive">
+    <table class="table table-bordered table-sm align-middle mb-0"
+           id="userTable">
+        <thead class="table-dark text-center">
+            <tr>
+                @* <th style="width:40px">#</th> *@
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                @* <th style="width:70px">Role</th>
+                <th style="width:75px">Status</th>
+                <th style="width:90px">Created</th>
+                <th style="width:70px">Actions</th> *@
+                <th>Role</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            @{ int sr = 1; }
+            @foreach (var u in Model)
+            {
+                <tr id="row-@u.UserId">
+                    <td class="text-center">@sr</td>
+                    <td>@u.Name</td>
+                    <td>@u.Email</td>
+                    <td class="text-center">
+                        <span class="badge bg-@(u.Role == "Admin" ? "danger" : "primary")">
+                            @u.Role
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-@(u.IsActive ? "success" : "secondary")">
+                            @(u.IsActive ? "Active" : "Inactive")
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        @u.CreatedDate.ToString("dd-MM-yyyy")
+                    </td>
+                    <td class="text-center">
+                        @if (u.IsActive)
+                        {
+                            <button class="btn btn-outline-warning btn-sm"
+                                    onclick="openStatusModal(@u.UserId, false)"
+                                    title="Deactivate">
+                                <i class="bi bi-person-x"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-success btn-sm"
+                                    onclick="openStatusModal(@u.UserId, true)"
+                                    title="Activate">
+                                <i class="bi bi-person-check"></i>
+                            </button>
+                        }
+                    </td>
+                </tr>
+                sr++;
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- ── PAGINATION BAR ── -->
+<div class="pagination-bar">
+    <span class="page-info" id="pageInfo"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnFirst" onclick="goToPage(1)"
+            title="First">«</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnPrev" onclick="goToPage(currentPage - 1)"
+            title="Previous">‹</button>
+    <span id="pageNumbers" class="d-flex gap-1"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnNext" onclick="goToPage(currentPage + 1)"
+            title="Next">›</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnLast" onclick="goToPage(totalPages)"
+            title="Last">»</button>
+
+    <select id="rowsPerPageSelect"
+            class="form-select form-select-sm"
+            style="width:80px"
+            onchange="changeRowsPerPage()">
+        <option value="15" selected>15</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+    </select>
+    <span class="page-info">/ page</span>
+</div>
+
+<!-- ── STATUS CONFIRM MODAL ── -->
+<div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+
+            <div class="modal-header bg-warning text-dark py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-question-circle me-2"></i>Confirm Action
+                </h6>
+                <button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body text-center small">
+                <p id="statusMsg" class="mb-1"></p>
+            </div>
+
+            <div class="modal-footer justify-content-center py-2">
+                <button class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>No
+                </button>
+                <button class="btn btn-primary btn-sm" id="btnConfirmStatus">
+                    <i class="bi bi-check-lg me-1"></i>Yes
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index:9999">
+    <div id="toast" class="toast align-items-center text-white border-0"
+         role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body small" id="toastMsg"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // ════════════════════════════════════════════
+    // PAGINATION STATE
+    // ════════════════════════════════════════════
+    let currentPage  = 1;
+    let rowsPerPage  = 15;
+    let totalPages   = 1;
+    let filteredRows = [];
+
+    const statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+    const toastEl     = document.getElementById('toast');
+    const bsToast     = new bootstrap.Toast(toastEl, { delay: 3000 });
+
+    let selectedUserId = 0;
+    let selectedStatus = false;
+
+    // ════════════════════════════════════════════
+    // PAGINATION FUNCTIONS
+    // ════════════════════════════════════════════
+    function getAllRows() {
+        return Array.from(document.querySelectorAll('#tableBody tr'));
+    }
+
+    function filterTable() {
+        const q = document.getElementById('searchInput').value.toLowerCase().trim();
+        filteredRows = getAllRows().filter(row =>
+            !q || row.textContent.toLowerCase().includes(q)
+        );
+        currentPage = 1;
+        renderPage();
+    }
+
+    function renderPage() {
+        // Hide all
+        getAllRows().forEach(row => row.style.display = 'none');
+
+        totalPages  = Math.max(1, Math.ceil(filteredRows.length / rowsPerPage));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end   = Math.min(start + rowsPerPage, filteredRows.length);
+
+        // Show current page rows
+        for (let i = start; i < end; i++)
+            filteredRows[i].style.display = '';
+
+        updatePaginationUI(start, end);
+    }
+
+    function updatePaginationUI(start, end) {
+        document.getElementById('pageInfo').textContent =
+            filteredRows.length === 0
+                ? 'No records'
+                : `${start + 1}–${end} of ${filteredRows.length}`;
+
+        document.getElementById('btnFirst').disabled = currentPage === 1;
+        document.getElementById('btnPrev').disabled  = currentPage === 1;
+        document.getElementById('btnNext').disabled  = currentPage === totalPages;
+        document.getElementById('btnLast').disabled  = currentPage === totalPages;
+
+        // Page number buttons (sliding window of 5)
+        const container  = document.getElementById('pageNumbers');
+        container.innerHTML = '';
+
+        const maxVisible = 3;
+        let   startPage  = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let   endPage    = Math.min(totalPages, startPage + maxVisible - 1);
+        if (endPage - startPage < maxVisible - 1)
+            startPage = Math.max(1, endPage - maxVisible + 1);
+
+        for (let p = startPage; p <= endPage; p++) {
+            const btn       = document.createElement('button');
+            btn.textContent = p;
+            btn.className   = 'btn btn-outline-secondary btn-sm'
+                            + (p === currentPage ? ' active-page' : '');
+            btn.onclick     = () => goToPage(p);
+            container.appendChild(btn);
+        }
+    }
+
+    function goToPage(page) {
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        renderPage();
+    }
+
+    function changeRowsPerPage() {
+        rowsPerPage = parseInt(
+            document.getElementById('rowsPerPageSelect').value);
+        currentPage = 1;
+        renderPage();
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+        filteredRows = getAllRows();
+        renderPage();
+    });
+
+    // ════════════════════════════════════════════
+    // STATUS TOGGLE
+    // ════════════════════════════════════════════
+    function openStatusModal(userId, activate) {
+        selectedUserId = userId;
+        selectedStatus = activate;
+        document.getElementById('statusMsg').textContent =
+            activate
+                ? 'Are you sure you want to activate this user?'
+                : 'Are you sure you want to deactivate this user?';
+        statusModal.show();
+    }
+
+    document.getElementById('btnConfirmStatus').addEventListener('click', async () => {
+        const token = document.querySelector(
+            'input[name="__RequestVerificationToken"]')?.value ?? '';
+        try {
+            const r = await fetch('/Auth/ToggleActive', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body:    new URLSearchParams({
+                    userId:   selectedUserId,
+                    isActive: selectedStatus,
+                    __RequestVerificationToken: token
+                })
+            });
+            const d = await r.json();
+            statusModal.hide();
+            if (d.success) {
+                showToast(
+                    selectedStatus ? 'User activated.' : 'User deactivated.',
+                    'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast('Action failed.', 'danger');
+            }
+        } catch (err) {
+            showToast('Network error.', 'danger');
+        }
+    });
+
+    // ════════════════════════════════════════════
+    // TOAST
+    // ════════════════════════════════════════════
+    function showToast(msg, type = 'success') {
+        toastEl.className =
+            `toast align-items-center text-white border-0 bg-${type}`;
+        document.getElementById('toastMsg').textContent = msg;
+        bsToast.show();
+    }
+</script>
+}

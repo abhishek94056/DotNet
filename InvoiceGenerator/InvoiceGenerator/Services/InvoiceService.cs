@@ -1,5 +1,4 @@
-﻿// Services/InvoiceService.cs
-using InvoiceGenerator.Interfaces;
+﻿using InvoiceGenerator.Interfaces;
 using InvoiceGenerator.Models;
 using Microsoft.Data.SqlClient;
 using System.Data;
@@ -19,39 +18,53 @@ namespace InvoiceGenerator.Services
             using var con = new SqlConnection(_conn);
             using var cmd = new SqlCommand(
                 "SELECT ISNULL(MAX(InvoiceNo), 0) + 1 FROM InvoiceMaster", con);
+
             con.Open();
             return Convert.ToInt32(cmd.ExecuteScalar());
         }
 
         // ── Companies dropdown ───────────────────────────────────────
-        public List<CompanyDetails> GetCompanies()
+        public List<CompanyModel> GetCompanies()
         {
-            var list = new List<CompanyDetails>();
+            var list = new List<CompanyModel>();
+
             using var con = new SqlConnection(_conn);
             using var cmd = new SqlCommand("SP_GetCompanies", con)
             { CommandType = CommandType.StoredProcedure };
+
             con.Open();
             using var dr = cmd.ExecuteReader();
+
             while (dr.Read())
-                list.Add(new CompanyDetails { CompanyName = dr["CompanyName"].ToString()! });
+            {
+                list.Add(new CompanyModel
+                {
+                    CompanyName = dr["CompanyName"].ToString()!
+                });
+            }
+
             return list;
         }
 
         // ── Single company details ───────────────────────────────────
-        public CompanyDetails? GetCompanyDetails(string name)
+        public CompanyModel? GetCompanyDetails(string name)
         {
             using var con = new SqlConnection(_conn);
             using var cmd = new SqlCommand("SP_GetCompanyDetails", con)
             { CommandType = CommandType.StoredProcedure };
+
             cmd.Parameters.AddWithValue("@CompanyName", name);
+
             con.Open();
             using var dr = cmd.ExecuteReader();
+
             if (!dr.Read()) return null;
-            return new CompanyDetails
+
+            return new CompanyModel
             {
                 CompanyName = dr["CompanyName"].ToString()!,
                 Address = dr["Address"].ToString()!,
-                StateCode = dr["StateCode"].ToString()!,
+                StateCode = Convert.ToInt32(dr["StateCode"]),
                 State = dr["State"].ToString()!,
                 GSTIN = dr["GSTIN"].ToString()!,
                 PaymentTerm = dr["PaymentTerm"].ToString()!
@@ -59,49 +72,67 @@ namespace InvoiceGenerator.Services
         }
 
         // ── All items (for dropdown) ─────────────────────────────────
-        public List<InvoiceItem> GetAllItems()
+        public List<ItemModel> GetAllItems()
         {
-            var list = new List<InvoiceItem>();
+            var list = new List<ItemModel>();
+
             using var con = new SqlConnection(_conn);
             using var cmd = new SqlCommand("SP_GetItems", con)
             { CommandType = CommandType.StoredProcedure };
+
             con.Open();
             using var dr = cmd.ExecuteReader();
+
             while (dr.Read())
-                list.Add(new InvoiceItem
+            {
+                list.Add(new ItemModel
                 {
+                    ItemId = Convert.ToInt32(dr["ItemId"]),
+                    ItemCode = dr["ItemCode"].ToString()!,
                     ItemDescription = dr["ItemDescription"].ToString()!,
                     HSNCode = dr["HSNCode"].ToString()!,
-                    Rate = Convert.ToDecimal(dr["Rate"])
+                    Rate = Convert.ToDecimal(dr["Rate"]),
+                    GST = Convert.ToDecimal(dr["GST"])
                 });
+            }
+
             return list;
         }
 
-        // ── Single item by name ──────────────────────────────────────
-        public InvoiceItem? GetItemByName(string name)
-            => GetAllItems().FirstOrDefault(i =>
+        // ── Get item by name ─────────────────────────────────────────
+        public ItemModel? GetItemByName(string name)
+        {
+            return GetAllItems().FirstOrDefault(i =>
                 i.ItemDescription.Equals(name, StringComparison.OrdinalIgnoreCase));
+        }
 
         // ── Transport modes ──────────────────────────────────────────
         public List<string> GetTransportModes()
         {
             var list = new List<string>();
+
             using var con = new SqlConnection(_conn);
             using var cmd = new SqlCommand("SP_GetTransportModes", con)
             { CommandType = CommandType.StoredProcedure };
+
             con.Open();
             using var dr = cmd.ExecuteReader();
-            while (dr.Read()) list.Add(dr["ModeName"].ToString()!);
+
+            while (dr.Read())
+            {
+                list.Add(dr["ModeName"].ToString()!);
+            }
+
             return list;
         }
 
-        // ── Save invoice + items, return new InvoiceNo ───────────────
-        public int SaveInvoice(InvoiceModel master, List<InvoiceItem> items)
+        // ── Save invoice + items ─────────────────────────────────────
+        public int SaveInvoice(InvoiceModel master, List<ItemModel> items)
         {
             using var con = new SqlConnection(_conn);
             con.Open();
 
-            // Master
+            // Insert Master
             var cmd = new SqlCommand("SP_InsertInvoiceMaster", con)
             { CommandType = CommandType.StoredProcedure };
 
@@ -109,8 +140,6 @@ namespace InvoiceGenerator.Services
             cmd.Parameters.AddWithValue("@DateOfSupply", master.DateOfSupply);
             cmd.Parameters.AddWithValue("@PurchaseOrderNo", master.PurchaseOrderNo);
             cmd.Parameters.AddWithValue("@PurchaseOrderDt", master.PurchaseOrderDt);
-            //cmd.Parameters.AddWithValue("@DCNo", master.DCNo);
-            //cmd.Parameters.AddWithValue("@DCDate", master.DCDate);
             cmd.Parameters.AddWithValue("@VehicleNo", master.VehicleNo);
             cmd.Parameters.AddWithValue("@ASNNo", master.ASNNo);
             cmd.Parameters.AddWithValue("@InvoiceTo", master.InvoiceTo);
@@ -125,18 +154,22 @@ namespace InvoiceGenerator.Services
 
             int invoiceNo = Convert.ToInt32(cmd.ExecuteScalar());
 
-            // Items
+            // Insert Items
             foreach (var item in items)
             {
-                var ci = new SqlCommand("SP_InsertInvoiceItem", con)
+                var ci = new SqlCommand("SP_InsertInvoiceItems", con)
                 { CommandType = CommandType.StoredProcedure };
 
                 ci.Parameters.AddWithValue("@InvoiceNo", invoiceNo);
                 ci.Parameters.AddWithValue("@SrNo", item.SrNo);
+                ci.Parameters.AddWithValue("@ItemCode", item.ItemCode);
                 ci.Parameters.AddWithValue("@ItemDescription", item.ItemDescription);
                 ci.Parameters.AddWithValue("@HSNCode", item.HSNCode);
                 ci.Parameters.AddWithValue("@Rate", item.Rate);
                 ci.Parameters.AddWithValue("@Qty", item.Qty);
+                ci.Parameters.AddWithValue("@GST", item.GST);
+                ci.Parameters.AddWithValue("@TaxableAmount", item.TaxableAmount);
+                ci.Parameters.AddWithValue("@GSTAmount", item.GSTAmount);
                 ci.Parameters.AddWithValue("@Amount", item.Amount);
 
                 ci.ExecuteNonQuery();
@@ -146,23 +179,28 @@ namespace InvoiceGenerator.Services
         }
 
         // ── Get invoice + items for PDF ──────────────────────────────
-        public (InvoiceModel? master, List<InvoiceItem> items) GetInvoiceForPdf(int invoiceNo)
+        public (InvoiceModel? master, List<ItemModel> items) GetInvoiceForPdf(int invoiceNo)
         {
             InvoiceModel? master = null;
 
+            // Get Master
             using (var con = new SqlConnection(_conn))
             {
                 var cmd = new SqlCommand("SP_GetInvoiceMaster", con)
                 { CommandType = CommandType.StoredProcedure };
+
                 cmd.Parameters.AddWithValue("@InvoiceNo", invoiceNo);
                 con.Open();
+
                 var da = new SqlDataAdapter(cmd);
                 var dt = new DataTable();
                 da.Fill(dt);
 
-                if (dt.Rows.Count == 0) return (null, new List<InvoiceItem>());
+                if (dt.Rows.Count == 0)
+                    return (null, new List<ItemModel>());
 
                 var r = dt.Rows[0];
+
                 master = new InvoiceModel
                 {
                     InvoiceNo = Convert.ToInt32(r["InvoiceNo"]),
@@ -170,8 +208,6 @@ namespace InvoiceGenerator.Services
                     DateOfSupply = Convert.ToDateTime(r["DateOfSupply"]),
                     PurchaseOrderNo = r["PurchaseOrderNo"].ToString()!,
                     PurchaseOrderDt = Convert.ToDateTime(r["PurchaseOrderDt"]),
-                    //DCNo = r["DCNo"].ToString()!,
-                    //DCDate = Convert.ToDateTime(r["DCDate"]),
                     VehicleNo = r["VehicleNo"].ToString()!,
                     ASNNo = r["ASNNo"].ToString()!,
                     InvoiceTo = r["InvoiceTo"].ToString()!,
@@ -186,24 +222,35 @@ namespace InvoiceGenerator.Services
                 };
             }
 
-            var items = new List<InvoiceItem>();
+            // Get Items
+            var items = new List<ItemModel>();
+
             using (var con = new SqlConnection(_conn))
             {
                 var cmd = new SqlCommand("SP_GetInvoiceItems", con)
                 { CommandType = CommandType.StoredProcedure };
+
                 cmd.Parameters.AddWithValue("@InvoiceNo", invoiceNo);
                 con.Open();
+
                 using var dr = cmd.ExecuteReader();
+
                 while (dr.Read())
-                    items.Add(new InvoiceItem
+                {
+                    items.Add(new ItemModel
                     {
                         SrNo = Convert.ToInt32(dr["SrNo"]),
+                        ItemCode = dr["ItemCode"].ToString()!,
                         ItemDescription = dr["ItemDescription"].ToString()!,
                         HSNCode = dr["HSNCode"].ToString()!,
                         Rate = Convert.ToDecimal(dr["Rate"]),
                         Qty = Convert.ToDecimal(dr["Qty"]),
+                        GST = Convert.ToDecimal(dr["GST"]),
+                        TaxableAmount = Convert.ToDecimal(dr["TaxableAmount"]),
+                        GSTAmount = Convert.ToDecimal(dr["GSTAmount"]),
                         Amount = Convert.ToDecimal(dr["Amount"])
                     });
+                }
             }
 
             return (master, items);

@@ -7,42 +7,80 @@ namespace InvoiceGenerator
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);     //Builder (Setup Phase)
+            var builder = WebApplication.CreateBuilder(args);
+            // Builder -> Used to configure services and app settings (Setup Phase)
 
-            // ── Services ──────────────────────────────────────────────
-            builder.Services.AddControllersWithViews();         //(Model-View-Controller) enable
-            builder.Services.AddScoped<IInvoiceService, InvoiceService>();       //Custom Services (Dependency Injection) 
+            // ── Services (Dependency Injection Container) ──
+            builder.Services.AddControllersWithViews();
+            // Enables MVC (Model-View-Controller) support
+
+            // ── Session Configuration ──
+            builder.Services.AddDistributedMemoryCache();
+            // Stores session data in server memory
+
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(60);
+                // Session expires after 60 minutes of inactivity
+
+                options.Cookie.HttpOnly = true;
+                // Prevents client-side JavaScript access (security)
+
+                options.Cookie.IsEssential = true;
+                // Required for GDPR (session always enabled)
+
+                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                // Uses HTTPS if request is HTTPS
+            });
+
+            // ── Custom Services (Dependency Injection) ──
+            builder.Services.AddScoped<IInvoiceService, InvoiceService>();
             builder.Services.AddScoped<PdfService>();
             builder.Services.AddScoped<ICompanyService, CompanyService>();
             builder.Services.AddScoped<IItemService, ItemService>();
             builder.Services.AddScoped<ITransportService, TransportService>();
-            var app = builder.Build();                          //Build Application
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            // AddScoped -> One instance per HTTP request
 
-            // ── Middleware Pipeline ───────────────────────────────────
-            if (!app.Environment.IsDevelopment())              //Middleware Pipeline(Production environment check)
+            var app = builder.Build();
+            // Builds the application pipeline
+
+            // ── Middleware Pipeline ──
+            if (!app.Environment.IsDevelopment())
             {
-                app.UseExceptionHandler("/Invoice/Error");    //Error Handling(if error occure redirect to /Invoice/Error)
-                app.UseHsts();    //enforce to use HTTPS not HTTP
+                app.UseExceptionHandler("/Home/Error");
+                // Redirects to error page in production
+
+                app.UseHsts();
+                // Forces HTTPS for security (HTTP Strict Transport Security)
             }
 
-            app.UseHttpsRedirection(); // HTTP → HTTPS
-            app.UseStaticFiles();      // CSS, JS, images
-            app.UseRouting();          // URL → Controller mapping
-            app.UseAuthorization();    // Security check
+            app.UseHttpsRedirection();
+            // Redirect HTTP requests to HTTPS
 
-            // ── Attribute Routing ────────────────────────────────────────────────
+            app.UseStaticFiles();
+            // Enables serving static files (CSS, JS, images)
+
+            app.UseRouting();
+            // Matches incoming request URL to endpoints
+
+            app.UseSession();
+            // Enables session (⚠ must come before endpoints)
+
+            app.UseAuthorization();
+            // Handles authorization (role/security checks)
+
+            // ── Attribute Routing ──
             app.MapControllers();
+            // Enables attribute-based routing
 
-            // ── Conventional Routing ────────────────────────────────────────────────
-            //app.MapControllerRoute(
-            //    name: "pdf",
-            //    pattern: "Invoice/Pdf/{invoiceNo:int}");
-
+            // ── Conventional Routing ──
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Invoice}/{action=InvoiceView}/{id?}");
 
-            app.Run();   //Run Application
+            app.Run();
+            // Starts the application
         }
     }
 }

@@ -26,26 +26,4 @@ namespace InvoiceGenerator.Models
         [StringLength(100, ErrorMessage = "Remark cannot exceed 250 characters")]
         public string Remark { get; set; }
     }
-
-    // Models/InvoiceItem.cs
-    public class InvoiceItem
-    {
-        public int SrNo { get; set; }
-        public string ItemDescription { get; set; }
-        public string HSNCode { get; set; }
-        public decimal Rate { get; set; }
-        public decimal Qty { get; set; }
-        public decimal Amount { get; set; }
-    }
-
-   // Models/CompanyDetails.cs
-    public class CompanyDetails
-    {
-        public string CompanyName { get; set; }
-        public string Address { get; set; }
-        public string StateCode { get; set; }
-        public string State { get; set; }
-        public string GSTIN { get; set; }
-        public string PaymentTerm { get; set; }
-    }
 }

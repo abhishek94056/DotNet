@@ -1,0 +1,90 @@
+﻿@{ ViewData["Title"] = "Dashboard"; }
+
+<div class="row g-3 mt-1">
+
+    <div class="col-12">
+        <div class="alert alert-dark d-flex align-items-center py-2 mb-0">
+            <i class="bi bi-person-circle fs-4 me-2"></i>
+            <div>
+                Welcome, <strong>@ViewBag.UserName</strong>
+                &nbsp;
+                <span class="badge bg-@(ViewBag.UserRole == "Admin"
+                    ? "danger" : "primary")">
+                    @ViewBag.UserRole
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice card — visible to ALL -->
+    <div class="col-md-3">
+        <a asp-controller="Invoice" asp-action="InvoiceView"
+           class="text-decoration-none">
+            <div class="card border-primary h-100 text-center py-4
+                        shadow-sm hover-card">
+                <i class="bi bi-receipt fs-1 text-primary"></i>
+                <div class="mt-2 fw-bold">Invoice</div>
+                <small class="text-muted">Create & Download</small>
+            </div>
+        </a>
+    </div>
+
+    <!-- Admin-only cards -->
+    @if (ViewBag.UserRole == "Admin")
+    {
+        <div class="col-md-3">
+            <a asp-controller="Company" asp-action="CompanyView"
+               class="text-decoration-none">
+                <div class="card border-success h-100 text-center py-4
+                            shadow-sm hover-card">
+                    <i class="bi bi-building fs-1 text-success"></i>
+                    <div class="mt-2 fw-bold">Company Master</div>
+                    <small class="text-muted">Manage Companies</small>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-3">
+            <a asp-controller="Item" asp-action="ItemView"
+               class="text-decoration-none">
+                <div class="card border-warning h-100 text-center py-4
+                            shadow-sm hover-card">
+                    <i class="bi bi-box-seam fs-1 text-warning"></i>
+                    <div class="mt-2 fw-bold">Item Master</div>
+                    <small class="text-muted">Manage Items</small>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-3">
+            <a asp-controller="Transport" asp-action="TransportView"
+               class="text-decoration-none">
+                <div class="card border-info h-100 text-center py-4
+                            shadow-sm hover-card">
+                    <i class="bi bi-truck fs-1 text-info"></i>
+                    <div class="mt-2 fw-bold">Transport Master</div>
+                    <small class="text-muted">Manage Modes</small>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-3">
+            <a asp-controller="Auth" asp-action="Users"
+               class="text-decoration-none">
+                <div class="card border-danger h-100 text-center py-4
+                            shadow-sm hover-card">
+                    <i class="bi bi-people fs-1 text-danger"></i>
+                    <div class="mt-2 fw-bold">User Management</div>
+                    <small class="text-muted">Admin Only</small>
+                </div>
+            </a>
+        </div>
+    }
+
+</div>
+
+<style>
+    .hover-card { transition: transform .15s, box-shadow .15s; cursor: pointer; }
+    .hover-card:hover { transform: translateY(-4px);
+                        box-shadow: 0 6px 20px rgba(0,0,0,.12) !important; }
+</style>

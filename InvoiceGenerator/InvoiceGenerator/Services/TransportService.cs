@@ -39,7 +39,7 @@ namespace InvoiceGenerator.Services
             return dr.Read() ? Map(dr) : null;
         }
 
-        // INSERT
+       // INSERT
         public int Insert(TransportModel t)
         {
             using var con = new SqlConnection(_conn);
@@ -49,6 +49,7 @@ namespace InvoiceGenerator.Services
             con.Open();
             return Convert.ToInt32(cmd.ExecuteScalar());
         }
+
 
         // UPDATE
         public void Update(TransportModel t)
