@@ -33,12 +33,6 @@
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
             panel1 = new Panel();
-            panel11 = new Panel();
-            pictureBox3 = new PictureBox();
-            label50 = new Label();
-            label49 = new Label();
-            panel10 = new Panel();
-            label48 = new Label();
             cbTransportMode = new ComboBox();
             tbxRemark = new TextBox();
             lblTotalValueWord = new Label();
@@ -130,9 +124,6 @@
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
             panel1.SuspendLayout();
-            panel11.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
-            panel10.SuspendLayout();
             panel5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvItems).BeginInit();
             panel9.SuspendLayout();
@@ -155,7 +146,7 @@
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(1370, 749);
+            tabControl1.Size = new Size(1370, 666);
             tabControl1.SizeMode = TabSizeMode.Fixed;
             tabControl1.TabIndex = 0;
             // 
@@ -166,7 +157,7 @@
             tabPage1.Location = new Point(4, 5);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(1362, 740);
+            tabPage1.Size = new Size(1362, 657);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "Invoice Details";
             tabPage1.UseVisualStyleBackColor = true;
@@ -175,8 +166,6 @@
             // 
             panel1.AutoScroll = true;
             panel1.BackColor = SystemColors.Control;
-            panel1.Controls.Add(panel11);
-            panel1.Controls.Add(panel10);
             panel1.Controls.Add(cbTransportMode);
             panel1.Controls.Add(tbxRemark);
             panel1.Controls.Add(lblTotalValueWord);
@@ -210,68 +199,8 @@
             panel1.Dock = DockStyle.Top;
             panel1.Location = new Point(3, 3);
             panel1.Name = "panel1";
-            panel1.Size = new Size(1339, 749);
+            panel1.Size = new Size(1339, 737);
             panel1.TabIndex = 2;
-            // 
-            // panel11
-            // 
-            panel11.BorderStyle = BorderStyle.FixedSingle;
-            panel11.Controls.Add(pictureBox3);
-            panel11.Controls.Add(label50);
-            panel11.Controls.Add(label49);
-            panel11.Location = new Point(669, 629);
-            panel11.Name = "panel11";
-            panel11.Size = new Size(668, 76);
-            panel11.TabIndex = 57;
-            // 
-            // pictureBox3
-            // 
-            pictureBox3.Image = (Image)resources.GetObject("pictureBox3.Image");
-            pictureBox3.Location = new Point(264, 14);
-            pictureBox3.Name = "pictureBox3";
-            pictureBox3.Size = new Size(157, 57);
-            pictureBox3.SizeMode = PictureBoxSizeMode.StretchImage;
-            pictureBox3.TabIndex = 50;
-            pictureBox3.TabStop = false;
-            // 
-            // label50
-            // 
-            label50.AutoSize = true;
-            label50.Font = new Font("Verdana", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label50.Location = new Point(518, 58);
-            label50.Name = "label50";
-            label50.Size = new Size(145, 16);
-            label50.TabIndex = 49;
-            label50.Text = "Authorised Signatory";
-            // 
-            // label49
-            // 
-            label49.AutoSize = true;
-            label49.Font = new Font("Verdana", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label49.Location = new Point(457, 3);
-            label49.Name = "label49";
-            label49.Size = new Size(206, 16);
-            label49.TabIndex = 49;
-            label49.Text = " For , CodNow Technologies";
-            // 
-            // panel10
-            // 
-            panel10.BorderStyle = BorderStyle.FixedSingle;
-            panel10.Controls.Add(label48);
-            panel10.Location = new Point(0, 629);
-            panel10.Name = "panel10";
-            panel10.Size = new Size(668, 76);
-            panel10.TabIndex = 56;
-            // 
-            // label48
-            // 
-            label48.AutoSize = true;
-            label48.Font = new Font("Verdana", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label48.Location = new Point(4, 0);
-            label48.Name = "label48";
-            label48.Size = new Size(185, 16);
-            label48.TabIndex = 47;
-            label48.Text = "Customer's Seal & Signature";
             // 
             // cbTransportMode
             // 
@@ -304,7 +233,7 @@
             // btnSave
             // 
             btnSave.BackColor = Color.FromArgb(40, 167, 69);
-            btnSave.Location = new Point(485, 707);
+            btnSave.Location = new Point(474, 631);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(100, 23);
             btnSave.TabIndex = 52;
@@ -315,7 +244,7 @@
             // btnPrint
             // 
             btnPrint.BackColor = Color.FromArgb(0, 123, 255);
-            btnPrint.Location = new Point(775, 707);
+            btnPrint.Location = new Point(775, 631);
             btnPrint.Name = "btnPrint";
             btnPrint.Size = new Size(100, 23);
             btnPrint.TabIndex = 51;
@@ -648,7 +577,6 @@
             dgvItems.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvItems.Size = new Size(1336, 81);
             dgvItems.TabIndex = 8;
-            dgvItems.CellContentClick += dgvItems_CellContentClick;
             // 
             // panel9
             // 
@@ -1160,7 +1088,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
-            ClientSize = new Size(1370, 749);
+            ClientSize = new Size(1370, 666);
             Controls.Add(tabControl1);
             Name = "Form1";
             Text = "Form1";
@@ -1169,11 +1097,6 @@
             tabPage1.ResumeLayout(false);
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
-            panel11.ResumeLayout(false);
-            panel11.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox3).EndInit();
-            panel10.ResumeLayout(false);
-            panel10.PerformLayout();
             panel5.ResumeLayout(false);
             panel5.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgvItems).EndInit();
@@ -1288,11 +1211,5 @@
         private Label lblTotalValueWord;
         private Button btnSave;
         private Button btnPrint;
-        private Panel panel11;
-        private PictureBox pictureBox3;
-        private Label label50;
-        private Label label49;
-        private Panel panel10;
-        private Label label48;
     }
 }

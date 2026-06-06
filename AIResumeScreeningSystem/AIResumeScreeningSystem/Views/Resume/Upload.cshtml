@@ -1,0 +1,292 @@
+﻿@model AIResumeScreeningSystem.ViewModels.Resume.ResumeUploadViewModel
+@{
+    ViewData["Title"] = "Upload Resume";
+}
+
+<div class="d-flex align-items-center gap-2 mb-4">
+    <a asp-controller="Candidate" asp-action="Dashboard"
+           class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+        <h4 class="fw-bold mb-0"><i class="bi bi-cloud-upload me-2 text-primary"></i>Upload Resume</h4>
+        <small class="text-muted">Upload your latest PDF or DOCX resume for AI parsing</small>
+    </div>
+</div>
+
+<div class="row g-4">
+
+    <!-- Upload Form -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm">
+            <div class="card-header py-3">
+                <h6 class="mb-0 fw-600"><i class="bi bi-file-earmark-plus me-2 text-primary"></i>Upload New Resume</h6>
+            </div>
+            <div class="card-body">
+                <form asp-action="Upload" method="post" enctype="multipart/form-data" novalidate>
+
+                    <!-- Drop Zone -->
+                    <div class="border-2 border-dashed rounded-3 p-5 text-center mb-4 position-relative"
+                         id="dropZone"
+                         style="border:2px dashed #d1d5db;cursor:pointer;transition:all 0.2s;background:#f9fafb;">
+                        <i class="bi bi-cloud-arrow-up text-primary mb-3 d-block" style="font-size:3rem;"></i>
+                        <h6 class="fw-600 mb-1">Drag & drop your resume here</h6>
+                        <p class="text-muted small mb-3">or click to browse files</p>
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2">
+                                <i class="bi bi-filetype-pdf me-1"></i>PDF
+                            </span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                                <i class="bi bi-filetype-docx me-1"></i>DOCX
+                            </span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2">
+                                <i class="bi bi-file-earmark me-1"></i>DOC
+                            </span>
+                        </div>
+                        <small class="text-muted">Maximum file size: @Model.MaxFileSizeMB MB</small>
+
+                        <!-- Hidden file input -->
+                        <input asp-for="ResumeFile" type="file"
+                               accept=".pdf,.docx,.doc"
+                               class="position-absolute top-0 start-0 w-100 h-100 opacity-0"
+                               style="cursor:pointer;" id="fileInput"
+                               onchange="handleFileSelect(this)" />
+                    </div>
+
+                    <!-- File Preview -->
+                    <div id="filePreview" class="d-none mb-4">
+                        <div class="d-flex align-items-center gap-3 p-3 border rounded-3 bg-light">
+                            <i id="fileIcon" class="fs-2"></i>
+                            <div class="flex-grow-1">
+                                <div class="fw-600" id="fileName">—</div>
+                                <small class="text-muted" id="fileSize">—</small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                    onclick="clearFile()">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <span asp-validation-for="ResumeFile" class="text-danger small d-block mb-3"></span>
+
+                    <!-- Options -->
+                    <div class="mb-4">
+                        <div class="form-check form-switch">
+                            <input asp-for="SetAsActive" class="form-check-input" role="switch"
+                                   style="width:2.5rem;height:1.3rem;" />
+                            <label asp-for="SetAsActive" class="form-check-label ms-2 fw-500">
+                                Set as my active resume
+                            </label>
+                        </div>
+                        <small class="text-muted ms-5">
+                            Active resume is used when applying for jobs
+                        </small>
+                    </div>
+
+                    <!-- What AI Does -->
+                    <div class="alert border-0 mb-4"
+                         style="background:linear-gradient(135deg,#eff6ff,#dbeafe);">
+                        <h6 class="fw-600 text-primary mb-2">
+                            <i class="bi bi-stars me-2"></i>What AI Does With Your Resume
+                        </h6>
+                        <div class="row g-2">
+                            @foreach (var (icon, text) in new[] {
+                                ("bi-person-badge","Extracts your name, email & phone"),
+                                ("bi-tags","Identifies all technical skills"),
+                                ("bi-mortarboard","Parses education history"),
+                                ("bi-briefcase","Detects work experience"),
+                                ("bi-bar-chart-steps","Estimates total experience years"),
+                                ("bi-bullseye","Calculates job match scores")
+                            })
+                            {
+                                <div class="col-6">
+                                    <small class="text-primary">
+                                        <i class="bi @icon me-1"></i>@text
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-600"
+                            id="uploadBtn" disabled style="border-radius:10px;">
+                        <i class="bi bi-cloud-upload me-2"></i>Upload & Parse Resume
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resume History Sidebar -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-600">
+                    <i class="bi bi-clock-history me-2 text-primary"></i>Resume History
+                </h6>
+                <span class="badge bg-primary bg-opacity-10 text-primary">
+                    @Model.ExistingResumes.Count / 10
+                </span>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.ExistingResumes.Any())
+                {
+                    <div class="text-center py-4">
+                        <i class="bi bi-file-earmark text-muted" style="font-size:2rem;"></i>
+                        <p class="text-muted small mt-2 mb-0">No resumes uploaded yet</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var resume in Model.ExistingResumes)
+                        {
+                            <div class="list-group-item border-0 border-bottom px-3 py-3">
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="bi @resume.FileIconClass fs-4 flex-shrink-0 mt-1"></i>
+                                    <div class="flex-grow-1 overflow-hidden">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <span class="fw-500 small text-truncate d-block"
+                                                  style="max-width:160px;" title="@resume.FileName">
+                                                @resume.FileName
+                                            </span>
+                                            @if (resume.IsActive)
+                                            {
+                                                <span class="badge bg-success bg-opacity-10 text-success ms-1"
+                                                      style="font-size:10px;white-space:nowrap;">
+                                                    <i class="bi bi-check-circle me-1"></i>Active
+                                                </span>
+                                            }
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2 mt-1">
+                                            <span class="badge @resume.StatusBadgeClass"
+                                                  style="font-size:10px;">
+                                                @resume.StatusDisplay
+                                            </span>
+                                            <small class="text-muted">@resume.FileSizeDisplay</small>
+                                            <small class="text-muted">
+                                                @resume.UploadedAt.ToString("MMM dd")
+                                            </small>
+                                        </div>
+                                        @if (resume.Status == ResumeStatus.Parsed &&
+                                                                                     !string.IsNullOrEmpty(resume.ParsedSkills))
+                                        {
+                                            <div class="mt-1">
+                                                <small class="text-success">
+                                                    <i class="bi bi-check2 me-1"></i>
+                                                    @resume.ParsedSkillsList.Count skill(s) extracted
+                                                </small>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="d-flex flex-column gap-1 ms-1">
+                                        <a asp-action="Details" asp-route-id="@resume.Id"
+                                               class="btn btn-sm btn-outline-secondary py-0 px-2"
+                                               title="View Details" style="font-size:11px;">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-action="Download" asp-route-id="@resume.Id"
+                                               class="btn btn-sm btn-outline-primary py-0 px-2"
+                                               title="Download" style="font-size:11px;">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="p-3 border-top">
+                        <a asp-action="Index" class="btn btn-outline-primary btn-sm w-100">
+                            <i class="bi bi-list me-1"></i>Manage All Resumes
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const filePreview = document.getElementById('filePreview');
+
+        // Drag and Drop
+        dropZone.addEventListener('dragover', e => {
+            e.preventDefault();
+            dropZone.style.background = '#dbeafe';
+            dropZone.style.borderColor = '#1a56db';
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.background = '#f9fafb';
+            dropZone.style.borderColor = '#d1d5db';
+        });
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.style.background = '#f9fafb';
+            dropZone.style.borderColor = '#d1d5db';
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect(fileInput);
+            }
+        });
+
+        function handleFileSelect(input) {
+            if (!input.files || input.files.length === 0) return;
+            const file = input.files[0];
+            const ext = file.name.split('.').pop().toLowerCase();
+            const allowed = ['pdf', 'docx', 'doc'];
+
+            if (!allowed.includes(ext)) {
+                alert('Only PDF, DOCX, and DOC files are allowed.');
+                clearFile();
+                return;
+            }
+
+            const maxBytes = @Model.MaxFileSizeMB * 1024 * 1024;
+            if (file.size > maxBytes) {
+                alert(`File is too large. Maximum size is @Model.MaxFileSizeMB MB.`);
+                clearFile();
+                return;
+            }
+
+            // Show preview
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatBytes(file.size);
+
+            const iconEl = document.getElementById('fileIcon');
+            iconEl.className = ext === 'pdf'
+                ? 'bi bi-file-earmark-pdf text-danger fs-2'
+                : 'bi bi-file-earmark-word text-primary fs-2';
+
+            filePreview.classList.remove('d-none');
+            dropZone.querySelector('h6').textContent = 'File selected!';
+            uploadBtn.disabled = false;
+        }
+
+        function clearFile() {
+            fileInput.value = '';
+            filePreview.classList.add('d-none');
+            dropZone.querySelector('h6').textContent = 'Drag & drop your resume here';
+            uploadBtn.disabled = true;
+        }
+
+        function formatBytes(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        // Show loading on submit
+        document.querySelector('form').addEventListener('submit', function () {
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                Uploading & Parsing...`;
+        });
+    </script>
+}

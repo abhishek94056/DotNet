@@ -1,0 +1,155 @@
+﻿@model RegisterViewModel
+@{
+    ViewData["Title"] = "Create Account";
+    Layout = "_Layout";
+}
+
+<div class="min-vh-100 d-flex align-items-center justify-content-center py-5"
+     style="background:linear-gradient(135deg,#1e3a5f 0%,#1a56db 100%);margin-top:-56px;padding-top:56px;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-9 col-lg-7 col-xl-6">
+
+                <!-- Header -->
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white mb-3"
+                         style="width:64px;height:64px;box-shadow:0 4px 15px rgba(0,0,0,0.2);">
+                        <i class="bi bi-person-plus text-primary" style="font-size:2rem;"></i>
+                    </div>
+                    <h2 class="text-white fw-bold mb-1">Create Your Account</h2>
+                    <p class="text-white-50 mb-0">Join the AI-powered recruitment platform</p>
+                </div>
+
+                <!-- Card -->
+                <div class="card shadow-lg" style="border-radius:16px;">
+                    <div class="card-body p-4 p-md-5">
+
+                        <form asp-action="Register" method="post" novalidate>
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-3"
+                                 style="display:@(ViewData.ModelState.ErrorCount > 0 ? "block" : "none")"></div>
+
+                            <!-- Role Selection Cards -->
+                            <div class="mb-4">
+                                <label class="form-label fw-600 text-dark">Register As</label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="radio" class="btn-check" asp-for="Role" value="Candidate" id="roleCandidate" />
+                                        <label class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center" for="roleCandidate">
+                                            <i class="bi bi-person-badge fs-4 mb-1"></i>
+                                            <span class="fw-600">Candidate</span>
+                                            <small class="text-muted">Looking for jobs</small>
+                                        </label>
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="radio" class="btn-check" asp-for="Role" value="Recruiter" id="roleRecruiter" />
+                                        <label class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center" for="roleRecruiter">
+                                            <i class="bi bi-briefcase fs-4 mb-1"></i>
+                                            <span class="fw-600">Recruiter</span>
+                                            <small class="text-muted">Hiring talent</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="Role" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Name Row -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-6">
+                                    <label asp-for="FirstName" class="form-label small fw-500 text-secondary"></label>
+                                    <input asp-for="FirstName" class="form-control" placeholder="John" />
+                                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                                </div>
+                                <div class="col-6">
+                                    <label asp-for="LastName" class="form-label small fw-500 text-secondary"></label>
+                                    <input asp-for="LastName" class="form-control" placeholder="Doe" />
+                                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label small fw-500 text-secondary"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-secondary"></i></span>
+                                    <input asp-for="Email" class="form-control border-start-0 ps-0" placeholder="you@example.com" />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="mb-3">
+                                <label asp-for="PhoneNumber" class="form-label small fw-500 text-secondary"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-phone text-secondary"></i></span>
+                                    <input asp-for="PhoneNumber" class="form-control border-start-0 ps-0" placeholder="+1 234 567 8900" />
+                                </div>
+                                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label small fw-500 text-secondary"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-secondary"></i></span>
+                                    <input asp-for="Password" class="form-control border-start-0 border-end-0 ps-0"
+                                           placeholder="Min 8 chars, 1 uppercase, 1 digit" id="regPassword" />
+                                    <button class="input-group-text bg-light border-start-0" type="button" onclick="toggleRegPassword()">
+                                        <i class="bi bi-eye" id="regEyeIcon"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="mb-3">
+                                <label asp-for="ConfirmPassword" class="form-label small fw-500 text-secondary"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock-fill text-secondary"></i></span>
+                                    <input asp-for="ConfirmPassword" class="form-control border-start-0 ps-0" placeholder="Repeat your password" />
+                                </div>
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Terms -->
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input asp-for="AgreeToTerms" class="form-check-input" />
+                                    <label asp-for="AgreeToTerms" class="form-check-label small text-secondary">
+                                        I agree to the <a href="#" class="text-primary">Terms of Service</a> and <a href="#" class="text-primary">Privacy Policy</a>
+                                    </label>
+                                </div>
+                                <span asp-validation-for="AgreeToTerms" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Submit -->
+                            <button type="submit" class="btn btn-primary w-100 py-2 fw-600" style="border-radius:10px;font-size:1rem;">
+                                <i class="bi bi-person-plus me-2"></i>Create Account
+                            </button>
+                        </form>
+
+                        <hr class="my-4">
+                        <p class="text-center text-secondary small mb-0">
+                            Already have an account?
+                            <a asp-action="Login" class="text-primary fw-600 text-decoration-none">Sign in</a>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function toggleRegPassword() {
+            const input = document.getElementById('regPassword');
+            const icon = document.getElementById('regEyeIcon');
+            input.type = input.type === 'password' ? 'text' : 'password';
+            icon.className = input.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+        }
+    </script>
+}
+
+

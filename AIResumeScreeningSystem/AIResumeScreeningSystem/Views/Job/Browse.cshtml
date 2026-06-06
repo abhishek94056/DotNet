@@ -1,0 +1,176 @@
+﻿@model AIResumeScreeningSystem.ViewModels.Job.JobListViewModel
+@{ ViewData["Title"] = "Browse Jobs"; }
+
+<!-- Hero -->
+<div class="rounded-3 p-4 mb-4 text-white"
+     style="background:linear-gradient(135deg,#1e3a5f,#1a56db);">
+    <div class="row align-items-center">
+        <div class="col-md-7">
+            <h3 class="fw-bold mb-1">Find Your Next Opportunity</h3>
+            <p class="mb-0 text-white-75">@Model.TotalCount active job(s) waiting for you</p>
+        </div>
+        <div class="col-md-5 mt-3 mt-md-0">
+            <form asp-action="Browse" method="get">
+                <div class="input-group">
+                    <input asp-for="Search.Keyword" class="form-control" placeholder="Job title, skill, company..." />
+                    <button type="submit" class="btn btn-light fw-600 text-primary">
+                        <i class="bi bi-search me-1"></i>Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Filters Sidebar -->
+    <div class="col-md-3">
+        <div class="card shadow-sm sticky-top" style="top:70px;">
+            <div class="card-header py-3">
+                <h6 class="mb-0"><i class="bi bi-funnel me-2"></i>Filters</h6>
+            </div>
+            <div class="card-body">
+                <form asp-action="Browse" method="get">
+                    <input asp-for="Search.Keyword" type="hidden" />
+                    <div class="mb-3">
+                        <label class="form-label small fw-600">Job Type</label>
+                        @foreach (var jt in Enum.GetValues<AIResumeScreeningSystem.Models.JobType>())
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="Search.JobType"
+                                       value="@((int)jt)" id="jt_@jt"
+                                       @(Model.Search.JobType.HasValue && Model.Search.JobType.Value == jt ? "checked" : "") />
+                                <label class="form-check-label small" for="jt_@jt">@jt</label>
+                            </div>
+                        }
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="Search.JobType" value=""
+                                   id="jt_all" @(!Model.Search.JobType.HasValue ? "checked" : "") />
+                            <label class="form-check-label small" for="jt_all">All Types</label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-600">Location</label>
+                        <input asp-for="Search.Location" class="form-control form-control-sm" placeholder="City or Remote" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-600">Salary Min ($)</label>
+                        <input asp-for="Search.SalaryMin" class="form-control form-control-sm" type="number" placeholder="e.g. 50000" />
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm w-100">Apply Filters</button>
+                    <a asp-action="Browse" class="btn btn-outline-secondary btn-sm w-100 mt-2">Clear All</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job Cards -->
+    <div class="col-md-9">
+        @if (!Model.Jobs.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-search text-muted" style="font-size:3.5rem;"></i>
+                <h5 class="text-muted mt-3">No jobs found</h5>
+                <p class="text-muted small">Try different keywords or clear filters.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var job in Model.Jobs)
+            {
+                <div class="card shadow-sm mb-3 job-card"
+                     style="border-left:3px solid @(job.Status == AIResumeScreeningSystem.Models.JobStatus.Active ? "#059669" : "#6b7280");transition:transform .15s;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                            <div>
+                                <a asp-action="Details" asp-route-id="@job.Id"
+                                   class="text-decoration-none">
+                                    <h5 class="fw-bold text-dark mb-1 hover-primary">@job.Title</h5>
+                                </a>
+                                <p class="text-muted mb-2 small">
+                                    <i class="bi bi-building me-1"></i>@job.Company
+                                    <span class="mx-2">·</span>
+                                    <i class="bi bi-geo-alt me-1"></i>@(job.Location ?? "Remote")
+                                    @if (!string.IsNullOrEmpty(job.Department))
+                                    {
+                                        <span class="mx-2">·</span><i class="bi bi-diagram-3 me-1"></i>@job.Department
+                                    }
+                                </p>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-600 text-success mb-1">@job.SalaryRange</div>
+                                <span class="badge bg-info bg-opacity-15 text-info">@job.JobTypeDisplay</span>
+                            </div>
+                        </div>
+
+                        <p class="text-muted small mb-3" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                            @job.Description
+                        </p>
+
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            @foreach (var skill in job.RequiredSkills.Take(5))
+                            {
+                                <span class="badge bg-primary bg-opacity-10 text-primary">@skill</span>
+                            }
+                            @if (job.RequiredSkills.Count > 5)
+                            {
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary">+@(job.RequiredSkills.Count - 5) more</span>
+                            }
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="bi bi-clock me-1"></i>
+                                Posted @((DateTime.UtcNow - job.PostedDate).Days) days ago
+                                @if (job.ExpiryDate.HasValue)
+                                {
+                                    <span class="ms-2 @(job.IsExpired ? "text-danger" : "text-warning")">
+                                        · Deadline: @job.ExpiryDate.Value.ToString("MMM dd")
+                                    </span>
+                                }
+                            </small>
+                            <div class="d-flex gap-2">
+                                <a asp-action="Details" asp-route-id="@job.Id"
+                                   class="btn btn-sm btn-outline-primary px-3">View Details</a>
+                                @if (User.IsInRole("Candidate"))
+                                {
+                                    <a asp-controller="Application" asp-action="Apply" asp-route-jobId="@job.Id"
+                                       class="btn btn-sm btn-primary px-3">Apply Now</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="d-flex justify-content-center mt-3">
+                    <ul class="pagination">
+                        <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                            <a class="page-link" asp-action="Browse" asp-route-Search.Page="@(Model.CurrentPage - 1)"
+                               asp-route-Search.Keyword="@Model.Search.Keyword">Previous</a>
+                        </li>
+                        @for (var i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <a class="page-link" asp-action="Browse" asp-route-Search.Page="@i"
+                                   asp-route-Search.Keyword="@Model.Search.Keyword">@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                            <a class="page-link" asp-action="Browse" asp-route-Search.Page="@(Model.CurrentPage + 1)"
+                               asp-route-Search.Keyword="@Model.Search.Keyword">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        }
+    </div>
+</div>
+
+<style>
+    .job-card:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; }
+    .hover-primary:hover { color: #1a56db !important; }
+</style>

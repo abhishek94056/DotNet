@@ -1,0 +1,133 @@
+﻿@model AIResumeScreeningSystem.ViewModels.Resume.ResumeListViewModel
+@{
+    ViewData["Title"] = "My Resumes";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0"><i class="bi bi-files me-2 text-primary"></i>My Resumes</h4>
+        <small class="text-muted">
+            @Model.ParsedCount parsed · @Model.PendingCount pending · @Model.TotalCount total
+        </small>
+    </div>
+    <a asp-action="Upload" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i>Upload New Resume
+    </a>
+</div>
+
+@if (!Model.Resumes.Any())
+{
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-file-earmark-plus text-muted" style="font-size:3.5rem;"></i>
+            <h5 class="text-muted mt-3">No resumes yet</h5>
+            <p class="text-muted small mb-4">Upload a PDF or DOCX resume to get started</p>
+            <a asp-action="Upload" class="btn btn-primary px-4">
+                <i class="bi bi-cloud-upload me-2"></i>Upload Resume
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var resume in Model.Resumes)
+        {
+            <div class="col-12">
+                <div class="card shadow-sm @(resume.IsActive ? "border-success" : "")">
+                    @if (resume.IsActive)
+                    {
+                        <div class="card-header py-2 bg-success bg-opacity-10 border-0">
+                            <small class="text-success fw-600">
+                                <i class="bi bi-check-circle-fill me-1"></i>Active Resume
+                            </small>
+                        </div>
+                    }
+                    <div class="card-body">
+                        <div class="row align-items-center g-3">
+
+                            <!-- Icon + Name -->
+                            <div class="col-auto">
+                                <i class="bi @resume.FileIconClass" style="font-size:2.5rem;"></i>
+                            </div>
+                            <div class="col">
+                                <div class="fw-600">@resume.FileName</div>
+                                <div class="d-flex flex-wrap gap-2 mt-1">
+                                    <span class="badge @resume.StatusBadgeClass">@resume.StatusDisplay</span>
+                                    <small class="text-muted">@resume.FileSizeDisplay</small>
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock me-1"></i>
+                                        Uploaded @resume.UploadedAt.ToString("MMM dd, yyyy HH:mm")
+                                    </small>
+                                    @if (resume.ParsedAt.HasValue)
+                                    {
+                                        <small class="text-success">
+                                            <i class="bi bi-cpu me-1"></i>
+                                            Parsed @resume.ParsedAt.Value.ToString("MMM dd, yyyy HH:mm")
+                                        </small>
+                                    }
+                                </div>
+
+                                @if (resume.Status == ResumeStatus.Parsed)
+                                {
+                                    <div class="mt-2 d-flex flex-wrap gap-3 text-muted small">
+                                        @if (!string.IsNullOrEmpty(resume.ParsedName))
+                                        {
+                                            <span><i class="bi bi-person me-1"></i>@resume.ParsedName</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(resume.ParsedEmail))
+                                        {
+                                            <span><i class="bi bi-envelope me-1"></i>@resume.ParsedEmail</span>
+                                        }
+                                        @if (resume.ParsedSkillsList.Any())
+                                        {
+                                            <span class="text-success">
+                                                <i class="bi bi-tags me-1"></i>
+                                                @resume.ParsedSkillsList.Count skill(s) extracted
+                                            </span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="col-auto d-flex gap-2 flex-wrap">
+                                <a asp-action="Details" asp-route-id="@resume.Id"
+                                       class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-eye me-1"></i>View
+                                </a>
+                                <a asp-action="Download" asp-route-id="@resume.Id"
+                                       class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-download me-1"></i>Download
+                                </a>
+                                @if (!resume.IsActive)
+                                {
+                                    <form asp-action="SetActive" asp-route-resumeId="@resume.Id"
+                                          method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-check-circle me-1"></i>Set Active
+                                        </button>
+                                    </form>
+                                }
+                                <form asp-action="Reparse" asp-route-resumeId="@resume.Id"
+                                      method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-warning">
+                                        <i class="bi bi-arrow-repeat me-1"></i>Re-parse
+                                    </button>
+                                </form>
+                                <form asp-action="Delete" asp-route-resumeId="@resume.Id"
+                                      method="post" class="d-inline"
+                                      onsubmit="return confirm('Delete this resume?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

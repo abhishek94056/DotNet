@@ -1,0 +1,210 @@
+﻿@model AIResumeScreeningSystem.ViewModels.Job.EditJobViewModel
+@{ ViewData["Title"] = "Edit Job"; }
+
+<div class="d-flex align-items-center mb-4 gap-2">
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+    <div>
+        <h4 class="fw-bold mb-0">Edit Job</h4>
+        <small class="text-muted">Update job details for <strong>@Model.Title</strong></small>
+    </div>
+</div>
+
+<form asp-action="Edit" method="post" novalidate>
+    <input asp-for="Id" type="hidden" />
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0"><i class="bi bi-info-circle me-2 text-primary"></i>Basic Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label asp-for="Title" class="form-label small fw-500"></label>
+                            <input asp-for="Title" class="form-control" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Department" class="form-label small fw-500"></label>
+                            <input asp-for="Department" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Company" class="form-label small fw-500"></label>
+                            <input asp-for="Company" class="form-control" />
+                            <span asp-validation-for="Company" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Location" class="form-label small fw-500"></label>
+                            <input asp-for="Location" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0"><i class="bi bi-file-text me-2 text-primary"></i>Description & Requirements</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label small fw-500"></label>
+                        <textarea asp-for="Description" class="form-control" rows="6"></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+                    <div>
+                        <label asp-for="Requirements" class="form-label small fw-500"></label>
+                        <textarea asp-for="Requirements" class="form-control" rows="5"></textarea>
+                        <span asp-validation-for="Requirements" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header py-3">
+                    <h6 class="mb-0"><i class="bi bi-tags me-2 text-primary"></i>Skills</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-600 text-success">Required Skills</label>
+                            <div class="border rounded p-2" style="max-height:200px;overflow-y:auto;">
+                                @foreach (var skill in Model.AvailableSkills)
+                                {
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               name="RequiredSkillIds" value="@skill.Value"
+                                               id="req_@skill.Value"
+                                               @(Model.RequiredSkillIds.Contains(int.Parse(skill.Value)) ? "checked" : "") />
+                                        <label class="form-check-label small" for="req_@skill.Value">@skill.Text</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-600 text-primary">Optional Skills</label>
+                            <div class="border rounded p-2" style="max-height:200px;overflow-y:auto;">
+                                @foreach (var skill in Model.AvailableSkills)
+                                {
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               name="OptionalSkillIds" value="@skill.Value"
+                                               id="opt_@skill.Value"
+                                               @(Model.OptionalSkillIds.Contains(int.Parse(skill.Value)) ? "checked" : "") />
+                                        <label class="form-check-label small" for="opt_@skill.Value">@skill.Text</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0"><i class="bi bi-sliders me-2 text-primary"></i>Settings</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="JobType" class="form-label small fw-500"></label>
+                        @* <select asp-for="JobType" class="form-select">
+                            @foreach (var item in Model.JobTypeOptions)
+                            {
+                                <option value="@item.Value" @(item.Value == ((int)Model.JobType).ToString() ? "selected" : "")>@item.Text</option>
+                            }
+                        </select> *@
+                        <select asp-for="Status" class="form-select">
+                            @foreach (var item in Model.StatusOptions)
+                            {
+                                if (item.Value == ((int)Model.Status).ToString())
+                                {
+                                    <option value="@item.Value" selected>@item.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Status" class="form-label small fw-500"></label>
+                        @* <select asp-for="Status" class="form-select">
+                            @foreach (var item in Model.StatusOptions)
+                            {
+                                <option value="@item.Value" @(item.Value == ((int)Model.Status).ToString() ? "selected" : "")>@item.Text</option>
+                            }
+                        </select> *@
+                        <select asp-for="Status" class="form-select">
+                            @foreach (var item in Model.StatusOptions)
+                            {
+                                if (item.Value == ((int)Model.Status).ToString())
+                                {
+                                    <option value="@item.Value" selected>@item.Text</option>
+                                }
+                                else
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label asp-for="ExpiryDate" class="form-label small fw-500"></label>
+                        <input asp-for="ExpiryDate" class="form-control" type="date" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0"><i class="bi bi-currency-dollar me-2 text-primary"></i>Salary</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="SalaryMin" class="form-label small fw-500"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input asp-for="SalaryMin" class="form-control" />
+                        </div>
+                    </div>
+                    <div>
+                        <label asp-for="SalaryMax" class="form-label small fw-500"></label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input asp-for="SalaryMax" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0"><i class="bi bi-person-workspace me-2 text-primary"></i>Experience</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label asp-for="ExperienceYearsMin" class="form-label small fw-500"></label>
+                            <input asp-for="ExperienceYearsMin" class="form-control" type="number" min="0" />
+                        </div>
+                        <div class="col-6">
+                            <label asp-for="ExperienceYearsMax" class="form-label small fw-500"></label>
+                            <input asp-for="ExperienceYearsMax" class="form-control" type="number" min="0" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary py-2 fw-600">
+                    <i class="bi bi-save me-2"></i>Save Changes
+                </button>
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

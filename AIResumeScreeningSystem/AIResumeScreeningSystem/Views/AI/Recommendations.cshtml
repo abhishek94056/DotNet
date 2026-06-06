@@ -1,0 +1,146 @@
+﻿@model AIResumeScreeningSystem.ViewModels.AI.AIRecommendationViewModel
+@{
+    ViewData["Title"] = "AI Career Recommendations";
+}
+
+<div class="d-flex align-items-center gap-2 mb-4">
+    <a asp-controller="Candidate" asp-action="Dashboard"
+           class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+        <h4 class="fw-bold mb-0">
+            <i class="bi bi-stars me-2 text-warning"></i>AI Career Recommendations
+        </h4>
+        <small class="text-muted">Personalised for @Model.CandidateName</small>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-circle me-2"></i>@Model.Error
+    </div>
+}
+else if (Model.IsLoaded)
+{
+    <div class="row g-4">
+        <div class="col-lg-8">
+
+            @if (!string.IsNullOrEmpty(Model.CareerAdvice))
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-person-check me-2 text-primary"></i>Career Advice
+                        </h6>
+                    </div>
+                    <div class="card-body text-muted" style="line-height:1.8;">
+                        @Model.CareerAdvice
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.JobSearchStrategy))
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-search me-2 text-primary"></i>Job Search Strategy
+                        </h6>
+                    </div>
+                    <div class="card-body text-muted" style="line-height:1.8;">
+                        @Model.JobSearchStrategy
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.SkillDevelopmentPlan))
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-graph-up me-2 text-primary"></i>Skill Development Plan
+                        </h6>
+                    </div>
+                    <div class="card-body text-muted" style="line-height:1.8;">
+                        @Model.SkillDevelopmentPlan
+                    </div>
+                </div>
+            }
+
+            <!-- Recommended Roles -->
+            @if (Model.RecommendedRoles.Any())
+            {
+                <div class="card shadow-sm">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-briefcase me-2 text-primary"></i>Recommended Roles
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+                        @foreach (var role in Model.RecommendedRoles)
+                        {
+                            <div class="p-4 border-bottom">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="fw-bold mb-1">@role.RoleTitle</h6>
+                                        <small class="text-muted">@role.Industry</small>
+                                    </div>
+                                    <span class="badge bg-primary px-3 py-2">
+                                        @role.MatchConfidence% match
+                                    </span>
+                                </div>
+                                <p class="text-muted small mt-2 mb-2">@role.Reasoning</p>
+                                @if (role.KeySkillsNeeded.Any())
+                                {
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var skill in role.KeySkillsNeeded)
+                                        {
+                                            <span class="badge bg-primary bg-opacity-10 text-primary"
+                                                  style="font-size:10px;">@skill</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+        </div>
+
+        <div class="col-lg-4">
+
+            @if (!string.IsNullOrEmpty(Model.IndustryInsights))
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-globe me-2 text-primary"></i>Industry Insights
+                        </h6>
+                    </div>
+                    <div class="card-body text-muted small" style="line-height:1.7;">
+                        @Model.IndustryInsights
+                    </div>
+                </div>
+            }
+
+            <div class="card shadow-sm">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-600">
+                        <i class="bi bi-tags me-2 text-primary"></i>Your Current Skills
+                    </h6>
+                </div>
+                <div class="card-body d-flex flex-wrap gap-2">
+                    @foreach (var skill in Model.CandidateSkills.Take(15))
+                    {
+                        <span class="badge bg-primary bg-opacity-10 text-primary px-2 py-1"
+                              style="font-size:11px;">@skill</span>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+}

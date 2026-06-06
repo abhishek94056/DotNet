@@ -1,0 +1,196 @@
+﻿@model AIResumeScreeningSystem.ViewModels.AI.InterviewQuestionsViewModel
+@{
+    ViewData["Title"] = "AI Interview Questions";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-2">
+        <a asp-controller="Job" asp-action="Details" asp-route-id="@Model.JobId"
+               class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h4 class="fw-bold mb-0">
+                <i class="bi bi-chat-left-quote me-2 text-success"></i>Interview Questions
+            </h4>
+            <small class="text-muted">
+                @Model.JobTitle
+                @if (!string.IsNullOrEmpty(Model.CandidateName))
+                {
+                    <text>· Tailored for @Model.CandidateName</text>
+                }
+            </small>
+        </div>
+    </div>
+    <a asp-action="InterviewQuestions"
+           asp-route-jobId="@Model.JobId"
+           asp-route-applicationId="@Model.ApplicationId"
+           asp-route-count="10"
+           class="btn btn-primary btn-sm">
+        <i class="bi bi-arrow-repeat me-1"></i>Regenerate
+    </a>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-circle me-2"></i>@Model.Error
+    </div>
+}
+
+<!-- Category Filter Tabs -->
+@if (Model.Questions.Any())
+{
+    <div class="mb-4">
+        <div class="d-flex gap-2 flex-wrap">
+            @foreach (var (cat, color) in new[] {
+                ("All", "primary"), ("Technical", "primary"), ("Behavioral", "success"),
+                ("Situational", "warning"), ("Cultural Fit", "info")
+            })
+            {
+                int count = cat == "All"
+                    ? Model.Questions.Count
+                    : Model.Questions.Count(q => q.Category == cat);
+                <button class="btn btn-sm @(cat == "All" ? "btn-primary" : "btn-outline-" + color)
+                    category-filter"
+                        data-category="@cat" onclick="filterQuestions('@cat', this)">
+                    @cat
+                    <span class="badge bg-white text-@color ms-1">@count</span>
+                </button>
+            }
+        </div>
+    </div>
+
+    <div id="questionsList">
+        @for (int i = 0; i < Model.Questions.Count; i++)
+        {
+            var q = Model.Questions[i];
+            <div class="card shadow-sm mb-3 question-card" data-category="@q.Category">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary bg-opacity-10 text-primary
+                                rounded-circle d-flex align-items-center
+                                justify-content-center fw-bold"
+                                  style="width:28px;height:28px;font-size:12px;flex-shrink:0;">
+                                @(i + 1)
+                            </span>
+                            <div class="d-flex gap-1 flex-wrap">
+                                <span class="badge @q.CategoryBadgeClass">@q.Category</span>
+                                <span class="badge @q.DifficultyBadgeClass"
+                                      style="font-size:10px;">@q.Difficulty</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary flex-shrink-0"
+                                onclick="copyQuestion(this)"
+                                data-question="@q.Question"
+                                title="Copy question">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+
+                    <p class="fw-500 mb-3 text-dark">@q.Question</p>
+
+                    @if (!string.IsNullOrEmpty(q.ExpectedAnswer))
+                    {
+                        <div class="collapse" id="answer_@i">
+                            <div class="p-3 rounded-3 bg-success bg-opacity-5
+                                border border-success border-opacity-25">
+                                <small class="fw-600 text-success d-block mb-1">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    What to look for:
+                                </small>
+                                <small class="text-muted">@q.ExpectedAnswer</small>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-success mt-2"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#answer_@i">
+                            <i class="bi bi-eye me-1"></i>Show Expected Answer
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- Saved Questions from DB -->
+@if (Model.SavedQuestions.Any())
+{
+    <div class="card shadow-sm mt-4">
+        <div class="card-header py-3 d-flex justify-content-between">
+            <h6 class="mb-0 fw-600">
+                <i class="bi bi-bookmark me-2 text-primary"></i>
+                Previously Generated Questions (@Model.SavedQuestions.Count)
+            </h6>
+            <button class="btn btn-sm btn-outline-secondary"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#savedQuestions">
+                Toggle
+            </button>
+        </div>
+        <div class="collapse" id="savedQuestions">
+            <div class="card-body p-0">
+                @foreach (var q in Model.SavedQuestions)
+                {
+                    <div class="border-bottom px-4 py-3">
+                        <div class="d-flex gap-2 mb-1">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary"
+                                  style="font-size:10px;">@q.QuestionType</span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary"
+                                  style="font-size:10px;">@q.DifficultyLevel</span>
+                            <small class="text-muted ms-auto">
+                                @q.GeneratedAt.ToString("MMM dd")
+                            </small>
+                        </div>
+                        <p class="small text-dark mb-0">@q.Question</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@if (!Model.Questions.Any() && !Model.SavedQuestions.Any())
+{
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-chat-left-quote text-muted" style="font-size:3rem;"></i>
+            <h5 class="text-muted mt-3">No questions generated yet</h5>
+            <p class="text-muted small mb-3">Click Regenerate to create AI interview questions.</p>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function filterQuestions(category, btn) {
+            document.querySelectorAll('.category-filter').forEach(b => {
+                b.className = b.className
+                    .replace('btn-primary', 'btn-outline-primary')
+                    .replace('btn-success', 'btn-outline-success')
+                    .replace('btn-warning', 'btn-outline-warning')
+                    .replace('btn-info', 'btn-outline-info');
+            });
+            btn.className = btn.className
+                .replace('btn-outline-primary', 'btn-primary')
+                .replace('btn-outline-success', 'btn-success')
+                .replace('btn-outline-warning', 'btn-warning')
+                .replace('btn-outline-info', 'btn-info');
+
+            document.querySelectorAll('.question-card').forEach(card => {
+                card.style.display =
+                    (category === 'All' || card.dataset.category === category)
+                        ? 'block' : 'none';
+            });
+        }
+
+        function copyQuestion(btn) {
+            navigator.clipboard.writeText(btn.dataset.question).then(() => {
+                btn.innerHTML = '<i class="bi bi-check text-success"></i>';
+                setTimeout(() => btn.innerHTML = '<i class="bi bi-clipboard"></i>', 2000);
+            });
+        }
+    </script>
+}

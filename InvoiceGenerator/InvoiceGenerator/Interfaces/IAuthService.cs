@@ -5,16 +5,21 @@ namespace InvoiceGenerator.Interfaces
 {
     public interface IAuthService
     {
-        // Register
+        // ── Register ──
         (bool success, string message) Register(RegisterViewModel vm);
 
-        // Login
+        // ── Login ──
         (bool success, UserModel? user, string message) Login(LoginViewModel vm);
 
-        // Get all users
+        //public void UpdateUser(UserModel user);
+        public (bool success, string message) UpdateUser(UserModel user);
+
+        // ── Get All Users ──
         List<UserModel> GetAllUsers();
 
-        // Toggle active status
+        public UserModel GetUserById(int userId);
+
+        // ── Toggle Active ──
         void ToggleActive(int userId, bool isActive);
     }
 }

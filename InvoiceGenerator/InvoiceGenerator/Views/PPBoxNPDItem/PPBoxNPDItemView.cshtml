@@ -1,0 +1,1286 @@
+﻿@{
+    ViewData["Title"] = "NPD PP Box Item Master";
+}
+
+<style>
+    /* ════════════════════════════════════════
+       CSS VARIABLES
+    ════════════════════════════════════════ */
+    :root {
+        --header-bg:  #1a2e1a;
+        --row-odd:    #f8f9fa;
+        --row-even:   #eef2ff;
+        --row-hover:  #cfe2ff;
+        --accent:     #198754;
+        --sec-hdr-bg: #0d6efd;
+    }
+
+    /* ════════════════════════════════════════
+       PAGE HEADER
+    ════════════════════════════════════════ */
+    .page-header {
+        display:         flex;
+        align-items:     center;
+        justify-content: space-between;
+        flex-wrap:       wrap;
+        gap:             8px;
+        margin-bottom:   10px;
+    }
+    .page-header h6 { margin: 0; font-weight: 700; }
+    .header-controls {
+        display:     flex;
+        align-items: center;
+        flex-wrap:   wrap;
+        gap:         6px;
+    }
+
+    /* ════════════════════════════════════════
+       TABLE
+    ════════════════════════════════════════ */
+    #ppboxTable { font-size: 0.70rem; }
+    #ppboxTable thead th {
+        font-size:   0.67rem;
+        padding:     4px 5px;
+        white-space: nowrap;
+        text-align:  center;
+        background:  var(--header-bg);
+        color:       #fff;
+        position:    sticky;
+        top:         0;
+        z-index:     2;
+    }
+    #ppboxTable tbody td {
+        padding:        3px 5px;
+        vertical-align: middle;
+        white-space:    nowrap;
+        max-width:      180px;
+        overflow:       hidden;
+        text-overflow:  ellipsis;
+    }
+    #ppboxTable tbody tr:nth-child(odd)  td { background-color: var(--row-odd); }
+    #ppboxTable tbody tr:nth-child(even) td { background-color: var(--row-even); }
+    #ppboxTable tbody tr:hover td {
+        background-color: var(--row-hover) !important;
+        cursor:           pointer;
+        transition:       background-color 0.15s;
+    }
+    #ppboxTable .btn-sm { padding: 1px 4px; font-size: 0.65rem; }
+
+    .table-wrap {
+        max-height: 460px;
+        overflow-y: auto;
+        overflow-x: auto;
+        border:        1px solid #dee2e6;
+        border-radius: 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ════════════════════════════════════════
+       PAGINATION
+    ════════════════════════════════════════ */
+    .pagination-bar {
+        display:         flex;
+        justify-content: flex-end;
+        align-items:     center;
+        flex-wrap:       wrap;
+        gap:             5px;
+        margin-top:      8px;
+        font-size:       0.73rem;
+    }
+    .pagination-bar button {
+        min-width:     28px;
+        height:        26px;
+        font-size:     0.68rem;
+        padding:       0 5px;
+        border-radius: 4px;
+    }
+    .pagination-bar button.active-page {
+        background:   var(--accent);
+        color:        #fff;
+        border-color: var(--accent);
+    }
+    #loadingRow td { text-align: center; padding: 20px; color: #888; }
+
+    /* ════════════════════════════════════════
+       MODAL SECTION HEADERS
+    ════════════════════════════════════════ */
+    .sec-hdr {
+        font-size:     0.70rem;
+        font-weight:   700;
+        color:         #fff;
+        background:    var(--sec-hdr-bg);
+        padding:       3px 10px;
+        border-radius: 4px;
+        margin:        10px 0 6px;
+        width:         100%;
+    }
+
+    /* ════════════════════════════════════════
+       FILE UPLOAD ZONE
+    ════════════════════════════════════════ */
+    .file-zone {
+        border:        2px dashed #adb5bd;
+        border-radius: 6px;
+        padding:       8px;
+        text-align:    center;
+        font-size:     0.70rem;
+        color:         #6c757d;
+        cursor:        pointer;
+        transition:    border-color 0.2s;
+    }
+    .file-zone:hover { border-color: var(--accent); color: var(--accent); }
+    .file-zone input[type=file] {
+        position: absolute;
+        opacity:  0;
+        width:    0;
+        height:   0;
+    }
+    .file-name {
+        font-size:  0.65rem;
+        color:      #198754;
+        margin-top: 2px;
+        word-break: break-all;
+    }
+    .file-zone:has(input:disabled) { opacity: 0.5; cursor: not-allowed; }
+
+    /* ════════════════════════════════════════
+       MOBILE CARD LIST
+    ════════════════════════════════════════ */
+    .npd-card-list { display: none; }
+
+    .npd-card {
+        border:        1px solid #dee2e6;
+        border-radius: 6px;
+        padding:       10px 12px;
+        margin-bottom: 8px;
+        background:    #fff;
+        font-size:     0.72rem;
+    }
+    .npd-card-header {
+        display:         flex;
+        justify-content: space-between;
+        align-items:     flex-start;
+        margin-bottom:   8px;
+    }
+    .npd-card-code  { font-weight: 700; color: #0d6efd; font-size: 0.78rem; }
+    .npd-card-name  { color: #333; font-size: 0.70rem; }
+    .npd-card-grid  {
+        display:               grid;
+        grid-template-columns: 1fr 1fr;
+        gap:                   4px 10px;
+        margin-bottom:         8px;
+    }
+    .npd-card-label { color: #6c757d; font-size: 0.63rem; }
+    .npd-card-value { font-weight: 600; font-size: 0.70rem; }
+    .npd-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .npd-card-actions .btn { font-size: 0.65rem; padding: 2px 8px; }
+
+    /* ══════════════════════════════════════
+       BREAKPOINT: MOBILE (≤ 575px)
+    ══════════════════════════════════════ */
+    @@media (max-width: 575px) {
+        .page-header {
+            flex-direction: column;
+            align-items:    stretch;
+        }
+        .header-controls {
+            flex-direction: column;
+            align-items:    stretch;
+        }
+        .header-controls input,
+        .header-controls button { width: 100% !important; }
+
+        .table-wrap {
+            display:   block !important;
+            overflow-x: auto;
+            overflow-y: auto;
+            width:      100%;
+            -webkit-overflow-scrolling: touch;
+        }
+        .npd-card-list { display: none !important; }
+
+        #ppboxTable {
+            min-width: 2600px;
+            width:     max-content;
+        }
+        .pagination-bar { justify-content: center; }
+        .pagination-bar #pageNumbers { flex-wrap: wrap; }
+    }
+</style>
+
+<!-- ── PAGE HEADER ── -->
+<div class="page-header">
+    <h6>
+        <i class="bi bi-box2 me-2 text-primary"></i>
+        NPD PP Box Item Master
+    </h6>
+    <div class="header-controls">
+        <input type="text" id="searchInput"
+               class="form-control form-control-sm"
+               placeholder="🔍 Search..."
+               style="width:165px" oninput="applyFilter()" />
+        <button class="btn btn-primary btn-sm" id="btnAdd">
+            <i class="bi bi-plus-lg me-1"></i>Add PP Box Item
+        </button>
+    </div>
+</div>
+
+<!-- ── DESKTOP / TABLET TABLE ── -->
+<div class="table-wrap">
+    <table class="table table-bordered mb-0" id="ppboxTable">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Department</th>
+                <th>Date</th>
+                <th>Marketing Person</th>
+                <th>Item Name</th>
+                <th>Item Code</th>
+                <th>Customer Name</th>
+                <th>Customer Contact Person</th>
+                <th>Customer Contact Details</th>
+                <th>Component Name</th>
+                <th>Specifications</th>
+                <th>GSM of Box</th>
+                <th>GSM of Partition</th>
+                <th>Color of Box</th>
+                <th>Production Person</th>
+                <th>Sheet Size</th>
+                <th>Sheet Size Partition</th>
+                <th>Material Color</th>
+                <th>Flap</th>
+                <th>Support Party</th>
+                <th>Handle Material Grade</th>
+                <th>Handle Fixing Method</th>
+                <th>Cloth</th>
+                <th>Printing Matter</th>
+                <th>Cutting</th>
+                <th>Packing Details</th>
+                <th>Delivery Location</th>
+                <th>Quality Person</th>
+                <th>SIR DateTime</th>
+                <th>SIR Remark</th>
+                <th>Transport Delivery Terms</th>
+                <th>Payment Terms</th>
+                <th>Rate of Product</th>
+                <th>Rework / Complaint Details</th>
+                <th>Created By</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <tr id="loadingRow">
+                <td colspan="36" class="text-center text-muted py-3">
+                    No records found.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ── MOBILE CARD LIST ── -->
+<div class="npd-card-list" id="cardList">
+    <!-- Cards injected by JS -->
+</div>
+
+<!-- ── PAGINATION ── -->
+<div class="pagination-bar">
+    <span id="pageInfo" class="text-muted"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnFirst" onclick="goToPage(1)">«</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnPrev"  onclick="goToPage(currentPage-1)">‹</button>
+    <span id="pageNumbers" class="d-flex gap-1 flex-wrap"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnNext"  onclick="goToPage(currentPage+1)">›</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnLast"  onclick="goToPage(totalPages)">»</button>
+    <select id="rppSelect" class="form-select form-select-sm"
+            style="width:75px" onchange="changeRPP()">
+        <option value="10" selected>10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+    </select>
+    <span class="text-muted">/ page</span>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ADD / EDIT MODAL
+══════════════════════════════════════════════ -->
+<div class="modal fade" id="ppboxModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header bg-dark text-white py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-box2 me-2"></i>
+                    <span id="modalTitleText">Add PP Box NPD Item</span>
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="ppboxForm" enctype="multipart/form-data" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="fNPDItemId" value="0" />
+                    <input type="hidden" id="fDepartmentId" />
+
+                    <!-- ── SECTION 1: Marketing Person Responsible ── -->
+                    <div class="sec-hdr">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Marketing Person Responsible
+                    </div>
+
+                    <div class="row g-2">
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Date <span class="text-danger">*</span></label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-calendar-date"></i></span>
+                                <input type="date" id="fDate" class="form-control form-control-sm" />
+                            </div>
+                            <div class="invalid-feedback d-block" id="err-date"></div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Marketing Person</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-person-workspace"></i></span>
+                                <input type="text" id="fMarketingPerson" class="form-control form-control-sm" placeholder="Name" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Item Name <span class="text-danger">*</span></label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-tag"></i></span>
+                                <input type="text" id="fItemName" class="form-control form-control-sm" placeholder="Full item name" />
+                            </div>
+                            <div class="invalid-feedback d-block" id="err-name"></div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Item Code <span class="text-danger">*</span></label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+                                <input type="text" id="fItemCode" class="form-control form-control-sm"
+                                       placeholder="e.g. PPB-001" style="text-transform:uppercase" />
+                            </div>
+                            <div class="invalid-feedback d-block" id="err-code"></div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Customer Name &amp; Location</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-building"></i></span>
+                                <input type="text" id="fCustomerName" class="form-control form-control-sm" placeholder="Company name" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Customer Contact Person</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
+                                <input type="text" id="fContactPerson" class="form-control form-control-sm" placeholder="Contact name" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Customer Contact Detail</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input type="text" id="fContactDetails" class="form-control form-control-sm" placeholder="Phone / Email" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Component Name &amp; Its Application</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-puzzle"></i></span>
+                                <input type="text" id="fComponentName" class="form-control form-control-sm" placeholder="Component" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Specifications (LxWxH)</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-rulers"></i></span>
+                                <input type="text" id="fSpecs" class="form-control form-control-sm" placeholder="Dimensions / specs" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">GSM of Box</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-layers"></i></span>
+                                <input type="text" id="fGSMBox" class="form-control form-control-sm" placeholder="e.g. 350 GSM" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">GSM of Partition</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-layers-half"></i></span>
+                                <input type="text" id="fGSMPartition" class="form-control form-control-sm" placeholder="e.g. 200 GSM" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Color of Box</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-palette"></i></span>
+                                <input type="text" id="fColorBox" class="form-control form-control-sm" placeholder="e.g. White / Brown" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Material Color</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-palette2"></i></span>
+                                <input type="text" id="fMaterialColor" class="form-control form-control-sm" placeholder="e.g. Natural" />
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Drawing File Attached</label>
+                            <div class="row g-2">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <div class="col-md-2 col-6">
+                                        <label for="ppbFile@(i)" class="file-zone w-100">
+                                            <i class="bi bi-cloud-upload fs-5"></i>
+                                            <div>Doc @i</div>
+                                            <input type="file" id="ppbFile@(i)" name="file@(i)"
+                                                   accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+                                                   onchange="showFileName(this,'ppbFname@(i)')" />
+                                        </label>
+                                        <div class="file-name" id="ppbFname@(i)"></div>
+                                        <div class="small text-muted mt-1" id="ppbExisting@(i)"></div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ── SECTION 2: Production Person Responsible ── -->
+                    <div class="sec-hdr">
+                        <i class="bi bi-person-lines-fill me-1"></i>
+                        Production Person Responsible
+                    </div>
+
+                    <div class="row g-2">
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Production Person</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-person-gear"></i></span>
+                                <input type="text" id="fProductionPerson" class="form-control form-control-sm" placeholder="Name" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Sheet Size</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-aspect-ratio"></i></span>
+                                <input type="text" id="fSheetSize" class="form-control form-control-sm" placeholder="e.g. 600×400 mm" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Sheet Size Partition</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-aspect-ratio-fill"></i></span>
+                                <input type="text" id="fSheetSizePartition" class="form-control form-control-sm" placeholder="e.g. 300×200 mm" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Flap</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-layout-sidebar-reverse"></i></span>
+                                <input type="text" id="fFlap" class="form-control form-control-sm" placeholder="e.g. Top Flap / No Flap" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Support Party</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-people"></i></span>
+                                <input type="text" id="fSupportParty" class="form-control form-control-sm" placeholder="Support party name" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Handle Material Grade</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-grip-horizontal"></i></span>
+                                <input type="text" id="fHandleGrade" class="form-control form-control-sm" placeholder="e.g. PP / Nylon" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Handle Fixing Method</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-tools"></i></span>
+                                <input type="text" id="fHandleFixing" class="form-control form-control-sm" placeholder="e.g. Riveted / Glued" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Cloth</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-bag"></i></span>
+                                <input type="text" id="fCloth" class="form-control form-control-sm" placeholder="Cloth details" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Printing Matter</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-printer"></i></span>
+                                <input type="text" id="fPrintingMatter" class="form-control form-control-sm" placeholder="Print details" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Cutting</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-scissors"></i></span>
+                                <input type="text" id="fCutting" class="form-control form-control-sm" placeholder="Cutting details" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Packing Details</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-box-seam"></i></span>
+                                <input type="text" id="fPackingDetails" class="form-control form-control-sm" placeholder="Packing info" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Delivery Location</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                <input type="text" id="fDeliveryLocation" class="form-control form-control-sm" placeholder="City / Address" />
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- ── SECTION 3: SIR Report ── -->
+                    <div class="sec-hdr">
+                        <i class="bi bi-clipboard-check me-1"></i>
+                        SIR Report
+                    </div>
+
+                    <div class="row g-2">
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Quality Person (giving SIR)</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-person-check"></i></span>
+                                <input type="text" id="fQualityPerson" class="form-control form-control-sm" placeholder="Name" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Date time of SIR, SIR No.</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-clock-history"></i></span>
+                                <input type="text" id="fSIRDateTime" class="form-control form-control-sm" placeholder="dd-MM-yyyy HH:mm" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">Remarks for SIR (ok / not ok / sample to be revised etc)</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-chat-left-text"></i></span>
+                                <input type="text" id="fSIRRemark" class="form-control form-control-sm" placeholder="SIR remark" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Transport &amp; Delivery Terms</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-truck"></i></span>
+                                <input type="text" id="fTransportTerms" class="form-control form-control-sm" placeholder="e.g. Ex-Works / FOR" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Payment Terms</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-credit-card"></i></span>
+                                <input type="text" id="fPaymentTerms" class="form-control form-control-sm" placeholder="e.g. Net 30" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Rate of Product (₹)</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-currency-rupee"></i></span>
+                                <input type="number" id="fRateOfProduct" class="form-control form-control-sm"
+                                       min="0" step="0.01" placeholder="0.00" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Rework / Complaint Details</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-arrow-repeat"></i></span>
+                                <input type="text" id="fReworkDetails" class="form-control form-control-sm" placeholder="Rework or complaint info" />
+                            </div>
+                        </div>
+
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" id="btnSave">
+                    <i class="bi bi-check-lg me-1"></i>Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ── DELETE CONFIRM MODAL ── -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center small">
+                <p class="mb-1">Delete PP Box NPD item</p>
+                <strong id="deleteLabel"></strong>?
+            </div>
+            <div class="modal-footer justify-content-center py-2">
+                <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger btn-sm" id="btnConfirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── DOCUMENT VIEWER MODAL ── -->
+<div class="modal fade" id="docsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white py-2">
+                <h6 class="modal-title">
+                    <i class="bi bi-paperclip me-2"></i>Documents
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="docsContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index:9999">
+    <div id="toast" class="toast align-items-center text-white border-0"
+         role="alert" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body small" id="toastMsg"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+$(function () {
+
+    // ════════════════════════════════════════════
+    // STATE
+    // ════════════════════════════════════════════
+    let allData         = [];
+    let filteredData    = [];
+    let currentPage     = 1;
+    let rowsPerPage     = 10;
+    let totalPages      = 1;
+    let pendingDeleteId = null;
+    let currentDeptId   = 0;
+
+    const ppboxModal  = new bootstrap.Modal($('#ppboxModal')[0]);
+    const deleteModal = new bootstrap.Modal($('#deleteModal')[0]);
+    const docsModal   = new bootstrap.Modal($('#docsModal')[0]);
+    const toastEl     = $('#toast')[0];
+    const bsToast     = new bootstrap.Toast(toastEl, { delay: 3500 });
+
+    window.currentPage = currentPage;
+    window.totalPages  = totalPages;
+
+    // ════════════════════════════════════════════
+    // LOAD DEPARTMENTS
+    // ════════════════════════════════════════════
+    $.ajax({
+        url:      '/PPBoxNPDItem/GetDepartments',
+        method:   'GET',
+        dataType: 'json',
+        success: function (depts) {
+            if (depts.length > 0) {
+                currentDeptId = depts[0].DepartmentId;
+                $('#fDepartmentId').val(currentDeptId);
+                loadData();
+            }
+        },
+        error: function () {
+            showToast('Failed to load department.', 'danger');
+        }
+    });
+
+    // ════════════════════════════════════════════
+    // LOAD DATA
+    // ════════════════════════════════════════════
+    function loadData() {
+        $('#loadingRow').show()
+            .find('td')
+            .html('<div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading...');
+        $('#tableBody tr:not(#loadingRow)').remove();
+        $('#cardList').html(
+            '<div class="text-center text-muted py-3">' +
+            '<div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading...</div>');
+
+        $.ajax({
+            url:      '/PPBoxNPDItem/GetAll?deptId=' + currentDeptId,
+            method:   'GET',
+            dataType: 'json',
+            success: function (data) {
+                allData = data;
+                applyFilter();
+                $('#loadingRow').hide();
+            },
+            error: function () {
+                $('#loadingRow td').html(
+                    '<i class="bi bi-exclamation-triangle text-danger me-1"></i>Failed to load data.');
+                $('#cardList').html(
+                    '<div class="text-center text-danger py-3">Failed to load data.</div>');
+            }
+        });
+    }
+
+    // ════════════════════════════════════════════
+    // RENDER TABLE + CARDS
+    // ════════════════════════════════════════════
+    function renderTable() {
+        totalPages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
+        window.totalPages = totalPages;
+        if (currentPage > totalPages) currentPage = 1;
+        window.currentPage = currentPage;
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end   = Math.min(start + rowsPerPage, filteredData.length);
+        const slice = filteredData.slice(start, end);
+
+        // Desktop table
+        $('#tableBody tr:not(#loadingRow)').remove();
+        if (slice.length === 0) {
+            $('#tableBody').append(
+                `<tr><td colspan="36" class="text-center text-muted py-3">No records found.</td></tr>`);
+        } else {
+            slice.forEach((r, idx) =>
+                $('#tableBody').append(buildRow(r, start + idx + 1)));
+        }
+
+        // Mobile cards
+        if (slice.length === 0) {
+            $('#cardList').html('<div class="text-center text-muted py-3">No records found.</div>');
+        } else {
+            $('#cardList').html(slice.map((r, idx) => buildCard(r, start + idx + 1)).join(''));
+        }
+
+        updatePaginationUI(start, end);
+    }
+
+    // ── Desktop table row ──
+    function buildRow(r, sr) {
+        const fmtD = v => v ? new Date(v).toLocaleDateString('en-IN') : '—';
+        const fmt  = v => v || '—';
+
+        return `
+        <tr id="row-${r.NPD_ItemId}">
+            <td class="text-center">${sr}</td>
+            <td><span class="badge bg-dark" style="font-size:0.60rem">${fmt(r.DepartmentName)}</span></td>
+            <td class="text-center">${fmtD(r.Date)}</td>
+            <td>${fmt(r.Marketing_Person)}</td>
+            <td title="${fmt(r.Item_Name)}">${fmt(r.Item_Name)}</td>
+            <td class="fw-bold text-primary">${fmt(r.Item_Code)}</td>
+            <td title="${fmt(r.Customer_Name)}">${fmt(r.Customer_Name)}</td>
+            <td>${fmt(r.Customer_Contact_Person)}</td>
+            <td>${fmt(r.Customer_Contact_Details)}</td>
+            <td>${fmt(r.Component_Name)}</td>
+            <td>${fmt(r.Specifications)}</td>
+            <td>${fmt(r.GSM_of_Box)}</td>
+            <td>${fmt(r.GSM_of_Partition)}</td>
+            <td>${fmt(r.Color_of_Box)}</td>
+            <td>${fmt(r.Production_Person)}</td>
+            <td>${fmt(r.Sheet_Size)}</td>
+            <td>${fmt(r.Sheet_Size_Partition)}</td>
+            <td>${fmt(r.Material_Color)}</td>
+            <td>${fmt(r.Flap)}</td>
+            <td>${fmt(r.Support_Party)}</td>
+            <td>${fmt(r.Handle_Material_Grade)}</td>
+            <td>${fmt(r.Handle_Fixing_Method)}</td>
+            <td>${fmt(r.Cloth)}</td>
+            <td>${fmt(r.Printing_Matter)}</td>
+            <td>${fmt(r.Cutting)}</td>
+            <td>${fmt(r.Packing_Details)}</td>
+            <td>${fmt(r.Delivery_Location)}</td>
+            <td>${fmt(r.Quality_Person)}</td>
+            <td>${fmt(r.SIR_DateTime)}</td>
+            <td>${fmt(r.SIR_Remark)}</td>
+            <td>${fmt(r.Transport_Delivery_Terms)}</td>
+            <td>${fmt(r.Payment_Terms)}</td>
+            <td class="text-end pe-2">${r.Rate_of_Product > 0 ? '₹' + r.Rate_of_Product.toFixed(2) : '—'}</td>
+            <td>${fmt(r.Rework_Complaint_Details)}</td>
+            <td>${fmt(r.CreatedBy)}</td>
+            <td class="text-center">
+                <button class="btn btn-outline-info btn-sm btn-docs"
+                        data-id="${r.NPD_ItemId}" title="View Documents">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <button class="btn btn-outline-primary btn-sm btn-edit"
+                        data-id="${r.NPD_ItemId}" title="Edit">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm btn-del"
+                        data-id="${r.NPD_ItemId}"
+                        data-label="${fmt(r.Item_Code)}"
+                        title="Delete">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </td>
+        </tr>`;
+    }
+
+    // ── Mobile card ──
+    function buildCard(r, sr) {
+        const fmtD = v => v ? new Date(v).toLocaleDateString('en-IN') : '—';
+        const fmt  = v => v || '—';
+
+        return `
+        <div class="npd-card" id="card-${r.NPD_ItemId}">
+            <div class="npd-card-header">
+                <div>
+                    <div class="npd-card-code">${fmt(r.Item_Code)}</div>
+                    <div class="npd-card-name">${fmt(r.Item_Name)}</div>
+                </div>
+                <span class="badge bg-dark" style="font-size:0.60rem">${fmt(r.DepartmentName)}</span>
+            </div>
+            <div class="npd-card-grid">
+                <div>
+                    <div class="npd-card-label">Date</div>
+                    <div class="npd-card-value">${fmtD(r.Date)}</div>
+                </div>
+                <div>
+                    <div class="npd-card-label">Customer</div>
+                    <div class="npd-card-value">${fmt(r.Customer_Name)}</div>
+                </div>
+                <div>
+                    <div class="npd-card-label">Component</div>
+                    <div class="npd-card-value">${fmt(r.Component_Name)}</div>
+                </div>
+                <div>
+                    <div class="npd-card-label">GSM of Box</div>
+                    <div class="npd-card-value">${fmt(r.GSM_of_Box)}</div>
+                </div>
+                <div>
+                    <div class="npd-card-label">Sheet Size</div>
+                    <div class="npd-card-value">${fmt(r.Sheet_Size)}</div>
+                </div>
+                <div>
+                    <div class="npd-card-label">Rate</div>
+                    <div class="npd-card-value fw-bold">${r.Rate_of_Product > 0 ? '₹' + r.Rate_of_Product.toFixed(2) : '—'}</div>
+                </div>
+                <div>
+                    <div class="npd-card-label">Production Person</div>
+                    <div class="npd-card-value">${fmt(r.Production_Person)}</div>
+                </div>
+                <div>
+                    <div class="npd-card-label">SIR DateTime</div>
+                    <div class="npd-card-value">${fmt(r.SIR_DateTime)}</div>
+                </div>
+            </div>
+            <div class="npd-card-actions">
+                <button class="btn btn-outline-info btn-sm btn-docs" data-id="${r.NPD_ItemId}">
+                    <i class="bi bi-eye me-1"></i>Docs
+                </button>
+                <button class="btn btn-outline-primary btn-sm btn-edit" data-id="${r.NPD_ItemId}">
+                    <i class="bi bi-pencil-square me-1"></i>Edit
+                </button>
+                <button class="btn btn-outline-danger btn-sm btn-del"
+                        data-id="${r.NPD_ItemId}" data-label="${fmt(r.Item_Code)}">
+                    <i class="bi bi-trash3 me-1"></i>Delete
+                </button>
+            </div>
+        </div>`;
+    }
+
+    // ════════════════════════════════════════════
+    // FILTER
+    // ════════════════════════════════════════════
+    window.applyFilter = function () {
+        const q = $('#searchInput').val().toLowerCase().trim();
+
+        filteredData = allData.filter(r =>
+            !q ||
+            (r.Item_Code      || '').toLowerCase().includes(q) ||
+            (r.Item_Name      || '').toLowerCase().includes(q) ||
+            (r.Customer_Name  || '').toLowerCase().includes(q) ||
+            (r.Component_Name || '').toLowerCase().includes(q) ||
+            (r.GSM_of_Box     || '').toLowerCase().includes(q)
+        );
+
+        currentPage = 1;
+        window.currentPage = 1;
+        renderTable();
+    };
+
+    // ════════════════════════════════════════════
+    // PAGINATION
+    // ════════════════════════════════════════════
+    function updatePaginationUI(start, end) {
+        $('#pageInfo').text(
+            filteredData.length === 0
+                ? 'No records'
+                : `${start + 1}–${end} of ${filteredData.length}`);
+
+        $('#btnFirst,#btnPrev').prop('disabled', currentPage === 1);
+        $('#btnNext,#btnLast').prop('disabled',  currentPage === totalPages);
+
+        const container = $('#pageNumbers').empty();
+        const maxV = 5;
+        let sp = Math.max(1, currentPage - Math.floor(maxV / 2));
+        let ep = Math.min(totalPages, sp + maxV - 1);
+        if (ep - sp < maxV - 1) sp = Math.max(1, ep - maxV + 1);
+
+        for (let p = sp; p <= ep; p++) {
+            $('<button>').text(p)
+                .addClass('btn btn-outline-secondary btn-sm' +
+                    (p === currentPage ? ' active-page' : ''))
+                .on('click', () => goToPage(p))
+                .appendTo(container);
+        }
+    }
+
+    window.goToPage = function (p) {
+        if (p < 1 || p > totalPages) return;
+        currentPage = p;
+        window.currentPage = p;
+        renderTable();
+    };
+
+    window.changeRPP = function () {
+        rowsPerPage = parseInt($('#rppSelect').val());
+        currentPage = 1;
+        window.currentPage = 1;
+        renderTable();
+    };
+
+    // ════════════════════════════════════════════
+    // ADD MODAL
+    // ════════════════════════════════════════════
+    $('#btnAdd').on('click', function () {
+        clearForm();
+        $('#modalTitleText').text('Add PP Box NPD Item');
+        $('#fDepartmentId').val(currentDeptId);
+        $('#fDate').val(new Date().toISOString().split('T')[0]);
+        ppboxModal.show();
+    });
+
+    // ════════════════════════════════════════════
+    // EDIT
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-edit', function () {
+        const id = $(this).data('id');
+        const r  = allData.find(x => x.NPD_ItemId === id);
+        if (!r) return;
+
+        clearForm();
+        $('#modalTitleText').text('Edit PP Box NPD Item');
+        $('#fNPDItemId').val(r.NPD_ItemId);
+        $('#fDepartmentId').val(r.DepartmentId);
+        $('#fDate').val(r.Date ? new Date(r.Date).toISOString().split('T')[0] : '');
+        $('#fItemCode').val(r.Item_Code);
+        $('#fItemName').val(r.Item_Name);
+        $('#fMarketingPerson').val(r.Marketing_Person);
+        $('#fCustomerName').val(r.Customer_Name);
+        $('#fContactPerson').val(r.Customer_Contact_Person);
+        $('#fContactDetails').val(r.Customer_Contact_Details);
+        $('#fComponentName').val(r.Component_Name);
+        $('#fSpecs').val(r.Specifications);
+        $('#fGSMBox').val(r.GSM_of_Box);
+        $('#fGSMPartition').val(r.GSM_of_Partition);
+        $('#fColorBox').val(r.Color_of_Box);
+        $('#fMaterialColor').val(r.Material_Color);
+        $('#fSheetSize').val(r.Sheet_Size);
+        $('#fSheetSizePartition').val(r.Sheet_Size_Partition);
+        $('#fFlap').val(r.Flap);
+        $('#fSupportParty').val(r.Support_Party);
+        $('#fHandleGrade').val(r.Handle_Material_Grade);
+        $('#fHandleFixing').val(r.Handle_Fixing_Method);
+        $('#fCloth').val(r.Cloth);
+        $('#fProductionPerson').val(r.Production_Person);
+        $('#fCutting').val(r.Cutting);
+        $('#fPrintingMatter').val(r.Printing_Matter);
+        $('#fQualityPerson').val(r.Quality_Person);
+        $('#fSIRDateTime').val(r.SIR_DateTime);
+        $('#fSIRRemark').val(r.SIR_Remark);
+        $('#fDeliveryLocation').val(r.Delivery_Location);
+        $('#fTransportTerms').val(r.Transport_Delivery_Terms);
+        $('#fPackingDetails').val(r.Packing_Details);
+        $('#fPaymentTerms').val(r.Payment_Terms);
+        $('#fRateOfProduct').val(r.Rate_of_Product);
+        $('#fReworkDetails').val(r.Rework_Complaint_Details);
+
+        [r.Document_File_Name1, r.Document_File_Name2,
+         r.Document_File_Name3, r.Document_File_Name4,
+         r.Document_File_Name5].forEach((f, i) => {
+            $(`#ppbExisting${i+1}`).html(
+                f && f.trim()
+                    ? `<i class="bi bi-file-earmark-check text-primary me-1"></i>${f.substring(37)}`
+                    : '');
+        });
+
+        ppboxModal.show();
+    });
+
+    // ════════════════════════════════════════════
+    // SAVE
+    // ════════════════════════════════════════════
+    $('#btnSave').on('click', function () {
+        clearErrors();
+
+        const date     = $('#fDate').val();
+        const itemCode = $('#fItemCode').val().trim();
+        const itemName = $('#fItemName').val().trim();
+
+        let valid = true;
+        if (!date)     { showError('fDate','err-date','Date is required.');          valid = false; }
+        if (!itemCode) { showError('fItemCode','err-code','Item Code is required.'); valid = false; }
+        if (!itemName) { showError('fItemName','err-name','Item Name is required.'); valid = false; }
+        if (!valid) return;
+
+        const fd = new FormData();
+        fd.append('__RequestVerificationToken',
+            $('input[name="__RequestVerificationToken"]').val());
+
+        const fields = {
+            NPD_ItemId:               $('#fNPDItemId').val(),
+            DepartmentId:             $('#fDepartmentId').val(),
+            Date:                     date,
+            Item_Code:                itemCode,
+            Item_Name:                itemName,
+            Marketing_Person:         $('#fMarketingPerson').val(),
+            Customer_Name:            $('#fCustomerName').val(),
+            Customer_Contact_Person:  $('#fContactPerson').val(),
+            Customer_Contact_Details: $('#fContactDetails').val(),
+            Component_Name:           $('#fComponentName').val(),
+            Specifications:           $('#fSpecs').val(),
+            GSM_of_Box:               $('#fGSMBox').val(),
+            GSM_of_Partition:         $('#fGSMPartition').val(),
+            Color_of_Box:             $('#fColorBox').val(),
+            Production_Person:        $('#fProductionPerson').val(),
+            Sheet_Size:               $('#fSheetSize').val(),
+            Sheet_Size_Partition:     $('#fSheetSizePartition').val(),
+            Material_Color:           $('#fMaterialColor').val(),
+            Flap:                     $('#fFlap').val(),
+            Support_Party:            $('#fSupportParty').val(),
+            Handle_Material_Grade:    $('#fHandleGrade').val(),
+            Handle_Fixing_Method:     $('#fHandleFixing').val(),
+            Cloth:                    $('#fCloth').val(),
+            Printing_Matter:          $('#fPrintingMatter').val(),
+            Cutting:                  $('#fCutting').val(),
+            Packing_Details:          $('#fPackingDetails').val(),
+            Delivery_Location:        $('#fDeliveryLocation').val(),
+            Quality_Person:           $('#fQualityPerson').val(),
+            SIR_DateTime:             $('#fSIRDateTime').val(),
+            SIR_Remark:               $('#fSIRRemark').val(),
+            Transport_Delivery_Terms: $('#fTransportTerms').val(),
+            Payment_Terms:            $('#fPaymentTerms').val(),
+            Rate_of_Product:          $('#fRateOfProduct').val() || 0,
+            Rework_Complaint_Details: $('#fReworkDetails').val()
+        };
+
+        Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
+
+        for (let i = 1; i <= 5; i++) {
+            const f = $(`#ppbFile${i}`)[0].files[0];
+            if (f) fd.append(`file${i}`, f);
+        }
+
+        $.ajax({
+            url:         '/PPBoxNPDItem/Save',
+            method:      'POST',
+            data:        fd,
+            processData: false,
+            contentType: false,
+            dataType:    'json',
+            success: function (d) {
+                if (!d.success) { showToast(d.message || 'Save failed.', 'danger'); return; }
+                ppboxModal.hide();
+                showToast(d.message, 'success');
+                loadData();
+            },
+            error: function () {
+                showToast('Network error. Please try again.', 'danger');
+            }
+        });
+    });
+
+    // ════════════════════════════════════════════
+    // DELETE
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-del', function () {
+        pendingDeleteId = $(this).data('id');
+        $('#deleteLabel').text($(this).data('label'));
+        deleteModal.show();
+    });
+
+    $('#btnConfirmDelete').on('click', function () {
+        $.ajax({
+            url:      '/PPBoxNPDItem/Delete',
+            method:   'POST',
+            dataType: 'json',
+            data: {
+                id: pendingDeleteId,
+                __RequestVerificationToken:
+                    $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function (d) {
+                deleteModal.hide();
+                if (d.success) {
+                    allData      = allData.filter(r => r.NPD_ItemId !== pendingDeleteId);
+                    filteredData = filteredData.filter(r => r.NPD_ItemId !== pendingDeleteId);
+                    renderTable();
+                    showToast('PP Box NPD Item deleted.', 'success');
+                } else {
+                    showToast('Delete failed.', 'danger');
+                }
+            },
+            error: function () { showToast('Network error.', 'danger'); }
+        });
+    });
+
+    // ════════════════════════════════════════════
+    // VIEW DOCUMENTS
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-docs', function () {
+        const id = $(this).data('id');
+        const r  = allData.find(x => x.NPD_ItemId === id);
+        if (!r) return;
+
+        const files = [
+            r.Document_File_Name1, r.Document_File_Name2,
+            r.Document_File_Name3, r.Document_File_Name4,
+            r.Document_File_Name5
+        ];
+
+        let html = '';
+        files.forEach(f => {
+            if (f && f.trim() !== '') {
+                const original = f.length > 37 ? f.substring(37) : f;
+                html += `
+                <div class="border rounded p-2 mb-2 d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-file-earmark-text text-primary me-2"></i>${original}
+                    </div>
+                    <a href="/uploads/npd_ppbox/${f}" target="_blank"
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-eye"></i> View
+                    </a>
+                </div>`;
+            }
+        });
+
+        if (!html) {
+            html = '<div class="text-muted text-center py-3">No documents available.</div>';
+        }
+
+        $('#docsContainer').html(html);
+        docsModal.show();
+    });
+
+    // ════════════════════════════════════════════
+    // FILE NAME DISPLAY + SEQUENTIAL ENABLE/DISABLE
+    // ════════════════════════════════════════════
+    window.showFileName = function (input, targetId) {
+        $('#' + targetId).text(input.files[0] ? input.files[0].name : '');
+    };
+
+    function clearForm() {
+        $('#ppboxForm')[0].reset();
+        $('#fNPDItemId').val('0');
+        for (let i = 1; i <= 5; i++) {
+            $(`#ppbFname${i}`).text('');
+            $(`#ppbExisting${i}`).html('');
+            $(`#ppbFile${i}`).val('').prop('disabled', i !== 1);
+        }
+        clearErrors();
+    }
+
+    for (let i = 1; i <= 5; i++) {
+        if (i !== 1) $(`#ppbFile${i}`).prop('disabled', true);
+
+        $(`#ppbFile${i}`).on('change', function () {
+            const hasFile = this.files.length > 0;
+            if (hasFile && i < 5) $(`#ppbFile${i + 1}`).prop('disabled', false);
+            if (!hasFile) {
+                for (let j = i + 1; j <= 5; j++) {
+                    $(`#ppbFile${j}`).val('').prop('disabled', true);
+                    $(`#ppbFname${j}`).text('');
+                }
+            }
+            showFileName(this, `ppbFname${i}`);
+        });
+    }
+
+    // ════════════════════════════════════════════
+    // HELPERS
+    // ════════════════════════════════════════════
+    function clearErrors() {
+        $('.invalid-feedback.d-block').text('');
+        $('#ppboxForm .form-control, #ppboxForm .form-select').removeClass('is-invalid');
+    }
+
+    function showError(fieldId, errId, msg) {
+        $('#' + fieldId).addClass('is-invalid');
+        $('#' + errId).text(msg);
+    }
+
+    function showToast(msg, type) {
+        toastEl.className = `toast align-items-center text-white border-0 bg-${type}`;
+        $('#toastMsg').text(msg);
+        bsToast.show();
+    }
+
+    // Re-render on resize
+    let resizeTimer;
+    $(window).on('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+            if (filteredData.length) renderTable();
+        }, 200);
+    });
+
+});
+</script>
+}

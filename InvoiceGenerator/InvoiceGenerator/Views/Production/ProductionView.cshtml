@@ -154,7 +154,7 @@
     <div class="col-6 col-md-2">
         <div class="summary-card border border-success bg-white shadow-sm">
             <div class="text-muted">Total Produce Qty</div>
-            <div class="val text-success" id="cardProduced">0</div>
+            <div class="val text-primary" id="cardProduced">0</div>
         </div>
     </div>
     <div class="col-6 col-md-2">
@@ -366,13 +366,13 @@ function renderTable() {
             <td class="num col-qty text-danger fw-bold">${fmt(r.reject)}</td>
             <td class="num col-qty">${fmt(r.dispatch)}</td>
             <td class="num col-alert text-danger">${fmt(r.min)}</td>
-            <td class="num col-alert text-success">${fmt(r.max)}</td>
+            <td class="num col-alert text-primary">${fmt(r.max)}</td>
             <td class="num col-fg fw-bold">
                 ${fmt(r.fgQty)}
                 <br>${statusBadge(r.fgQty, r.min, r.max)}
             </td>
             <td class="num col-fg text-warning fw-bold">${fmt(r.toProduce)}</td>
-            <td class="num col-fg ${r.pending > 0 ? 'text-danger fw-bold' : 'text-success'}">
+            <td class="num col-fg ${r.pending > 0 ? 'text-danger fw-bold' : 'text-primary'}">
                 ${fmt(r.pending)}
             </td>
             <td class="num col-cost">${fmtC(r.invCost)}</td>

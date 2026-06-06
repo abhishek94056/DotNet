@@ -1,0 +1,282 @@
+﻿@model AIResumeScreeningSystem.ViewModels.SkillMatching.CandidateRankingViewModel
+@{
+    ViewData["Title"] = $"AI Ranking — {Model.JobTitle}";
+}
+
+<div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-2">
+        <a asp-action="Index" asp-route-jobId="@Model.JobId"
+               class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h4 class="fw-bold mb-0">
+                <i class="bi bi-bar-chart-steps me-2 text-primary"></i>AI Ranking
+            </h4>
+            <small class="text-muted">@Model.JobTitle · @Model.Company</small>
+        </div>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <form asp-action="RecalculateScores" asp-route-jobId="@Model.JobId" method="post">
+            <button type="submit" class="btn btn-outline-warning btn-sm">
+                <i class="bi bi-cpu me-1"></i>Re-run AI Ranking
+            </button>
+        </form>
+        <form asp-action="BulkShortlist" method="post" class="d-flex gap-2 align-items-center">
+            <input type="hidden" name="jobId" value="@Model.JobId" />
+            <span class="text-muted small">Top</span>
+            <input type="number" name="topN" value="5" min="1" max="50"
+                   class="form-control form-control-sm" style="width:60px;" />
+            <button type="submit" class="btn btn-warning btn-sm">
+                <i class="bi bi-bookmark-check me-1"></i>Bulk Shortlist
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Score Distribution Card -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row g-4 text-center">
+            @foreach (var (label, val, color) in new[] {
+                ("Total Applications", Model.TotalApplications.ToString(), "primary"),
+                ("Average AI Score", Model.AverageScore + "%", "info"),
+                ("High Match (≥75%)", Model.ExcellentCount.ToString(), "success"),
+                ("Shortlisted", Model.ShortlistedCount.ToString(), "warning")
+            })
+            {
+                <div class="col-6 col-md-3">
+                    <div class="p-3 rounded-3 bg-@color bg-opacity-10">
+                        <h3 class="fw-bold text-@color mb-0">@val</h3>
+                        <small class="text-muted">@label</small>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Score Distribution Bar Chart -->
+@if (Model.RankedCandidates.Any())
+{
+    <div class="card shadow-sm mb-4">
+        <div class="card-header py-3">
+            <h6 class="mb-0 fw-600">
+                <i class="bi bi-bar-chart me-2 text-primary"></i>Score Distribution
+            </h6>
+        </div>
+        <div class="card-body">
+            <canvas id="rankingChart" height="100"></canvas>
+        </div>
+    </div>
+}
+
+<!-- Ranking Cards -->
+@if (!Model.RankedCandidates.Any())
+{
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size:3rem;"></i>
+            <h5 class="text-muted mt-3">No applications yet</h5>
+        </div>
+    </div>
+}
+else
+{
+    @foreach (var candidate in Model.RankedCandidates)
+    {
+        <div class="card shadow-sm mb-3 @(candidate.Status == ApplicationStatus.Shortlisted ? "border-warning border-2" : "")
+            @(candidate.Status == ApplicationStatus.Approved ? "border-success border-2" : "")">
+            <div class="card-body">
+                <div class="row align-items-center g-3">
+
+                    <!-- Rank Medal -->
+                    <div class="col-auto text-center" style="min-width:60px;">
+                        <div class="fw-bold" style="font-size:1.8rem;">@candidate.RankMedal</div>
+                        <small class="text-muted">Rank</small>
+                    </div>
+
+                    <!-- Candidate Info -->
+                    <div class="col">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            @if (!string.IsNullOrEmpty(candidate.ProfileImagePath))
+                            {
+                                <img src="@candidate.ProfileImagePath" class="rounded-circle"
+                                     style="width:40px;height:40px;object-fit:cover;" />
+                            }
+                            else
+                            {
+                                <div class="rounded-circle bg-primary text-white d-flex
+                                    align-items-center justify-content-center fw-bold"
+                                     style="width:40px;height:40px;">
+                                    @candidate.InitialsAvatar
+                                </div>
+                            }
+                            <div>
+                                <span class="fw-600">@candidate.CandidateName</span>
+                                <span class="badge @candidate.StatusBadgeClass ms-2">
+                                    @candidate.Status
+                                </span>
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrEmpty(candidate.CandidateHeadline))
+                        {
+                            <small class="text-muted">@candidate.CandidateHeadline</small>
+                        }
+                        <div class="text-muted small mt-1">
+                            <i class="bi bi-briefcase me-1"></i>@candidate.CandidateExperienceYears yr exp
+                            @if (!string.IsNullOrEmpty(candidate.CandidateLocation))
+                            {
+                                <span class="ms-2">
+                                    <i class="bi bi-geo-alt me-1"></i>@candidate.CandidateLocation
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Skills -->
+                    <div class="col-md-3">
+                        <div class="d-flex flex-wrap gap-1 mb-1">
+                            @foreach (var skill in candidate.MatchedSkills.Take(4))
+                            {
+                                <span class="badge bg-success bg-opacity-10 text-success"
+                                      style="font-size:10px;">✓ @skill</span>
+                            }
+                        </div>
+                        @if (candidate.MissingSkills.Any())
+                        {
+                            <div class="d-flex flex-wrap gap-1">
+                                @foreach (var skill in candidate.MissingSkills.Take(2))
+                                {
+                                    <span class="badge bg-danger bg-opacity-10 text-danger"
+                                          style="font-size:10px;">✗ @skill</span>
+                                }
+                                @if (candidate.MissingSkills.Count > 2)
+                                {
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary"
+                                          style="font-size:10px;">
+                                        +@(candidate.MissingSkills.Count - 2) more
+                                    </span>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Score Ring -->
+                    <div class="col-auto text-center">
+                        <div class="position-relative d-inline-block">
+                            <svg width="80" height="80" viewBox="0 0 80 80">
+                                <circle cx="40" cy="40" r="32"
+                                        fill="none" stroke="#e5e7eb" stroke-width="8" />
+                                <circle cx="40" cy="40" r="32"
+                                        fill="none"
+                                        stroke="@candidate.GradeBadgeClass
+                                .Replace(" bg-success","#059669")
+                                        .Replace("bg-primary","#1a56db")
+                                        .Replace("bg-info text-dark","#0891b2")
+                                        .Replace("bg-warning text-dark","#d97706")
+                                        .Replace("bg-danger","#dc2626")"
+                                        stroke-width="8"
+                                        stroke-dasharray="@(2 * Math.PI * 32 * (double)candidate.OverallMatchScore / 100) @(2 * Math.PI * 32)"
+                                        stroke-dashoffset="@(2 * Math.PI * 32 * 0.25)"
+                                        stroke-linecap="round"
+                                        transform="rotate(-90 40 40)" />
+                                <text x="40" y="44" text-anchor="middle"
+                                      font-size="16" font-weight="bold" fill="#111827">
+                                    @candidate.OverallMatchScore.ToString("F0")%
+                                </text>
+                            </svg>
+                        </div>
+                        <div><small class="text-muted fw-500">@candidate.MatchGrade</small></div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="col-auto d-flex flex-column gap-2">
+                        <a asp-action="Details" asp-route-id="@candidate.ApplicationId"
+                               class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-eye me-1"></i>Details
+                        </a>
+                        @if (candidate.Status != ApplicationStatus.Shortlisted &&
+                                                     candidate.Status != ApplicationStatus.Approved)
+                        {
+                            <form asp-action="UpdateStatus" method="post">
+                                <input type="hidden" name="applicationId"
+                                       value="@candidate.ApplicationId" />
+                                <input type="hidden" name="status" value="Shortlisted" />
+                                <input type="hidden" name="jobId" value="@Model.JobId" />
+                                <button type="submit"
+                                        class="btn btn-sm btn-warning w-100">
+                                    <i class="bi bi-star me-1"></i>Shortlist
+                                </button>
+                            </form>
+                        }
+                        @if (candidate.Status == ApplicationStatus.Shortlisted)
+                        {
+                            <form asp-action="UpdateStatus" method="post">
+                                <input type="hidden" name="applicationId"
+                                       value="@candidate.ApplicationId" />
+                                <input type="hidden" name="status" value="Approved" />
+                                <input type="hidden" name="jobId" value="@Model.JobId" />
+                                <button type="submit"
+                                        class="btn btn-sm btn-success w-100">
+                                    <i class="bi bi-check-circle me-1"></i>Approve
+                                </button>
+                            </form>
+                        }
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@section Scripts {
+    @if (Model.RankedCandidates.Any())
+    {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                    Model.RankedCandidates.Select(r => r.CandidateName.Split(' ')[0]).ToList()));
+            const scores = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                    Model.RankedCandidates.Select(r => r.OverallMatchScore).ToList()));
+            const colors = scores.map(s =>
+            s >= 75 ? 'rgba(5,150,105,0.8)' :
+            s >= 50 ? 'rgba(26,86,219,0.8)' :
+            s >= 30 ? 'rgba(217,119,6,0.8)' :
+            'rgba(220,38,38,0.8)');
+
+            new Chart(document.getElementById('rankingChart'), {
+            type: 'bar',
+            data: {
+            labels,
+            datasets: [{
+            label: 'AI Match Score (%)',
+            data: scores,
+            backgroundColor: colors,
+            borderRadius: 8
+            }]
+            },
+            options: {
+            responsive: true,
+            plugins: {
+            legend: { display: false },
+            tooltip: {
+            callbacks: {
+            label: ctx => ` Score: ${ctx.raw.toFixed(1)}%`
+            }
+            }
+            },
+            scales: {
+            y: {
+            beginAtZero: true, max: 100,
+            ticks: { callback: v => v + '%' },
+            grid: { color: '#f3f4f6' }
+            },
+            x: { grid: { display: false } }
+            }
+            }
+            });
+        </script>
+    }
+}

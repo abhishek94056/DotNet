@@ -28,8 +28,10 @@ namespace InvoiceGenerator.Services
 
             cmd.Parameters.AddWithValue("@Name", vm.Name.Trim());
             cmd.Parameters.AddWithValue("@Email", vm.Email.Trim().ToLower());
+            cmd.Parameters.AddWithValue("@Department", vm.Department.Trim());
+            cmd.Parameters.AddWithValue("@Designation", vm.Designation.Trim());
             cmd.Parameters.AddWithValue("@Password", hashed);
-            cmd.Parameters.AddWithValue("@Role", vm.Role ?? "User");
+            cmd.Parameters.AddWithValue("@Role", vm.Role ?? "Operator");
 
             con.Open();
             int newId = Convert.ToInt32(cmd.ExecuteScalar());
@@ -63,6 +65,8 @@ namespace InvoiceGenerator.Services
                 UserId = Convert.ToInt32(dr["UserId"]),
                 Name = dr["Name"].ToString()!,
                 Email = dr["Email"].ToString()!,
+                Department = dr["Department"].ToString()!,
+                Designation = dr["Designation"].ToString()!,
                 Password = dr["Password"].ToString()!,
                 Role = dr["Role"].ToString()!,
                 IsActive = Convert.ToBoolean(dr["IsActive"]),
@@ -81,6 +85,41 @@ namespace InvoiceGenerator.Services
             return (true, user, "Login successful.");
         }
 
+
+        public (bool success, string message) UpdateUser(UserModel user)
+        {
+            var exists = GetAllUsers()
+                .Any(x => x.Email.Trim().ToLower() == user.Email.Trim().ToLower()
+                       && x.UserId != user.UserId); // ✅ ignore same user
+
+            if (exists)
+                return (false, "Email already exists.");
+
+            using var con = new SqlConnection(_conn);
+            using var cmd = new SqlCommand("SP_UPDATE_USER", con)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+
+            cmd.Parameters.AddWithValue("@UserId", user.UserId);
+            cmd.Parameters.AddWithValue("@Name", user.Name.Trim());
+            cmd.Parameters.AddWithValue("@Email", user.Email.Trim().ToLower());
+            cmd.Parameters.AddWithValue("@Department", user.Department ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@Designation", user.Designation ?? (object)DBNull.Value);
+
+            string hashed = string.IsNullOrWhiteSpace(user.Password)
+                ? ""
+                : BCrypt.Net.BCrypt.HashPassword(user.Password);
+
+            cmd.Parameters.AddWithValue("@Password", hashed);
+            cmd.Parameters.AddWithValue("@Role", user.Role);
+            cmd.Parameters.AddWithValue("@IsActive", user.IsActive);
+
+            con.Open();
+            cmd.ExecuteNonQuery();
+
+            return (true, "User updated successfully.");
+        }
         // ── Get All Users (Admin only) ──
         public List<UserModel> GetAllUsers()
         {
@@ -100,6 +139,9 @@ namespace InvoiceGenerator.Services
                     UserId = Convert.ToInt32(dr["UserId"]),
                     Name = dr["Name"].ToString()!,
                     Email = dr["Email"].ToString()!,
+                    Department = dr["Department"].ToString() ?? "",
+                    Designation = dr["Designation"].ToString() ?? "",
+                    Password = dr["Password"].ToString()!,
                     Role = dr["Role"].ToString()!,
                     IsActive = Convert.ToBoolean(dr["IsActive"]),
                     CreatedDate = Convert.ToDateTime(dr["CreatedDate"])
@@ -107,6 +149,34 @@ namespace InvoiceGenerator.Services
             }
 
             return list;
+        }
+        public UserModel GetUserById(int userId)
+        {
+            using var con = new SqlConnection(_conn);
+            using var cmd = new SqlCommand("SP_GetUserById", con)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+
+            cmd.Parameters.AddWithValue("@UserId", userId);
+
+            con.Open();
+            using var dr = cmd.ExecuteReader();
+
+            if (!dr.Read()) return null;
+
+            return new UserModel
+            {
+                UserId = Convert.ToInt32(dr["UserId"]),
+                Name = dr["Name"].ToString()!,
+                Email = dr["Email"].ToString()!,
+                Department = dr["Department"].ToString() ?? "",
+                Designation = dr["Designation"].ToString() ?? "",
+                //Password = dr["Password"].ToString()!,
+                Role = dr["Role"].ToString()!,
+                IsActive = Convert.ToBoolean(dr["IsActive"]),
+                CreatedDate = Convert.ToDateTime(dr["CreatedDate"])
+            };
         }
 
         // ── Toggle Active ──

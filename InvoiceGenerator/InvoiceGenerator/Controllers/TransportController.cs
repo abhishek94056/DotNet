@@ -29,29 +29,7 @@ namespace InvoiceGenerator.Controllers
             return Json(mode);
         }
 
-        //// POST: Save (Insert or Update)
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public IActionResult Save(TransportModel model)
-        //{
-        //    if (!ModelState.IsValid)
-        //        return Json(new
-        //        {
-        //            success = false,
-        //            errors = ModelState.Values
-        //                .SelectMany(v => v.Errors)
-        //                .Select(e => e.ErrorMessage)
-        //        });
-
-        //    if (model.Id == 0)
-        //        _svc.Insert(model);
-        //    else
-        //        _svc.Update(model);
-
-        //    return Json(new { success = true });
-        //}
-
-        // POST: Save (Insert or Update)
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Save(TransportModel model)

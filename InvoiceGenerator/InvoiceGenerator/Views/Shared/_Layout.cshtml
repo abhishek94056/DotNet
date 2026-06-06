@@ -1,103 +1,4 @@
-﻿@* <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] — Invoice Generator</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
-    <link rel="stylesheet" href="~/css/invoice.css" />
-</head>
-<body>
-
-    <!-- ── TOP NAVBAR: Logo + Company Name + Hamburger ── -->
-    <nav class="navbar navbar-light bg-white px-2 py-1 shadow-sm">
-        <div class="d-flex align-items-center w-100 position-relative">
-
-            <!-- Left: Logo -->
-            <img src="~/images/Logo.png" alt="Logo" height="40" class="me-2" />
-
-            <!-- Center: Company Name -->
-            <div class="position-absolute top-50 start-50 translate-middle">
-                <img src="~/images/Company Name.png" alt="Company Name" height="35" />
-            </div>
-
-            <!-- Right: Hamburger -->
-            <button class="navbar-toggler ms-auto" type="button"
-                    data-bs-toggle="offcanvas"
-                    data-bs-target="#offcanvasNav"
-                    aria-controls="offcanvasNav"
-                    aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-        </div>
-    </nav>
-
-    <!-- ── OFFCANVAS MENU ── -->
-    <div class="offcanvas offcanvas-end text-bg-dark"
-         tabindex="-1"
-         id="offcanvasNav"
-         aria-labelledby="offcanvasNavLabel">
-
-        <div class="offcanvas-header border-bottom border-secondary">
-            <h5 class="offcanvas-title" id="offcanvasNavLabel">
-                <i class="bi bi-grid-fill me-2"></i>Menu
-            </h5>
-            <button type="button"
-                    class="btn-close btn-close-white"
-                    data-bs-dismiss="offcanvas"
-                    aria-label="Close"></button>
-        </div>
-
-        <div class="offcanvas-body px-0">
-            <ul class="navbar-nav flex-column">
-
-                <li class="nav-item">
-                    <a class="nav-link px-3 py-2 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Invoice" ? "active" : "")"
-                           href="@Url.Action("InvoiceView", "Invoice")">
-                        <i class="bi bi-house-door me-2"></i>Home
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link px-3 py-2 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Company" ? "active" : "")"
-                           href="@Url.Action("CompanyView", "Company")">
-                        <i class="bi bi-building me-2"></i>Company Master
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link px-3 py-2 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Item" ? "active" : "")"
-                           href="@Url.Action("ItemView", "Item")">
-                        <i class="bi bi-box-seam me-2"></i>Item Master
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link px-3 py-2 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Transport" ? "active" : "")"
-                           href="@Url.Action("TransportView", "Transport")">
-                        <i class="bi bi-truck me-2"></i>Transport Master
-                    </a>
-                </li>
-
-            </ul>
-        </div>
-
-    </div>
-    <!-- ── END OFFCANVAS ── -->
-    <!-- ── PAGE CONTENT ── -->
-    <div class="container-fluid py-3 px-4 mt-2">
-        @Html.AntiForgeryToken()
-        @RenderBody()
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-
-</body>
-</html> *@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -110,129 +11,563 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="~/css/invoice.css" />
+    @RenderSection("Styles", required: false)
+    
+    <style>
+        /* ── Layout shell ── */
+        body { display: flex; flex-direction: column; min-height: 100vh; margin: 0; }
+
+        /* ── Top navbar ── */
+        .top-navbar { height: 52px; z-index: 1040; }
+
+        /* ── Sidebar ── */
+        #sidebar {
+    width: 240px;
+    height: calc(100vh - 52px);   /* fixed height */
+    background: #1a1d23;
+    position: fixed;
+    top: 52px;
+    left: -240px;
+    z-index: 1035;
+    transition: left .25s ease;
+
+    overflow-y: auto;   /* vertical scrollbar */
+    overflow-x: hidden;
+
+    scrollbar-width: thin; /* Firefox */
+}
+/* Chrome, Edge, Safari */
+#sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+#sidebar::-webkit-scrollbar-track {
+    background: #1a1d23;
+}
+
+#sidebar::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 10px;
+}
+
+#sidebar::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+        #sidebar.show { left: 0; }
+
+        /* ── Sidebar overlay (mobile) ── */
+        #sidebarOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.45);
+            z-index: 1034;
+        }
+        #sidebarOverlay.show { display: block; }
+
+        /* ── Main content shifts right when sidebar open on large screens ── */
+        @@media (min-width: 992px) {
+            body.sidebar-open #sidebar        { left: 0; }
+            body.sidebar-open #mainContent    { margin-left: 240px; }
+            body.sidebar-open #sidebarOverlay { display: none !important; }
+        }
+
+        #mainContent { transition: margin-left .25s ease; }
+
+        /* ── Sidebar nav links ── */
+        #sidebar .nav-link {
+            color: #c8ccd4;
+            font-size: .875rem;
+            padding: .45rem 1rem;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            gap: .55rem;
+            white-space: nowrap;
+        }
+        #sidebar .nav-link:hover  { background: #2a2d35; color: #fff; }
+        #sidebar .nav-link.active { background: #0d6efd; color: #fff; }
+
+        /* ── Section header label ── */
+        #sidebar .sidebar-label {
+            font-size: .7rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: #6c757d;
+            padding: 1rem 1rem .35rem;
+        }
+
+        /* ── Collapsible group arrow ── */
+        #sidebar .group-toggle::after {
+            content: "\F282";                /* bi-chevron-down */
+            font-family: "bootstrap-icons";
+            margin-left: auto;
+            transition: transform .2s;
+            font-size: .75rem;
+        }
+        #sidebar .group-toggle.collapsed::after { transform: rotate(-90deg); }
+
+        /* ── Sub-menu indent ── */
+        #sidebar .sub-menu .nav-link {
+            padding-left: 2.4rem;
+            font-size: .82rem;
+        }
+
+        /* ── User panel in sidebar ── */
+        .sidebar-user {
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            padding: 1rem;
+            border-bottom: 1px solid #2a2d35;
+        }
+        .sidebar-user .avatar {
+            width: 36px; height: 36px;
+            background: #0d6efd;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1rem; flex-shrink: 0;
+        }
+        .sidebar-user .username { color: #e2e5ea; font-size: .85rem; font-weight: 500; }
+        .sidebar-user .status   { color: #28a745; font-size: .72rem; }
+    </style>
 </head>
 <body>
 
-    <!-- ───────── NAVBAR ───────── -->
-    <nav class="navbar navbar-dark bg-dark px-3 py-1 shadow-sm">
-        <div class="d-flex align-items-center w-100 position-relative">
+<!-- ───────── TOP NAVBAR ───────── -->
+<nav class="navbar navbar-dark bg-dark px-3 py-1 shadow-sm top-navbar position-fixed w-100">
+    <div class="d-flex align-items-center w-100 position-relative">
 
-            <!-- Logo -->
-            <a asp-controller="Auth" asp-action="Dashboard">
+        <!-- Hamburger (toggles sidebar) -->
+        <button id="sidebarToggle" class="btn btn-link text-white p-0 me-3 border-0">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+
+        <!-- Logo -->
+        <a asp-controller="Auth" asp-action="Dashboard">
             <img src="~/images/Logo.png" alt="Logo" height="40" class="me-2" />
-            </a>
+        </a>
 
-            <!-- Company Name Center -->
-            <div class="position-absolute top-50 start-50 translate-middle">
-                <img src="~/images/Company Name.png" alt="Company Name" height="35" />
-            </div>
-
-            <!-- Right Side -->
-            <div class="ms-auto d-flex align-items-center gap-2">
-
-                @if (Context.Session.GetInt32("UserId").HasValue)
-                {
-                    <!-- Username -->
-                    <span class="text-white small d-none d-md-inline">
-                        <i class="bi bi-person-circle me-1"></i>
-                        @Context.Session.GetString("UserName")
-                    </span>
-
-                    <!-- Logout -->
-                    <a asp-controller="Auth" asp-action="Logout"
-                           class="btn btn-outline-light btn-sm py-0 px-2">
-                        <i class="bi bi-box-arrow-right me-1"></i>Logout
-                    </a>
-                }
-
-                <!-- Hamburger -->
-                <button class="navbar-toggler" type="button"
-                        data-bs-toggle="offcanvas"
-                        data-bs-target="#offcanvasNav"
-                        aria-controls="offcanvasNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-            </div>
-
-        </div>
-    </nav>
-
-    <!-- ───────── OFFCANVAS MENU ───────── -->
-    <div class="offcanvas offcanvas-end text-bg-dark"
-         tabindex="-1"
-         id="offcanvasNav">
-
-        <!-- Header -->
-        <div class="offcanvas-header border-bottom border-secondary">
-            <h5 class="offcanvas-title">
-                <i class="bi bi-grid-fill me-2"></i>Menu
-            </h5>
-
-            <button type="button"
-                    class="btn-close btn-close-white"
-                    data-bs-dismiss="offcanvas">
-            </button>
+        <!-- Company name — centered -->
+        <div class="position-absolute top-50 start-50 translate-middle">
+            <img src="~/images/Company Name.png" alt="Company Name" height="35" />
         </div>
 
-        <!-- Menu Items -->
-        <div class="offcanvas-body px-0">
-            <ul class="navbar-nav flex-column">
-
-                <li class="nav-item">
-                    <a class="nav-link px-3 py-2 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Invoice" ? "active bg-secondary" : "")"
-                           href="@Url.Action("InvoiceView", "Invoice")">
-                        <i class="bi bi-house-door me-2"></i>Home
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link px-3 py-2 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Company" ? "active bg-secondary" : "")"
-                           href="@Url.Action("CompanyView", "Company")">
-                        <i class="bi bi-building me-2"></i>Company Master
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link px-3 py-2 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Item" ? "active bg-secondary" : "")"
-                           href="@Url.Action("ItemView", "Item")">
-                        <i class="bi bi-box-seam me-2"></i>Item Master
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link px-3 py-2 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Transport" ? "active bg-secondary" : "")"
-                           href="@Url.Action("TransportView", "Transport")">
-                        <i class="bi bi-truck me-2"></i>Transport Master
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link px-3 py-2 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Auth" ? "active bg-secondary" : "")"
-                           href="@Url.Action("Users", "Auth")">
-                        <i class="bi bi-people me-2"></i>User Master
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link px-3 py-2 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Production" ? "active bg-secondary" : "")"
-                           
-                           href="@Url.Action("ProductionView", "Production")">
-                        <i class="bi bi-gear me-2"></i>Production
-                    </a>
-                </li>
-
-            </ul>
+        <!-- Right side -->
+        <div class="ms-auto d-flex align-items-center gap-2">
+            @if (Context.Session.GetInt32("UserId").HasValue)
+            {
+                <span class="text-white small d-none d-md-inline">
+                    <i class="bi bi-person-circle me-1"></i>
+                    @Context.Session.GetString("UserName")
+                </span>
+                <a asp-controller="Auth" asp-action="Logout"
+                   class="btn btn-outline-light btn-sm py-0 px-2">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </a>
+            }
         </div>
+
     </div>
+</nav>
 
-    <!-- ───────── PAGE CONTENT ───────── -->
-    <div class="container-fluid py-0 px-2 mt-4">
+<!-- ───────── SIDEBAR OVERLAY (mobile) ───────── -->
+<div id="sidebarOverlay"></div>
+
+<!-- ───────── SIDEBAR ───────── -->
+<nav id="sidebar">
+
+    <!-- User panel -->
+    @if (Context.Session.GetInt32("UserId").HasValue)
+    {
+        <div class="sidebar-user">
+            <div class="avatar"><i class="bi bi-person-fill"></i></div>
+            <div>
+                <div class="username">@Context.Session.GetString("UserName")</div>
+                <div class="status"><i class="bi bi-circle-fill me-1" style="font-size:.55rem"></i>Online</div>
+            </div>
+        </div>
+    }
+
+    @* <div class="sidebar-label">Navigation</div> *@
+
+    <ul class="nav flex-column pb-3">
+
+        @{
+            var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
+        }
+
+        <!-- Home -->
+        <li class="nav-item">
+            <a class="nav-link @(ctrl == "Invoice" ? "active" : "")"
+               href="@Url.Action("InvoiceView", "Invoice")">
+                <i class="bi bi-house-door"></i> Home
+            </a>
+        </li>
+
+        <!-- ── Masters group ── -->
+        @* <div class="sidebar-label">Invoice Master</div> *@
+
+        <li class="nav-item">
+            <a class="nav-link group-toggle @(ctrl is "Company" or "Item" or "Transport" or "User" ? "" : "collapsed")"
+               data-bs-toggle="collapse"
+               href="#invoiceMasterGroup"
+               role="button"
+               aria-expanded="@(ctrl is "Company" or "Item" or "Transport" or "User" ? "true" : "false")">
+                <i class="bi bi-folder2"></i> Invoice Master
+            </a>
+            <div class="collapse @(ctrl is "Company" or "Item" or "Transport" or "User" ? "show" : "")"
+                 id="invoiceMasterGroup">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item">
+    <a class="nav-link @(ctrl == "Company" ? "active" : "")"
+       href="@Url.Action("CompanyView", "Company")">
+        <i class="bi bi-building"></i> Company Master
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link @(ctrl == "Item" ? "active" : "")"
+       href="@Url.Action("ItemView", "Item")">
+        <i class="bi bi-box-seam"></i> Item Master
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link @(ctrl == "Transport" ? "active" : "")"
+       href="@Url.Action("TransportView", "Transport")">
+        <i class="bi bi-truck"></i> Transport Master
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link @(ctrl == "User" ? "active" : "")"
+       href="@Url.Action("Users", "Auth")">
+        <i class="bi bi-people"></i> User Master
+    </a>
+</li>
+
+                </ul>
+            </div>
+        </li>
+
+
+
+
+         <!-- ── NPD Data Details ── -->
+        @* <div class="sidebar-label">Data Entry Masters</div> *@
+
+        <li class="nav-item">
+            <a class="nav-link group-toggle @(ctrl is "CustomerPOSchedule" or "RawMaterial"   ? "" : "collapsed")"
+               data-bs-toggle="collapse"
+               href="#RawMaterial"
+               role="button"
+               aria-expanded="@(ctrl is "RawMaterial" or "PPBoxNPDItem"? "true" : "false")">
+                <i class="bi bi-gear"></i> Data Entry Masters
+            </a>
+            <div class="collapse @(ctrl is "RawMaterial" or "PPBoxNPDItem" ? "show" : "")"
+                 id="RawMaterial">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item">
+                        <a class="nav-link @(ctrl == "CustomerPOSchedule" ? "active" : "")"
+                           href="@Url.Action("CustomerPOScheduleView", "CustomerPOSchedule")">
+                            <i class="bi bi-cpu"></i> Add PO Schedule
+                        </a>
+                    </li>
+                     <li class="nav-item">
+                        <a class="nav-link @(ctrl == "ProductionPlan" ? "active" : "")"
+                           href="@Url.Action("ProductionPlanView", "ProductionPlan")">
+                            <i class="bi bi-cpu"></i> Add Production Plan
+                        </a>
+                    </li>
+                     <li class="nav-item">
+                        <a class="nav-link @(ctrl == "MachineProduction" ? "active" : "")"
+                           href="@Url.Action("MachineProductionView", "MachineProduction")">
+                            <i class="bi bi-cpu"></i> Add Production
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link @(ctrl == "CustomerDispatch" ? "active" : "")"
+                           href="@Url.Action("CustomerDispatchView", "CustomerDispatch")">
+                            <i class="bi bi-cpu"></i> Add Dispatch
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ctrl == "RawMaterial" ? "active" : "")"  
+                           href="@Url.Action("RawMaterialView", "RawMaterial")">
+                            <i class="bi bi-diagram-3"></i> Raw Material
+                        </a>
+                    </li>
+                     <li class="nav-item">
+                        <a class="nav-link @(ctrl == "MachineDowntime" ? "active" : "")"  
+                           href="@Url.Action("MachineDowntimeView", "MachineDowntime")">
+                            <i class="bi bi-diagram-3"></i> Machine Downtime
+                        </a>
+                    </li>
+                     <li class="nav-item">
+                        <a class="nav-link @(ctrl == "RawMaterialIssueReceived" ? "active" : "")"  
+                           href="@Url.Action("RawMaterialIssueReceivedView", "RawMaterialIssueReceived")">
+                            <i class="bi bi-diagram-3"></i> Raw Material Issue Received
+                        </a>  
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ctrl == "ProductionFGIssue" ? "active" : "")"  
+                           href="@Url.Action("ProductionFGIssueView", "ProductionFGIssue")">
+                            <i class="bi bi-diagram-3"></i> Production FG Issue
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ctrl == "SupplierPOStatus" ? "active" : "")"  
+                           href="@Url.Action("SupplierPOStatusView", "SupplierPOStatus")">
+                            <i class="bi bi-diagram-3"></i> Supplier PO Status
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ctrl == "ManualScheduleDispatch" ? "active" : "")"  
+                           href="@Url.Action("ManualScheduleDispatchView", "ManualScheduleDispatch")">
+                            <i class="bi bi-diagram-3"></i> Manual Schedule Dispatch
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ctrl == "ControlPlan" ? "active" : "")"  
+                           href="@Url.Action("ControlPlanView", "ControlPlan")">
+                            <i class="bi bi-diagram-3"></i> Control Plan
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </li> 
+          <!-- ── Masters group ── -->
+        @* <div class="sidebar-label">Masters</div> *@
+
+        <li class="nav-item">
+            <a class="nav-link group-toggle @(ctrl is "Customer" or "ItemSize" or "Supplier" or "MatrixItemSize" or "MatrixItemCustomer"? "" : "collapsed")"
+               data-bs-toggle="collapse"
+               href="#masterDataGroup"
+               role="button"
+               aria-expanded="@(ctrl is "Customer" or "ItemSize" or "Supplier" or "MatrixItemSize" or "MatrixItemCustomer" ? "true" : "false")">
+                <i class="bi bi-folder2"></i> Master Data
+            </a>
+            <div class="collapse @(ctrl is "Customer" or "ItemSize" or "Supplier" or "MatrixItemSize" or "MatrixItemCustomer" ? "show" : "")"
+                 id="masterDataGroup">
+                <ul class="nav flex-column sub-menu">
+
+
+<li class="nav-item">
+    <a class="nav-link @(ctrl == "Customer" ? "active" : "")"
+       href="@Url.Action("CustomerView", "Customer")">
+        <i class="bi bi-person"></i> Customer
+    </a>
+</li>
+
+ <li class="nav-item">
+    <a class="nav-link @(ctrl == "ItemSize" ? "active" : "")"
+       href="@Url.Action("ItemSizeView", "ItemSize")">
+        <i class="bi bi-aspect-ratio"></i> Add Item Size
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link @(ctrl == "Supplier" ? "active" : "")"
+       href="@Url.Action("SupplierView", "Supplier")">
+        <i class="bi bi-truck-flatbed"></i> Supplier
+    </a>
+</li> 
+<li class="nav-item">
+    <a class="nav-link @(ctrl == "MatrixItemSize" ? "active" : "")"
+       href="@Url.Action("MatrixItemSizeView", "MatrixItemSize")">
+        <i class="bi bi-diagram-3"></i> Matrix Item Size
+    </a>
+</li> 
+<li class="nav-item">
+    <a class="nav-link @(ctrl == "MatrixItemCustomer" ? "active" : "")"
+       href="@Url.Action("MatrixItemCustomerView", "MatrixItemCustomer")">
+        <i class="bi bi-diagram-3"></i> Matrix Item Customer
+    </a>
+</li> 
+                </ul>
+            </div>
+        </li>
+
+
+<!-- ── Item Master ── -->
+@* <div class="sidebar-label">Item Master</div> *@
+
+<li class="nav-item">
+    <a class="nav-link group-toggle @(ctrl == "ItemDescription" ? "" : "collapsed")"
+       data-bs-toggle="collapse"
+       href="#itemMasterGroup"
+       role="button"
+       aria-expanded="@(ctrl == "ItemDescription" ? "true" : "false")">
+        <i class="bi bi-folder2"></i> Item Master
+    </a>
+
+    <div class="collapse @(ctrl == "ItemDescription" ? "show" : "")"
+         id="itemMasterGroup">
+        <ul class="nav flex-column sub-menu">
+
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Blister" ? "active" : "")"
+                   href="@Url.Action("Blister", "ItemDescription")">
+                    <i class="bi bi-grid-3x3-gap"></i> Blister Department
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Extrusion" ? "active" : "")"
+                   href="@Url.Action("Extrusion", "ItemDescription")">
+                    <i class="bi bi-bezier2"></i> Extrusion Department
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Moulding" ? "active" : "")"
+                   href="@Url.Action("Moulding", "ItemDescription")">
+                    <i class="bi bi-bounding-box"></i> Moulding Department
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "PPBoxView" ? "active" : "")"
+                   href="@Url.Action("PPBoxView", "ItemDescriptionPPBOX")">
+                    <i class="bi bi-box"></i> PP Box Department
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "PVC" ? "active" : "")"
+                   href="@Url.Action("PVC", "ItemDescription")">
+                    <i class="bi bi-sliders"></i> PVC Department
+                </a>
+            </li>
+
+        </ul>
+    </div>
+</li>
+
+  <!-- ── NPD Data Details ── -->
+        @* <div class="sidebar-label">NPD Data Details</div> *@
+
+        <li class="nav-item">
+            <a class="nav-link group-toggle @(ctrl is "NPDItem" or "PPBoxNPDItem"  ? "" : "collapsed")"
+               data-bs-toggle="collapse"
+               href="#npdGroup"
+               role="button"
+               aria-expanded="@(ctrl is "NPDItem" or "PPBoxNPDItem"? "true" : "false")">
+                <i class="bi bi-gear"></i> NPD Data Details
+            </a>
+            <div class="collapse @(ctrl is "NPDItem" or "PPBoxNPDItem" ? "show" : "")"
+                 id="npdGroup">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item">
+                        <a class="nav-link @(ctrl == "NPDItem" ? "active" : "")"
+                           href="@Url.Action("NPDItemView", "NPDItem")">
+                            <i class="bi bi-diagram-3"></i> NPD Item
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ctrl == "PPBoxNPDItem" ? "active" : "")"
+                           href="@Url.Action("PPBoxNPDItemView", "PPBoxNPDItem")">
+                            <i class="bi bi-cpu"></i> PPBox NPD Item
+                        </a>
+                    </li>
+                  
+                </ul>
+            </div>
+        </li> 
+
+
+        <!-- ── Operations group ── -->
+        @* <div class="sidebar-label">Operations</div> *@
+
+        <li class="nav-item">
+            <a class="nav-link group-toggle @(ctrl is "Production" or "Machine" or "MachineStatus" ? "" : "collapsed")"
+               data-bs-toggle="collapse"
+               href="#operationsGroup"
+               role="button"
+               aria-expanded="@(ctrl is "Production" or "Machine" or "MachineStatus" ? "true" : "false")">
+                <i class="bi bi-gear"></i> Operations
+            </a>
+            <div class="collapse @(ctrl is "Production" or "Machine" or "MachineStatus" ? "show" : "")"
+                 id="operationsGroup">
+                <ul class="nav flex-column sub-menu">
+                    <li class="nav-item">
+                        <a class="nav-link @(ctrl == "Production" ? "active" : "")"
+                           href="@Url.Action("ProductionView", "Production")">
+                            <i class="bi bi-diagram-3"></i> Production
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ctrl == "Machine" ? "active" : "")"
+                           href="@Url.Action("MachineView", "Machine")">
+                            <i class="bi bi-cpu"></i> Machine
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(ctrl == "MachineStatus" ? "active" : "")"
+                           href="@Url.Action("MachineStatusView", "MachineStatus")">
+                            <i class="bi bi-activity"></i> Machine Status
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+
+    </ul>
+</nav>
+
+<!-- ───────── MAIN CONTENT ───────── -->
+<div id="mainContent" style="margin-top:52px; min-height:calc(100vh - 52px);">
+    <div class="container-fluid py-3 px-3">
         @Html.AntiForgeryToken()
         @RenderBody()
     </div>
+</div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    @await RenderSectionAsync("Scripts", required: false)
+<script>
+    const toggle   = document.getElementById('sidebarToggle');
+    const sidebar  = document.getElementById('sidebar');
+    const overlay  = document.getElementById('sidebarOverlay');
+    const body     = document.body;
+
+    // On large screens, remember sidebar preference
+    const isLg = () => window.innerWidth >= 992;
+
+    function openSidebar() {
+        sidebar.classList.add('show');
+        if (isLg()) body.classList.add('sidebar-open');
+        else overlay.classList.add('show');
+    }
+    function closeSidebar() {
+        sidebar.classList.remove('show');
+        body.classList.remove('sidebar-open');
+        overlay.classList.remove('show');
+    }
+
+    toggle.addEventListener('click', () =>
+        sidebar.classList.contains('show') ? closeSidebar() : openSidebar()
+    );
+    overlay.addEventListener('click', closeSidebar);
+
+    // Auto-open on large screens on load
+    // if (isLg()) openSidebar();
+
+    window.addEventListener('resize', () => {
+        if (isLg() && sidebar.classList.contains('show')) {
+            body.classList.add('sidebar-open');
+            overlay.classList.remove('show');
+        } else if (!isLg()) {
+            body.classList.remove('sidebar-open');
+        }
+    });
+</script>
+<script src="~/js/jquery-3.6.0.min.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
 
 </body>
 </html>

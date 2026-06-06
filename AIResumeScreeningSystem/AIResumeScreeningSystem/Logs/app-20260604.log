@@ -1,0 +1,267 @@
+2026-06-04 23:47:56.827 +05:30 [INF] Executed DbCommand (373ms) [Parameters=[], CommandType='"Text"', CommandTimeout='60']
+CREATE DATABASE [AIResumeScreeningDB];
+2026-06-04 23:47:57.134 +05:30 [INF] Executed DbCommand (224ms) [Parameters=[], CommandType='"Text"', CommandTimeout='60']
+IF SERVERPROPERTY('EngineEdition') <> 5
+BEGIN
+    ALTER DATABASE [AIResumeScreeningDB] SET READ_COMMITTED_SNAPSHOT ON;
+END;
+2026-06-04 23:47:57.192 +05:30 [INF] Executed DbCommand (23ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-06-04 23:47:57.353 +05:30 [INF] Executed DbCommand (19ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [__EFMigrationsHistory] (
+    [MigrationId] nvarchar(150) NOT NULL,
+    [ProductVersion] nvarchar(32) NOT NULL,
+    CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId])
+);
+2026-06-04 23:47:57.355 +05:30 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-06-04 23:47:57.390 +05:30 [INF] Executed DbCommand (29ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2026-06-04 23:47:57.443 +05:30 [INF] Executed DbCommand (48ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2026-06-04 23:47:57.478 +05:30 [INF] Applying migration '20260604181431_InitialCreate'.
+2026-06-04 23:47:57.753 +05:30 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Roles] (
+    [Id] nvarchar(450) NOT NULL,
+    [Name] nvarchar(256) NULL,
+    [NormalizedName] nvarchar(256) NULL,
+    [ConcurrencyStamp] nvarchar(max) NULL,
+    CONSTRAINT [PK_Roles] PRIMARY KEY ([Id])
+);
+2026-06-04 23:47:57.759 +05:30 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Skills] (
+    [Id] int NOT NULL IDENTITY,
+    [Name] nvarchar(100) NOT NULL,
+    [Description] nvarchar(500) NULL,
+    [Category] int NOT NULL,
+    [CreatedAt] datetime2 NOT NULL,
+    CONSTRAINT [PK_Skills] PRIMARY KEY ([Id])
+);
+2026-06-04 23:47:57.769 +05:30 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Users] (
+    [Id] nvarchar(450) NOT NULL,
+    [FirstName] nvarchar(100) NOT NULL,
+    [LastName] nvarchar(100) NOT NULL,
+    [PhoneNumber] nvarchar(20) NULL,
+    [CreatedAt] datetime2 NOT NULL,
+    [UpdatedAt] datetime2 NULL,
+    [IsActive] bit NOT NULL,
+    [ProfileImagePath] nvarchar(500) NULL,
+    [UserName] nvarchar(256) NULL,
+    [NormalizedUserName] nvarchar(256) NULL,
+    [Email] nvarchar(256) NULL,
+    [NormalizedEmail] nvarchar(256) NULL,
+    [EmailConfirmed] bit NOT NULL,
+    [PasswordHash] nvarchar(max) NULL,
+    [SecurityStamp] nvarchar(max) NULL,
+    [ConcurrencyStamp] nvarchar(max) NULL,
+    [PhoneNumberConfirmed] bit NOT NULL,
+    [TwoFactorEnabled] bit NOT NULL,
+    [LockoutEnd] datetimeoffset NULL,
+    [LockoutEnabled] bit NOT NULL,
+    [AccessFailedCount] int NOT NULL,
+    CONSTRAINT [PK_Users] PRIMARY KEY ([Id])
+);
+2026-06-04 23:47:57.776 +05:30 [INF] Executed DbCommand (7ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [RoleClaims] (
+    [Id] int NOT NULL IDENTITY,
+    [RoleId] nvarchar(450) NOT NULL,
+    [ClaimType] nvarchar(max) NULL,
+    [ClaimValue] nvarchar(max) NULL,
+    CONSTRAINT [PK_RoleClaims] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_RoleClaims_Roles_RoleId] FOREIGN KEY ([RoleId]) REFERENCES [Roles] ([Id]) ON DELETE CASCADE
+);
+2026-06-04 23:47:57.785 +05:30 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Candidates] (
+    [Id] int NOT NULL IDENTITY,
+    [UserId] nvarchar(450) NOT NULL,
+    [Headline] nvarchar(500) NULL,
+    [Summary] nvarchar(max) NULL,
+    [CurrentJobTitle] nvarchar(200) NULL,
+    [CurrentCompany] nvarchar(200) NULL,
+    [TotalExperienceYears] int NOT NULL,
+    [Location] nvarchar(200) NULL,
+    [LinkedInUrl] nvarchar(200) NULL,
+    [GitHubUrl] nvarchar(200) NULL,
+    [PortfolioUrl] nvarchar(200) NULL,
+    [HighestEducation] nvarchar(100) NULL,
+    [University] nvarchar(200) NULL,
+    [GraduationYear] int NULL,
+    [CreatedAt] datetime2 NOT NULL,
+    [UpdatedAt] datetime2 NULL,
+    [IsAvailable] bit NOT NULL,
+    CONSTRAINT [PK_Candidates] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Candidates_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id]) ON DELETE CASCADE
+);
+2026-06-04 23:47:57.793 +05:30 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Jobs] (
+    [Id] int NOT NULL IDENTITY,
+    [Title] nvarchar(200) NOT NULL,
+    [Company] nvarchar(200) NOT NULL,
+    [Description] nvarchar(max) NOT NULL,
+    [Requirements] nvarchar(max) NOT NULL,
+    [Location] nvarchar(200) NULL,
+    [SalaryMin] decimal(18,2) NULL,
+    [SalaryMax] decimal(18,2) NULL,
+    [JobType] int NOT NULL,
+    [Status] int NOT NULL,
+    [PostedDate] datetime2 NOT NULL,
+    [ExpiryDate] datetime2 NULL,
+    [UpdatedAt] datetime2 NULL,
+    [PostedByUserId] nvarchar(450) NOT NULL,
+    [Department] nvarchar(100) NULL,
+    [ExperienceYearsMin] int NOT NULL,
+    [ExperienceYearsMax] int NOT NULL,
+    CONSTRAINT [PK_Jobs] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Jobs_Users_PostedByUserId] FOREIGN KEY ([PostedByUserId]) REFERENCES [Users] ([Id]) ON DELETE NO ACTION
+);
+2026-06-04 23:47:57.798 +05:30 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Notifications] (
+    [Id] int NOT NULL IDENTITY,
+    [UserId] nvarchar(450) NOT NULL,
+    [Title] nvarchar(200) NOT NULL,
+    [Message] nvarchar(max) NOT NULL,
+    [Type] int NOT NULL,
+    [IsRead] bit NOT NULL,
+    [CreatedAt] datetime2 NOT NULL,
+    [ReadAt] datetime2 NULL,
+    [ActionUrl] nvarchar(500) NULL,
+    CONSTRAINT [PK_Notifications] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Notifications_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id]) ON DELETE CASCADE
+);
+2026-06-04 23:47:57.815 +05:30 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [UserClaims] (
+    [Id] int NOT NULL IDENTITY,
+    [UserId] nvarchar(450) NOT NULL,
+    [ClaimType] nvarchar(max) NULL,
+    [ClaimValue] nvarchar(max) NULL,
+    CONSTRAINT [PK_UserClaims] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_UserClaims_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id]) ON DELETE CASCADE
+);
+2026-06-04 23:47:57.826 +05:30 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [UserLogins] (
+    [LoginProvider] nvarchar(450) NOT NULL,
+    [ProviderKey] nvarchar(450) NOT NULL,
+    [ProviderDisplayName] nvarchar(max) NULL,
+    [UserId] nvarchar(450) NOT NULL,
+    CONSTRAINT [PK_UserLogins] PRIMARY KEY ([LoginProvider], [ProviderKey]),
+    CONSTRAINT [FK_UserLogins_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id]) ON DELETE CASCADE
+);
+2026-06-04 23:47:57.831 +05:30 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [UserRoles] (
+    [UserId] nvarchar(450) NOT NULL,
+    [RoleId] nvarchar(450) NOT NULL,
+    CONSTRAINT [PK_UserRoles] PRIMARY KEY ([UserId], [RoleId]),
+    CONSTRAINT [FK_UserRoles_Roles_RoleId] FOREIGN KEY ([RoleId]) REFERENCES [Roles] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_UserRoles_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id]) ON DELETE CASCADE
+);
+2026-06-04 23:47:57.837 +05:30 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [UserTokens] (
+    [UserId] nvarchar(450) NOT NULL,
+    [LoginProvider] nvarchar(450) NOT NULL,
+    [Name] nvarchar(450) NOT NULL,
+    [Value] nvarchar(max) NULL,
+    CONSTRAINT [PK_UserTokens] PRIMARY KEY ([UserId], [LoginProvider], [Name]),
+    CONSTRAINT [FK_UserTokens_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id]) ON DELETE CASCADE
+);
+2026-06-04 23:47:57.844 +05:30 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [CandidateSkills] (
+    [Id] int NOT NULL IDENTITY,
+    [CandidateId] int NOT NULL,
+    [SkillId] int NOT NULL,
+    [ProficiencyLevel] int NOT NULL,
+    [YearsOfExperience] int NOT NULL,
+    [IsVerified] bit NOT NULL,
+    CONSTRAINT [PK_CandidateSkills] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_CandidateSkills_Candidates_CandidateId] FOREIGN KEY ([CandidateId]) REFERENCES [Candidates] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_CandidateSkills_Skills_SkillId] FOREIGN KEY ([SkillId]) REFERENCES [Skills] ([Id]) ON DELETE CASCADE
+);
+2026-06-04 23:47:57.849 +05:30 [INF] Executed DbCommand (5ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Resumes] (
+    [Id] int NOT NULL IDENTITY,
+    [CandidateId] int NOT NULL,
+    [FileName] nvarchar(500) NOT NULL,
+    [FilePath] nvarchar(1000) NOT NULL,
+    [FileExtension] nvarchar(20) NOT NULL,
+    [FileSizeBytes] bigint NOT NULL,
+    [Status] int NOT NULL,
+    [UploadedAt] datetime2 NOT NULL,
+    [ParsedAt] datetime2 NULL,
+    [ParsedName] nvarchar(max) NULL,
+    [ParsedEmail] nvarchar(max) NULL,
+    [ParsedPhone] nvarchar(max) NULL,
+    [ParsedSkills] nvarchar(max) NULL,
+    [ParsedEducation] nvarchar(max) NULL,
+    [ParsedExperience] nvarchar(max) NULL,
+    [ParsedSummary] nvarchar(max) NULL,
+    [RawText] nvarchar(max) NULL,
+    [IsActive] bit NOT NULL,
+    CONSTRAINT [PK_Resumes] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Resumes_Candidates_CandidateId] FOREIGN KEY ([CandidateId]) REFERENCES [Candidates] ([Id]) ON DELETE CASCADE
+);
+2026-06-04 23:47:57.859 +05:30 [INF] Executed DbCommand (9ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [JobSkills] (
+    [Id] int NOT NULL IDENTITY,
+    [JobId] int NOT NULL,
+    [SkillId] int NOT NULL,
+    [IsRequired] bit NOT NULL,
+    [WeightagePercent] int NOT NULL,
+    CONSTRAINT [PK_JobSkills] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_JobSkills_Jobs_JobId] FOREIGN KEY ([JobId]) REFERENCES [Jobs] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_JobSkills_Skills_SkillId] FOREIGN KEY ([SkillId]) REFERENCES [Skills] ([Id]) ON DELETE CASCADE
+);
+2026-06-04 23:47:58.869 +05:30 [INF] Executed DbCommand (6ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Reports] (
+    [Id] int NOT NULL IDENTITY,
+    [Name] nvarchar(200) NOT NULL,
+    [ReportType] int NOT NULL,
+    [Format] int NOT NULL,
+    [FilePath] nvarchar(1000) NULL,
+    [GeneratedAt] datetime2 NOT NULL,
+    [GeneratedByUserId] nvarchar(450) NOT NULL,
+    [JobId] int NULL,
+    CONSTRAINT [PK_Reports] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Reports_Jobs_JobId] FOREIGN KEY ([JobId]) REFERENCES [Jobs] ([Id]) ON DELETE SET NULL,
+    CONSTRAINT [FK_Reports_Users_GeneratedByUserId] FOREIGN KEY ([GeneratedByUserId]) REFERENCES [Users] ([Id]) ON DELETE NO ACTION
+);
+2026-06-04 23:47:58.878 +05:30 [INF] Executed DbCommand (8ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [Applications] (
+    [Id] int NOT NULL IDENTITY,
+    [JobId] int NOT NULL,
+    [CandidateId] int NOT NULL,
+    [ResumeId] int NOT NULL,
+    [Status] int NOT NULL,
+    [AppliedAt] datetime2 NOT NULL,
+    [ReviewedAt] datetime2 NULL,
+    [UpdatedAt] datetime2 NULL,
+    [AIMatchScore] decimal(5,2) NULL,
+    [SkillMatchPercentage] decimal(5,2) NULL,
+    [RankPosition] int NULL,
+    [AIEvaluation] nvarchar(max) NULL,
+    [SkillGapAnalysis] nvarchar(max) NULL,
+    [RecruiterNotes] nvarchar(max) NULL,
+    [MissingSkills] nvarchar(max) NULL,
+    [ReviewedByUserId] nvarchar(450) NULL,
+    CONSTRAINT [PK_Applications] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Applications_Candidates_CandidateId] FOREIGN KEY ([CandidateId]) REFERENCES [Candidates] ([Id]) ON DELETE NO ACTION,
+    CONSTRAINT [FK_Applications_Jobs_JobId] FOREIGN KEY ([JobId]) REFERENCES [Jobs] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_Applications_Resumes_ResumeId] FOREIGN KEY ([ResumeId]) REFERENCES [Resumes] ([Id]) ON DELETE NO ACTION,
+    CONSTRAINT [FK_Applications_Users_ReviewedByUserId] FOREIGN KEY ([ReviewedByUserId]) REFERENCES [Users] ([Id]) ON DELETE SET NULL
+);
+2026-06-04 23:47:58.927 +05:30 [ERR] Failed executing DbCommand (47ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE [InterviewQuestions] (
+    [Id] int NOT NULL IDENTITY,
+    [JobId] int NOT NULL,
+    [ApplicationId] int NULL,
+    [Question] nvarchar(max) NOT NULL,
+    [ExpectedAnswer] nvarchar(max) NULL,
+    [QuestionType] int NOT NULL,
+    [DifficultyLevel] int NOT NULL,
+    [IsAIGenerated] bit NOT NULL,
+    [GeneratedAt] datetime2 NOT NULL,
+    CONSTRAINT [PK_InterviewQuestions] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_InterviewQuestions_Applications_ApplicationId] FOREIGN KEY ([ApplicationId]) REFERENCES [Applications] ([Id]) ON DELETE SET NULL,
+    CONSTRAINT [FK_InterviewQuestions_Jobs_JobId] FOREIGN KEY ([JobId]) REFERENCES [Jobs] ([Id]) ON DELETE CASCADE
+);

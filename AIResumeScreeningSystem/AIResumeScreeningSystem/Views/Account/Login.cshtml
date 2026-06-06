@@ -1,0 +1,112 @@
+﻿@model LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "_Layout";
+}
+
+<div class="min-vh-100 d-flex align-items-center justify-content-center" style="background:linear-gradient(135deg,#1e3a5f 0%,#1a56db 100%);margin-top:-56px;padding-top:56px;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-10 col-md-7 col-lg-5">
+
+                <!-- Logo -->
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white mb-3"
+                         style="width:64px;height:64px;box-shadow:0 4px 15px rgba(0,0,0,0.2);">
+                        <i class="bi bi-cpu text-primary" style="font-size:2rem;"></i>
+                    </div>
+                    <h2 class="text-white fw-bold mb-1">Welcome Back</h2>
+                    <p class="text-white-50 mb-0">Sign in to AI Resume Screening</p>
+                </div>
+
+                <!-- Card -->
+                <div class="card shadow-lg" style="border-radius:16px;">
+                    <div class="card-body p-4 p-md-7">
+
+                        <form asp-action="Login" method="post" novalidate>
+                            <input type="hidden" asp-for="ReturnUrl" />
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-3" style="display:@(ViewData.ModelState.ErrorCount > 0 ? "block" : "none")"></div>
+
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label fw-500 text-secondary small"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-envelope text-secondary"></i>
+                                    </span>
+                                    <input asp-for="Email" class="form-control border-start-0 ps-0"
+                                           placeholder="you@example.com" autocomplete="email" />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <label asp-for="Password" class="form-label fw-500 text-secondary small"></label>
+                                    <a asp-action="ForgotPassword" class="small text-primary text-decoration-none">Forgot password?</a>
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="bi bi-lock text-secondary"></i>
+                                    </span>
+                                    <input asp-for="Password" class="form-control border-start-0 border-end-0 ps-0"
+                                           placeholder="Enter your password" autocomplete="current-password" id="passwordInput" />
+                                    <button class="input-group-text bg-light border-start-0" type="button" onclick="togglePassword()">
+                                        <i class="bi bi-eye" id="eyeIcon"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Remember Me -->
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input asp-for="RememberMe" class="form-check-input" />
+                                    <label asp-for="RememberMe" class="form-check-label small text-secondary"></label>
+                                </div>
+                            </div>
+
+                            <!-- Submit -->
+                            <button type="submit" class="btn btn-primary w-100 py-2 fw-600" style="border-radius:10px;font-size:1rem;">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                            </button>
+                        </form>
+
+                        <hr class="my-4">
+
+                        <p class="text-center text-secondary small mb-0">
+                            Don't have an account?
+                            <a asp-action="Register" class="text-primary fw-600 text-decoration-none">Create one free</a>
+                        </p>
+
+                    </div>
+                </div>
+
+                @* <!-- Admin hint -->
+                <div class="text-center mt-3">
+                    <small class="text-white-50">Demo admin: admin@airesumescreen.com / Admin@12345</small>
+                </div>  *@
+
+            </div>
+        </div>  
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePassword() {
+            const input = document.getElementById('passwordInput');
+            const icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        }
+    </script>
+}
+

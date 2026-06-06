@@ -1,0 +1,282 @@
+﻿@model AIResumeScreeningSystem.ViewModels.Candidate.CandidateViewModel
+@{
+    ViewData["Title"] = "My Profile";
+    bool isSelf = User.IsInRole("Candidate");
+}
+
+<div class="d-flex align-items-center gap-2 mb-4">
+    @if (!isSelf)
+    {
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+    }
+    <h4 class="fw-bold mb-0">
+        @(isSelf ? "My Profile" : "Candidate Profile")
+    </h4>
+</div>
+
+<div class="row g-4">
+    <!-- Left: Profile Card -->
+    <div class="col-lg-4">
+
+        <div class="card shadow-sm text-center mb-4">
+            <div class="card-body py-4">
+                @if (!string.IsNullOrEmpty(Model.ProfileImagePath))
+                {
+                    <img src="@Model.ProfileImagePath" class="rounded-circle mb-3"
+                         style="width:100px;height:100px;object-fit:cover;" alt="Profile" />
+                }
+                else
+                {
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center
+                        justify-content-center fw-bold mx-auto mb-3"
+                         style="width:100px;height:100px;font-size:2rem;">
+                        @Model.InitialsAvatar
+                    </div>
+                }
+
+                <h5 class="fw-bold mb-1">@Model.FullName</h5>
+                @if (!string.IsNullOrEmpty(Model.Headline))
+                {
+                    <p class="text-muted small mb-2">@Model.Headline</p>
+                }
+                <div class="d-flex justify-content-center gap-2 flex-wrap mb-3">
+                    <span class="badge @Model.AvailabilityBadgeClass px-3 py-2">
+                        <i class="bi @(Model.IsAvailable ? "bi-circle-fill" : "bi-circle") me-1" style="font-size:8px;"></i>
+                        @(Model.IsAvailable ? "Open to Work" : "Not Available")
+                    </span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                        @Model.ExperienceLabel
+                    </span>
+                </div>
+
+                @if (isSelf)
+                {
+                    <a asp-action="EditProfile" class="btn btn-primary btn-sm w-100 mb-2">
+                        <i class="bi bi-pencil me-1"></i>Edit Profile
+                    </a>
+                    <form asp-action="ToggleAvailability" method="post">
+                        <button class="btn btn-outline-secondary btn-sm w-100" type="submit">
+                            <i class="bi bi-arrow-repeat me-1"></i>Toggle Availability
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header py-3">
+                <h6 class="mb-0 fw-600"><i class="bi bi-person-lines-fill me-2 text-primary"></i>Contact</h6>
+            </div>
+            <div class="list-group list-group-flush">
+                <div class="list-group-item border-0 py-2">
+                    <small class="text-muted d-block">Email</small>
+                    <span class="small fw-500">@Model.Email</span>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.PhoneNumber))
+                {
+                    <div class="list-group-item border-0 py-2">
+                        <small class="text-muted d-block">Phone</small>
+                        <span class="small fw-500">@Model.PhoneNumber</span>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.Location))
+                {
+                    <div class="list-group-item border-0 py-2">
+                        <small class="text-muted d-block">Location</small>
+                        <span class="small fw-500"><i class="bi bi-geo-alt me-1"></i>@Model.Location</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Social Links -->
+        @if (Model.LinkedInUrl != null || Model.GitHubUrl != null || Model.PortfolioUrl != null)
+        {
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-600"><i class="bi bi-link-45deg me-2 text-primary"></i>Links</h6>
+                </div>
+                <div class="card-body d-flex flex-wrap gap-2">
+                    @if (!string.IsNullOrEmpty(Model.LinkedInUrl))
+                    {
+                        <a href="@Model.LinkedInUrl" target="_blank"
+                               class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-linkedin me-1"></i>LinkedIn
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.GitHubUrl))
+                    {
+                        <a href="@Model.GitHubUrl" target="_blank"
+                               class="btn btn-sm btn-outline-dark">
+                            <i class="bi bi-github me-1"></i>GitHub
+                        </a>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.PortfolioUrl))
+                    {
+                        <a href="@Model.PortfolioUrl" target="_blank"
+                               class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-globe me-1"></i>Portfolio
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Stats -->
+        <div class="card shadow-sm">
+            <div class="card-header py-3">
+                <h6 class="mb-0 fw-600"><i class="bi bi-bar-chart me-2 text-primary"></i>Stats</h6>
+            </div>
+            <div class="list-group list-group-flush">
+                @foreach (var (label, val, color) in new[] {
+                    ("Applications", Model.TotalApplications.ToString(), "primary"),
+                    ("Resumes", Model.TotalResumes.ToString(), "success"),
+                    ("Shortlisted", Model.ShortlistedCount.ToString(), "warning"),
+                    ("Skills", Model.Skills.Count.ToString(), "info")
+                })
+                {
+                    <div class="list-group-item border-0 d-flex justify-content-between py-2">
+                        <span class="text-muted small">@label</span>
+                        <span class="fw-600 text-@color">@val</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Right: Details -->
+    <div class="col-lg-8">
+
+        <!-- Summary -->
+        @if (!string.IsNullOrEmpty(Model.Summary))
+        {
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-600"><i class="bi bi-file-person me-2 text-primary"></i>About Me</h6>
+                </div>
+                <div class="card-body text-muted" style="line-height:1.7;white-space:pre-line;">@Model.Summary</div>
+            </div>
+        }
+
+        <!-- Experience & Education -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header py-3">
+                <h6 class="mb-0 fw-600"><i class="bi bi-briefcase me-2 text-primary"></i>Experience & Education</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    @if (!string.IsNullOrEmpty(Model.CurrentJobTitle))
+                    {
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3 border">
+                                <small class="text-muted d-block mb-1">Current Role</small>
+                                <div class="fw-600">@Model.CurrentJobTitle</div>
+                                @if (!string.IsNullOrEmpty(Model.CurrentCompany))
+                                {
+                                    <small class="text-muted">@Model.CurrentCompany</small>
+                                }
+                            </div>
+                        </div>
+                    }
+                    <div class="col-md-6">
+                        <div class="p-3 rounded-3 border">
+                            <small class="text-muted d-block mb-1">Experience</small>
+                            <div class="fw-600">@Model.TotalExperienceYears year(s)</div>
+                            <small class="text-muted">@Model.ExperienceLabel level</small>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.HighestEducation))
+                    {
+                        <div class="col-md-6">
+                            <div class="p-3 rounded-3 border">
+                                <small class="text-muted d-block mb-1">Education</small>
+                                <div class="fw-600">@Model.HighestEducation</div>
+                                @if (!string.IsNullOrEmpty(Model.University))
+                                {
+                                    <small class="text-muted">@Model.University</small>
+                                }
+                                @if (Model.GraduationYear.HasValue)
+                                {
+                                    <small class="text-muted d-block">Class of @Model.GraduationYear</small>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Skills -->
+        @if (Model.Skills.Any())
+        {
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3 d-flex justify-content-between">
+                    <h6 class="mb-0 fw-600"><i class="bi bi-tags me-2 text-primary"></i>Skills</h6>
+                    @if (isSelf)
+                    {
+                        <a asp-action="Skills" class="btn btn-sm btn-outline-primary">Manage Skills</a>
+                    }
+                </div>
+                <div class="card-body">
+                    @foreach (var group in Model.Skills.GroupBy(s => s.Category))
+                    {
+                        <div class="mb-3">
+                            <p class="text-muted small fw-600 mb-2">@group.Key</p>
+                            <div class="row g-2">
+                                @foreach (var skill in group.OrderByDescending(s => s.ProficiencyLevel))
+                                {
+                                    <div class="col-md-6">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="small fw-500">@skill.SkillName</span>
+                                            <span class="badge @skill.ProficiencyBarClass bg-opacity-15 text-dark"
+                                                  style="font-size:10px;">
+                                                @skill.ProficiencyDisplay
+                                                @if (skill.YearsOfExperience > 0)
+                                                {
+                                                    <text> · @skill.YearsOfExperience yr</text>
+                                                }
+                                            </span>
+                                        </div>
+                                        <div class="progress" style="height:5px;border-radius:3px;">
+                                            <div class="progress-bar @skill.ProficiencyBarClass"
+                                                 style="width:@skill.ProficiencyPercent%"></div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Action Buttons (Recruiter/Admin) -->
+        @if (!isSelf)
+        {
+            <div class="card shadow-sm">
+                <div class="card-body d-flex flex-wrap gap-2">
+                    <a asp-controller="Application" asp-action="Index"
+                           asp-route-candidateId="@Model.Id"
+                           class="btn btn-primary">
+                        <i class="bi bi-collection me-2"></i>View Applications
+                    </a>
+                    <a asp-controller="Resume" asp-action="CandidateResumes"
+                           asp-route-candidateId="@Model.Id"
+                           class="btn btn-outline-primary">
+                        <i class="bi bi-file-earmark me-2"></i>View Resumes
+                    </a>
+                    <form asp-action="ToggleActive" asp-route-userId="@Model.UserId" method="post">
+                        <button type="submit"
+                                class="btn @(Model.IsActive ? "btn-outline-danger" : "btn-outline-success")">
+                            <i class="bi @(Model.IsActive ? "bi-person-x" : "bi-person-check") me-1"></i>
+                            @(Model.IsActive ? "Deactivate" : "Activate") Account
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>

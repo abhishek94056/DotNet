@@ -1,0 +1,64 @@
+﻿/* ── Table font & density ── */
+#companyTable {
+    font-size: 0.75rem;
+}
+
+    #companyTable thead th {
+        font-size: 0.72rem;
+        padding: 5px 6px;
+        white-space: nowrap;
+    }
+
+    #companyTable tbody td {
+        padding: 4px 6px;
+        vertical-align: middle;
+    }
+
+
+    /* ── Action buttons tiny ── */
+    #companyTable .btn-sm {
+        padding: 1px 5px;
+        font-size: 0.7rem;
+    }
+
+/* ── Pagination ── */
+.pagination-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 0.78rem;
+}
+
+    .pagination-bar .page-info {
+        color: #555;
+    }
+
+    .pagination-bar button {
+        min-width: 30px;
+        height: 28px;
+        font-size: 0.72rem;
+        padding: 0 6px;
+        border-radius: 4px;
+    }
+
+        .pagination-bar button.active-page {
+            background-color: #0d6efd;
+            color: #fff;
+            border-color: #0d6efd;
+        }
+/* ── Alternating row colors (FIXED) ── */
+#companyTable tbody tr:nth-child(odd) td {
+    background-color: #f8f9fa !important;
+}
+
+#companyTable tbody tr:nth-child(even) td {
+    background-color: #eef2ff !important;
+}
+
+/* ── Hover effect ── */
+#companyTable tbody tr:hover td {
+    background-color: #cfe2ff !important;
+    cursor: pointer;
+}

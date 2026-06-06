@@ -1,0 +1,90 @@
+﻿@model List<AIResumeScreeningSystem.Models.Application>
+@{
+    ViewData["Title"] = "Shortlisted Candidates";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0">
+            <i class="bi bi-star me-2 text-warning"></i>Shortlisted Candidates
+        </h4>
+        <small class="text-muted">@Model.Count shortlisted across all jobs</small>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-star text-muted" style="font-size:3rem;"></i>
+            <h5 class="text-muted mt-3">No shortlisted candidates yet</h5>
+            <p class="text-muted small">
+                Review applications and shortlist promising candidates.
+            </p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var app in Model)
+        {
+            var candidate = app.Candidate;
+            var fullName = candidate != null
+                ? $"{candidate.User.FirstName} {candidate.User.LastName}" : "Unknown";
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100 border-warning border-2">
+                    <div class="card-header py-2 bg-warning bg-opacity-10 border-0">
+                        <small class="text-warning fw-600">
+                            <i class="bi bi-star-fill me-1"></i>Shortlisted
+                            · @app.Job?.Title
+                        </small>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <div class="rounded-circle bg-primary text-white d-flex
+                                align-items-center justify-content-center fw-bold"
+                                 style="width:44px;height:44px;">
+                                @(fullName.Length >= 2
+                                    ? $"{fullName.Split(' ').First()[0]}{fullName.Split(' ').Last()[0]}".ToUpper()
+                                    : "?")
+                            </div>
+                            <div>
+                                <div class="fw-600">@fullName</div>
+                                <small class="text-muted">@candidate?.Headline</small>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="text-muted small">
+                                <i class="bi bi-briefcase me-1"></i>
+                                @(candidate?.TotalExperienceYears ?? 0) yr exp
+                            </div>
+                            @if (app.AIMatchScore.HasValue)
+                            {
+                                <span class="fw-bold text-primary fs-5">
+                                    @app.AIMatchScore.Value.ToString("F0")%
+                                </span>
+                            }
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <a asp-action="Details" asp-route-id="@app.Id"
+                                   class="btn btn-sm btn-outline-primary flex-grow-1">
+                                <i class="bi bi-eye me-1"></i>View
+                            </a>
+                            <form asp-action="UpdateStatus" method="post">
+                                <input type="hidden" name="applicationId" value="@app.Id" />
+                                <input type="hidden" name="status" value="Approved" />
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="bi bi-check-circle"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

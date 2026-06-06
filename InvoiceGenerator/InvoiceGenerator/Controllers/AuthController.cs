@@ -1,44 +1,20 @@
 ﻿// Controllers/AuthController.cs
 using InvoiceGenerator.Filters;
 using InvoiceGenerator.Helper;
-using InvoiceGenerator.ViewModels;
 using InvoiceGenerator.Interfaces;
-using Microsoft.AspNetCore.Mvc;//Controller functionality
+using InvoiceGenerator.Models;
+using InvoiceGenerator.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 
 namespace InvoiceGenerator.Controllers
 {
-    public class AuthController : Controller //(C) Controller -> Base class for MVC controllers
+    public class AuthController : Controller
     {
-        //Dependency Injection (Service)
         private readonly IAuthService _auth;
 
-        public AuthController(IAuthService auth) => _auth = auth;
-
-        // ── GET /Auth/Register ──
-        [HttpGet]
-        public IActionResult Register() //(I) IActionResult -> Represents action result
+        public AuthController(IAuthService auth)
         {
-            if (SessionHelper.IsLoggedIn(HttpContext.Session))
-                return RedirectToAction("Dashboard");
-            return View();  //(M) View()	-> Returns UI view
-        }
-
-        // ── POST /Auth/Register ──
-        [HttpPost]  // form submit
-        [ValidateAntiForgeryToken] // security (CSRF protection)
-        public IActionResult Register(RegisterViewModel vm)
-        {
-            if (!ModelState.IsValid) return View(vm);
-
-            var (success, message) = _auth.Register(vm);
-            if (!success)
-            {
-                ModelState.AddModelError("Email", message);
-                return View(vm);
-            }
-
-            TempData["Success"] = "Registration successful! Please login.";
-            return RedirectToAction("Login");
+            _auth = auth;
         }
 
         // ── GET /Auth/Login ──
@@ -47,9 +23,17 @@ namespace InvoiceGenerator.Controllers
         {
             if (SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Dashboard");
-            return View();
-        }
 
+            LoginViewModel vm = new LoginViewModel();
+
+            if (Request.Cookies.ContainsKey("RememberEmail"))
+            {
+                vm.Email = Request.Cookies["RememberEmail"];
+                vm.RememberMe = true;
+            }
+
+            return View(vm);
+        }
         // ── POST /Auth/Login ──
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -64,16 +48,88 @@ namespace InvoiceGenerator.Controllers
                 return View(vm);
             }
 
+            // Block Operator at login
+            if (user!.Role == "Operator")
+            {
+                ModelState.AddModelError(string.Empty,
+                    "Operator accounts do not have system access.");
+                return View(vm);
+            }
+
             SessionHelper.SetUser(HttpContext.Session, user!);
+
+            if (vm.RememberMe)
+            {
+                CookieOptions options = new CookieOptions
+                {
+                    Expires = DateTime.Now.AddDays(30),
+                    HttpOnly = true,
+                    IsEssential = true
+                };
+
+                Response.Cookies.Append("RememberEmail", vm.Email, options);
+            }
+            else
+            {
+                Response.Cookies.Delete("RememberEmail");
+            }
             return RedirectToAction("Dashboard");
         }
+        [HttpGet]
+        public IActionResult GetUser(int userId)
+        {
+            try
+            {
+                var user = _auth.GetUserById(userId);
+                if (user == null)
+                    return Json(new { success = false, message = "User not found" });
 
+                return Json(new
+                {
+                    success = true,
+                    user = new
+                    {
+                        user.UserId,
+                        user.Name,
+                        user.Email,
+                        user.Department,
+                        user.Designation,
+                        user.Role,
+                        user.IsActive
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message   // 👈 IMPORTANT for debugging
+                });
+            }
+        }
+
+        [RequireAdmin]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditUser(UserModel user)
+        {
+            var (success, message) = _auth.UpdateUser(user); // ✅ get result
+
+            return Json(new
+            {
+                success,
+                message
+            });
+        }
         // ── GET /Auth/Dashboard ──
         [RequireLogin]
         public IActionResult Dashboard()
         {
             ViewBag.UserName = SessionHelper.GetUserName(HttpContext.Session);
             ViewBag.UserRole = SessionHelper.GetUserRole(HttpContext.Session);
+            ViewBag.IsAdmin = SessionHelper.IsAdmin(HttpContext.Session);
+            ViewBag.HasInvoice = SessionHelper.HasInvoiceAccess(HttpContext.Session);
             return View();
         }
 
@@ -99,10 +155,32 @@ namespace InvoiceGenerator.Controllers
         // ── POST /Auth/ToggleActive ──
         [RequireAdmin]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult ToggleActive(int userId, bool isActive)
         {
             _auth.ToggleActive(userId, isActive);
             return Json(new { success = true });
+        }
+
+
+
+        // ── POST /Auth/RegisterAjax (modal from User Master) ──
+        [RequireAdmin]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RegisterAjax(RegisterViewModel vm)
+        {
+            if (!ModelState.IsValid)
+                return Json(new
+                {
+                    success = false,
+                    message = string.Join(" | ", ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage))
+                });
+
+            var (success, message) = _auth.Register(vm);
+            return Json(new { success, message });
         }
     }
 }

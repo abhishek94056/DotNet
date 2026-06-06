@@ -1,0 +1,12 @@
+﻿@model AIResumeScreeningSystem.ViewModels.Candidate.CandidateViewModel
+@{
+    ViewData["Title"] = Model.FullName;
+}
+
+<div class="d-flex align-items-center gap-2 mb-4">
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+    <h4 class="fw-bold mb-0">Candidate: @Model.FullName</h4>
+</div>
+
+<!-- Reuse the Profile view with Recruiter context -->
+@await Html.PartialAsync("Profile", Model)

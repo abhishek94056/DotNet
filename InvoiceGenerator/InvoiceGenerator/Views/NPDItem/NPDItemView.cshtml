@@ -1,0 +1,1419 @@
+﻿@{
+    ViewData["Title"] = "NPD Item Master";
+}
+
+<style>
+    /* ════════════════════════════════════════
+       CSS VARIABLES
+    ════════════════════════════════════════ */
+    :root {
+        --header-bg:   #1a1a2e;
+        --row-odd:     #f8f9fa;
+        --row-even:    #eef2ff;
+        --row-hover:   #cfe2ff;
+        --accent:      #0d6efd;
+        --sec-hdr-bg:  #0d6efd;
+    }
+
+    /* ════════════════════════════════════════
+       PAGE HEADER
+    ════════════════════════════════════════ */
+    .page-header {
+        display:         flex;
+        align-items:     center;
+        justify-content: space-between;
+        flex-wrap:       wrap;
+        gap:             8px;
+        margin-bottom:   10px;
+    }
+
+    .page-header h6 { margin: 0; font-weight: 700; }
+
+    .header-controls {
+        display:     flex;
+        align-items: center;
+        flex-wrap:   wrap;
+        gap:         6px;
+    }
+
+    /* ════════════════════════════════════════
+       TABLE
+    ════════════════════════════════════════ */
+    #npdTable { font-size: 0.70rem; }
+
+    #npdTable thead th {
+        font-size:   0.67rem;
+        padding:     4px 5px;
+        white-space: nowrap;
+        text-align:  center;
+        background:  var(--header-bg);
+        color:       #fff;
+        position:    sticky;
+        top:         0;
+        z-index:     2;
+    }
+
+    #npdTable tbody td {
+        padding:        3px 5px;
+        vertical-align: middle;
+        white-space:    nowrap;
+        max-width:      200px;
+        overflow:       hidden;
+        text-overflow:  ellipsis;
+    }
+
+    #npdTable tbody tr:nth-child(odd)  td { background-color: var(--row-odd); }
+    #npdTable tbody tr:nth-child(even) td { background-color: var(--row-even); }
+    #npdTable tbody tr:hover td {
+        background-color: var(--row-hover) !important;
+        cursor:           pointer;
+        transition:       background-color 0.15s;
+    }
+
+    #npdTable .btn-sm { padding: 1px 4px; font-size: 0.65rem; }
+
+    .table-wrap {
+        max-height: 460px;
+        overflow-y: auto;
+        overflow-x: auto;
+        border:        1px solid #dee2e6;
+        border-radius: 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ════════════════════════════════════════
+       PAGINATION
+    ════════════════════════════════════════ */
+    .pagination-bar {
+        display:         flex;
+        justify-content: flex-end;
+        align-items:     center;
+        flex-wrap:       wrap;
+        gap:             5px;
+        margin-top:      8px;
+        font-size:       0.73rem;
+    }
+
+    .pagination-bar button {
+        min-width:     28px;
+        height:        26px;
+        font-size:     0.68rem;
+        padding:       0 5px;
+        border-radius: 4px;
+    }
+
+    .pagination-bar button.active-page {
+        background:   var(--accent);
+        color:        #fff;
+        border-color: var(--accent);
+    }
+
+    #loadingRow td { text-align: center; padding: 20px; color: #888; }
+
+    /* ════════════════════════════════════════
+       MODAL — SECTION HEADERS
+    ════════════════════════════════════════ */
+    .sec-hdr {
+        font-size:     0.70rem;
+        font-weight:   700;
+        color:         #fff;
+        background:    var(--sec-hdr-bg);
+        padding:       3px 10px;
+        border-radius: 4px;
+        margin:        10px 0 6px;
+        width:         100%;
+    }
+
+    /* ════════════════════════════════════════
+       FILE UPLOAD ZONE
+    ════════════════════════════════════════ */
+    .file-zone {
+        border:        2px dashed #adb5bd;
+        border-radius: 6px;
+        padding:       8px;
+        text-align:    center;
+        font-size:     0.70rem;
+        color:         #6c757d;
+        cursor:        pointer;
+        transition:    border-color 0.2s;
+    }
+    .file-zone:hover { border-color: var(--accent); color: var(--accent); }
+
+    .file-zone input[type=file] {
+        position: absolute;
+        opacity:  0;
+        width:    0;
+        height:   0;
+    }
+
+    .file-name {
+        font-size:    0.65rem;
+        color:        #198754;
+        margin-top:   2px;
+        word-break:   break-all;
+    }
+
+    .file-zone:has(input:disabled) {
+        opacity: 0.5;
+        cursor:  not-allowed;
+    }
+
+    /* ════════════════════════════════════════
+       MOBILE CARD LIST  (≤ 575px)
+    ════════════════════════════════════════ */
+    .npd-card-list { display: none; }
+
+    /* ══════════════════════════════════════
+       BREAKPOINT: MOBILE  (≤ 575px)
+    ══════════════════════════════════════ */
+    @@media (max-width: 575px) {
+
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-controls select,
+    .header-controls input,
+    .header-controls button {
+        width: 100% !important;
+    }
+
+    /* KEEP TABLE VISIBLE */
+    .table-wrap {
+        display: block !important;
+        overflow-x: auto;
+        overflow-y: auto;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* HIDE CARD VIEW */
+    .npd-card-list {
+        display: none !important;
+    }
+
+    /* IMPORTANT */
+    #npdTable {
+        min-width: 2500px;
+        width: max-content;
+    }
+
+    .pagination-bar {
+        justify-content: center;
+    }
+
+    .pagination-bar #pageNumbers {
+        flex-wrap: wrap;
+    }
+}
+</style>
+
+<!-- ── PAGE HEADER ── -->
+<div class="page-header">
+    <h6>
+        <i class="bi bi-clipboard2-pulse me-2 text-primary"></i>
+        NPD Item Master
+    </h6>
+
+    <div class="header-controls">
+
+        <select id="deptFilter" class="form-select form-select-sm"
+                style="width:155px" onchange="onDeptChange()">
+            <option value="">-- Select Department --</option>
+        </select>
+
+        <input type="text" id="searchInput"
+               class="form-control form-control-sm"
+               placeholder="🔍 Search..."
+               style="width:165px" oninput="applyFilter()" />
+
+        <button class="btn btn-primary btn-sm" id="btnAdd">
+            <i class="bi bi-plus-lg me-1"></i>Add NPD Item
+        </button>
+    </div>
+</div>
+
+<!-- ── DESKTOP / TABLET TABLE ── -->
+<div class="table-wrap">
+    <table class="table table-bordered mb-0" id="npdTable">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Dept</th>
+                <th>Date</th>
+                <th>Item Code</th>
+                <th>Item Name</th>
+                <th class="col-hide-sm col-hide-md">Customer</th>
+                <th class="col-hide-sm col-hide-md">Contact Person</th>
+                <th class="col-hide-sm col-hide-md">Contact Details</th>
+                <th class="col-hide-sm">Component</th>
+                <th class="col-hide-sm col-hide-md">Specifications</th>
+                <th class="col-hide-sm col-hide-md">Material</th>
+                <th class="col-hide-sm col-hide-md">Shot Wt</th>
+                <th class="col-hide-sm col-hide-md">Color</th>
+                <th class="col-hide-sm">RM Size</th>
+                <th class="col-hide-sm col-hide-md">Component Fitting</th>
+                <th class="col-hide-sm">Machine</th>
+                <th class="col-hide-sm col-hide-md">Marketing</th>
+                <th class="col-hide-sm col-hide-md">Production</th>
+                <th class="col-hide-sm col-hide-md">Quality</th>
+                <th class="col-hide-sm col-hide-md">Printing</th>
+                <th class="col-hide-sm col-hide-md">Cutting</th>
+                <th class="col-hide-sm col-hide-md">Packing</th>
+                <th class="col-hide-sm col-hide-md">Delivery</th>
+                <th class="col-hide-sm col-hide-md">Transport Terms</th>
+                <th class="col-hide-sm col-hide-md">Payment Terms</th>
+                <th class="col-hide-sm col-hide-md">SIR DateTime</th>
+                <th class="col-hide-sm col-hide-md">SIR Remark</th>
+                <th>Rate (₹)</th>
+                <th class="col-hide-sm col-hide-md">Rework Complaint</th>
+                <th class="col-hide-sm col-hide-md">Created By</th>
+                <th style="width:90px">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <tr id="loadingRow">
+                <td colspan="31" class="text-center text-muted py-3">
+                    No records found.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ── MOBILE CARD LIST ── -->
+@* <div class="npd-card-list" id="cardList">
+    <!-- Cards injected by JS -->
+</div> *@
+
+<!-- ── PAGINATION ── -->
+<div class="pagination-bar">
+    <span id="pageInfo" class="text-muted"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnFirst" onclick="goToPage(1)">«</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnPrev"  onclick="goToPage(currentPage-1)">‹</button>
+    <span id="pageNumbers" class="d-flex gap-1 flex-wrap"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnNext"  onclick="goToPage(currentPage+1)">›</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnLast"  onclick="goToPage(totalPages)">»</button>
+    <select id="rppSelect" class="form-select form-select-sm"
+            style="width:75px" onchange="changeRPP()">
+        <option value="10" selected>10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+    </select>
+    <span class="text-muted">/ page</span>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ADD / EDIT MODAL
+══════════════════════════════════════════════ -->
+<div class="modal fade" id="npdModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header bg-dark text-white py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-clipboard2-pulse me-2"></i>
+                    <span id="modalTitleText">Add NPD Item</span>
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="npdForm" enctype="multipart/form-data" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="fNPDItemId" value="0" />
+
+                    <div class="row g-2">
+
+                        <!-- ── SECTION: Marketing Person Responsible ── -->
+                        <div class="sec-hdr">
+                            <i class="bi bi-person-workspace me-1"></i>
+                            Marketing Person Responsible
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">
+                                Department <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-diagram-3"></i>
+                                </span>
+                                <select id="fDepartmentId" class="form-select form-select-sm">
+                                    <option value="0">-- Select Department --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">
+                                Date <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-calendar-date"></i>
+                                </span>
+                                <input type="date" id="fDate"
+                                       class="form-control form-control-sm" />
+                            </div>
+                            <div class="invalid-feedback d-block" id="err-date"></div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Marketing Person</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-person-workspace"></i>
+                                </span>
+                                <input type="text" id="fMarketingPerson"
+                                       class="form-control form-control-sm"
+                                       placeholder="Name" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">
+                                Item Name <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-box-seam"></i>
+                                </span>
+                                <input type="text" id="fItemName"
+                                       class="form-control form-control-sm"
+                                       placeholder="Full item name" />
+                            </div>
+                            <div class="invalid-feedback d-block" id="err-name"></div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">
+                                Item Code <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-upc-scan"></i>
+                                </span>
+                                <input type="text" id="fItemCode"
+                                       class="form-control form-control-sm"
+                                       placeholder="e.g. NPD-001"
+                                       style="text-transform:uppercase" />
+                            </div>
+                            <div class="invalid-feedback d-block" id="err-code"></div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Customer Name &amp; Location</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-building"></i>
+                                </span>
+                                <input type="text" id="fCustomerName"
+                                       class="form-control form-control-sm"
+                                       placeholder="Company name" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Customer Contact Person</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                                <input type="text" id="fContactPerson"
+                                       class="form-control form-control-sm"
+                                       placeholder="Contact name" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Customer Contact Details</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-telephone"></i>
+                                </span>
+                                <input type="text" id="fContactDetails"
+                                       class="form-control form-control-sm"
+                                       placeholder="Phone / Email" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Component Name &amp; Application</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-box-seam"></i>
+                                </span>
+                                <input type="text" id="fComponentName"
+                                       class="form-control form-control-sm"
+                                       placeholder="Component" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Specifications (LxWxH)</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-list-check"></i>
+                                </span>
+                                <input type="text" id="fSpecs"
+                                       class="form-control form-control-sm"
+                                       placeholder="Dimensions / specs" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Material Type &amp; Thickness</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-layers"></i>
+                                </span>
+                                <input type="text" id="fMaterialType"
+                                       class="form-control form-control-sm"
+                                       placeholder="e.g. PVC / ABS" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Shot Weight (as per costing)</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-speedometer2"></i>
+                                </span>
+                                <input type="number" id="fShotWeight"
+                                       class="form-control form-control-sm"
+                                       min="0" step="0.01" placeholder="0.00" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Material Color</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-palette"></i>
+                                </span>
+                                <input type="text" id="fMaterialColor"
+                                       class="form-control form-control-sm"
+                                       placeholder="e.g. Natural / Black" />
+                            </div>
+                        </div>
+
+                        <!-- Drawing Files -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">Drawing File Attached</label>
+                            <div class="row g-2">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <div class="col-md-2 col-6">
+                                        <label for="file@(i)" class="file-zone w-100">
+                                            <i class="bi bi-cloud-upload fs-5"></i>
+                                            <div>Doc @i</div>
+                                            <input type="file"
+                                                   id="file@(i)"
+                                                   name="file@(i)"
+                                                   accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
+                                                   onchange="showFileName(this,'fname@(i)')" />
+                                        </label>
+                                        <div class="file-name" id="fname@(i)"></div>
+                                        <div class="small text-muted mt-1" id="existingFile@(i)"></div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- ── SECTION: Production Person Responsible ── -->
+                        <div class="sec-hdr">
+                            <i class="bi bi-gear me-1"></i>
+                            Production Person Responsible
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Production Person</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-person-badge"></i>
+                                </span>
+                                <input type="text" id="fProductionPerson"
+                                       class="form-control form-control-sm"
+                                       placeholder="Name" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">RM Size &amp; Supplier</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-aspect-ratio"></i>
+                                </span>
+                                <input type="text" id="fRMSize"
+                                       class="form-control form-control-sm"
+                                       placeholder="e.g. 50mm × 100mm" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Machine</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-cpu"></i>
+                                </span>
+                                <select id="fMachineId" class="form-select form-select-sm">
+                                    <option value="0">-- Select Machine --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Printing Matter</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-printer"></i>
+                                </span>
+                                <input type="text" id="fPrintingMatter"
+                                       class="form-control form-control-sm"
+                                       placeholder="Print details" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Cutting / Finishing</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-scissors"></i>
+                                </span>
+                                <input type="text" id="fCutting"
+                                       class="form-control form-control-sm"
+                                       placeholder="Cutting details" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Packing Details</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-box2"></i>
+                                </span>
+                                <input type="text" id="fPackingDetails"
+                                       class="form-control form-control-sm"
+                                       placeholder="Packing info" />
+                            </div>
+                        </div>
+
+                        <!-- ── SECTION: SIR Report ── -->
+                        <div class="sec-hdr">
+                            <i class="bi bi-clipboard-check me-1"></i>
+                            SIR Report
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Delivery Location</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-geo-alt"></i>
+                                </span>
+                                <input type="text" id="fDeliveryLocation"
+                                       class="form-control form-control-sm"
+                                       placeholder="City / Address" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Quality Person (giving SIR)</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-shield-check"></i>
+                                </span>
+                                <input type="text" id="fQualityPerson"
+                                       class="form-control form-control-sm"
+                                       placeholder="Name" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Date time of SIR, SIR No.</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-clock-history"></i>
+                                </span>
+                                <input type="text" id="fSIRDateTime"
+                                       class="form-control form-control-sm"
+                                       placeholder="dd-MM-yyyy HH:mm" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Remarks for SIR</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-chat-left-text"></i>
+                                </span>
+                                <input type="text" id="fSIRRemark"
+                                       class="form-control form-control-sm"
+                                       placeholder="ok / not ok / sample to be revised" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Component for Fitting</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-puzzle"></i>
+                                </span>
+                                <input type="text" id="fComponentFitting"
+                                       class="form-control form-control-sm"
+                                       placeholder="Fitting details" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Transport &amp; Delivery Terms</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-truck"></i>
+                                </span>
+                                <input type="text" id="fTransportTerms"
+                                       class="form-control form-control-sm"
+                                       placeholder="e.g. Ex-Works / FOR" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Payment Terms</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-credit-card"></i>
+                                </span>
+                                <input type="text" id="fPaymentTerms"
+                                       class="form-control form-control-sm"
+                                       placeholder="e.g. Net 30" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Rate of Product (₹)</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-cash-coin"></i>
+                                </span>
+                                <input type="number" id="fRateOfProduct"
+                                       class="form-control form-control-sm"
+                                       min="0" step="0.01" placeholder="0.00" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">Rework / Complaint Details</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                </span>
+                                <input type="text" id="fReworkDetails"
+                                       class="form-control form-control-sm"
+                                       placeholder="Rework or complaint info" />
+                            </div>
+                        </div>
+
+                    </div><!-- /row -->
+                </form>
+            </div><!-- /modal-body -->
+
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" id="btnSave">
+                    <i class="bi bi-check-lg me-1"></i>Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ── DELETE CONFIRM MODAL ── -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirm Delete
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center small">
+                <p class="mb-1">Delete NPD item</p>
+                <strong id="deleteLabel"></strong>?
+            </div>
+            <div class="modal-footer justify-content-center py-2">
+                <button class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger btn-sm"
+                        id="btnConfirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── DOCUMENT VIEWER MODAL ── -->
+<div class="modal fade" id="docsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white py-2">
+                <h6 class="modal-title">
+                    <i class="bi bi-paperclip me-2"></i>Documents
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="docsContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index:9999">
+    <div id="toast" class="toast align-items-center text-white border-0"
+         role="alert" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body small" id="toastMsg"></div>
+            <button type="button"
+                    class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+$(function () {
+
+    // ════════════════════════════════════════════
+    // STATE
+    // ════════════════════════════════════════════
+    let allData         = [];
+    let filteredData    = [];
+    let currentPage     = 1;
+    let rowsPerPage     = 10;
+    let totalPages      = 1;
+    let pendingDeleteId = null;
+    let currentDeptId   = 0;
+
+    const npdModal    = new bootstrap.Modal($('#npdModal')[0]);
+    const deleteModal = new bootstrap.Modal($('#deleteModal')[0]);
+    const docsModal   = new bootstrap.Modal($('#docsModal')[0]);
+    const toastEl     = $('#toast')[0];
+    const bsToast     = new bootstrap.Toast(toastEl, { delay: 3500 });
+
+    /* expose for inline onclick handlers */
+    window.currentPage = currentPage;
+    window.totalPages  = totalPages;
+
+    // ════════════════════════════════════════════
+    // LOAD DEPARTMENTS
+    // ════════════════════════════════════════════
+    $.ajax({
+        url:      '/NPDItem/GetDepartments',
+        method:   'GET',
+        dataType: 'json',
+        success: function (depts) {
+            let filterOpts = '<option value="">-- Select Department --</option>';
+            let formOpts   = '<option value="0">-- Select Department --</option>';
+
+            depts.forEach(d => {
+                filterOpts += `<option value="${d.DepartmentId}">${d.Department}</option>`;
+                formOpts   += `<option value="${d.DepartmentId}">${d.Department}</option>`;
+            });
+
+            $('#deptFilter').html(filterOpts);
+            $('#fDepartmentId').html(formOpts);
+        }
+    });
+
+    // ════════════════════════════════════════════
+    // DEPT CHANGE → load machines + table data
+    // ════════════════════════════════════════════
+    window.onDeptChange = function () {
+        currentDeptId = parseInt($('#deptFilter').val()) || 0;
+        window.currentDeptId = currentDeptId;
+
+        if (!currentDeptId) {
+            allData = filteredData = [];
+            renderTable();
+            return;
+        }
+
+        loadMachines(currentDeptId, '#fMachineId');
+        loadData();
+    };
+
+    function loadMachines(deptId, target) {
+        $.ajax({
+            url:      '/NPDItem/GetMachinesByDept?deptId=' + deptId,
+            method:   'GET',
+            dataType: 'json',
+            success: function (machines) {
+                let opts = '<option value="0">-- Select Machine --</option>';
+                machines.forEach(m => {
+                    opts += `<option value="${m.MachineId}">${m.MachineName}</option>`;
+                });
+                $(target).html(opts);
+            }
+        });
+    }
+
+    $(document).on('change', '#fDepartmentId', function () {
+        const deptId = parseInt($(this).val()) || 0;
+        if (!deptId) {
+            $('#fMachineId').html('<option value="0">-- Select Machine --</option>');
+            return;
+        }
+        loadMachines(deptId, '#fMachineId');
+    });
+
+    // ════════════════════════════════════════════
+    // LOAD DATA
+    // ════════════════════════════════════════════
+    function loadData() {
+        $('#loadingRow').show()
+            .find('td')
+            .html('<div class="spinner-border spinner-border-sm text-warning me-2"></div>Loading...');
+        $('#tableBody tr:not(#loadingRow)').remove();
+        $('#cardList').html(
+            '<div class="text-center text-muted py-3">' +
+            '<div class="spinner-border spinner-border-sm text-warning me-2"></div>Loading...</div>');
+
+        $.ajax({
+            url:      '/NPDItem/GetAll?deptId=' + currentDeptId,
+            method:   'GET',
+            dataType: 'json',
+            success: function (data) {
+                allData = data;
+                applyFilter();
+                $('#loadingRow').hide();
+            },
+            error: function () {
+                $('#loadingRow td').html(
+                    '<i class="bi bi-exclamation-triangle text-danger me-1"></i>Failed to load data.');
+                $('#cardList').html(
+                    '<div class="text-center text-danger py-3">Failed to load data.</div>');
+            }
+        });
+    }
+
+    // ════════════════════════════════════════════
+    // RENDER TABLE + CARDS
+    // ════════════════════════════════════════════
+    function renderTable() {
+        totalPages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
+        window.totalPages = totalPages;
+        if (currentPage > totalPages) currentPage = 1;
+        window.currentPage = currentPage;
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end   = Math.min(start + rowsPerPage, filteredData.length);
+        const slice = filteredData.slice(start, end);
+
+        // Desktop table
+        $('#tableBody tr:not(#loadingRow)').remove();
+        if (slice.length === 0) {
+            $('#tableBody').append(
+                `<tr><td colspan="31" class="text-center text-muted py-3">No records found.</td></tr>`);
+        } else {
+            slice.forEach((r, idx) =>
+                $('#tableBody').append(buildRow(r, start + idx + 1)));
+        }
+
+        // Mobile cards
+        if (slice.length === 0) {
+            $('#cardList').html(
+                '<div class="text-center text-muted py-3">No records found.</div>');
+        } else {
+            $('#cardList').html(slice.map((r, idx) =>
+                buildCard(r, start + idx + 1)).join(''));
+        }
+
+        updatePaginationUI(start, end);
+    }
+
+    // ── Desktop table row ──
+    function buildRow(r, sr) {
+        const fmtD = v => v ? new Date(v).toLocaleDateString('en-IN') : '—';
+        const fmt  = v => v || '—';
+
+        return `
+        <tr id="row-${r.NPD_ItemId}">
+            <td class="text-center">${sr}</td>
+            <td><span class="badge bg-dark" style="font-size:0.60rem">${fmt(r.DepartmentName)}</span></td>
+            <td class="text-center">${fmtD(r.Date)}</td>
+            <td class="fw-bold text-primary">${fmt(r.Item_Code)}</td>
+            <td title="${fmt(r.Item_Name)}">${fmt(r.Item_Name)}</td>
+            <td class="col-hide-sm col-hide-md" title="${fmt(r.Customer_Name)}">${fmt(r.Customer_Name)}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.Customer_Contact_Person)}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.Customer_Contact_Details)}</td>
+            <td class="col-hide-sm">${fmt(r.Component_Name)}</td>
+            <td class="col-hide-sm col-hide-md" title="${fmt(r.Specifications)}">${fmt(r.Specifications)}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.Material_Type)}</td>
+            <td class="text-end pe-2 col-hide-sm col-hide-md">${r.Shot_Weight > 0 ? r.Shot_Weight.toFixed(2) : '—'}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.Material_Color)}</td>
+            <td class="col-hide-sm">${fmt(r.RM_Size)}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.Component_Fitting)}</td>
+            <td class="col-hide-sm">${fmt(r.MachineName)}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.Marketing_Person)}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.Production_Person)}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.Quality_Person)}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.Printing_Matter)}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.Cutting)}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.Packing_Details)}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.Delivery_Location)}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.Transport_Delivery_Terms)}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.Payment_Terms)}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.SIR_DateTime)}</td>
+            <td class="col-hide-sm col-hide-md" title="${fmt(r.SIR_Remark)}">${fmt(r.SIR_Remark)}</td>
+            <td class="text-end pe-2">${r.Rate_of_Product > 0 ? '₹' + r.Rate_of_Product.toFixed(2) : '—'}</td>
+            <td class="col-hide-sm col-hide-md" title="${fmt(r.Rework_Complaint_Details)}">${fmt(r.Rework_Complaint_Details)}</td>
+            <td class="col-hide-sm col-hide-md">${fmt(r.CreatedBy)}</td>
+            <td class="text-center">
+                <button class="btn btn-outline-info btn-sm btn-docs"
+                        data-id="${r.NPD_ItemId}" title="View Documents">
+                    <i class="bi bi-eye"></i>
+                </button>
+                <button class="btn btn-outline-primary btn-sm btn-edit"
+                        data-id="${r.NPD_ItemId}" title="Edit">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm btn-del"
+                        data-id="${r.NPD_ItemId}"
+                        data-label="${fmt(r.Item_Code)}"
+                        title="Delete">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </td>
+        </tr>`;
+    }
+
+    // ── Mobile card ──
+    function buildCard(r, sr) {
+        const fmtD = v => v ? new Date(v).toLocaleDateString('en-IN') : '—';
+        const fmt  = v => v || '—';
+
+        return `
+        <div class="npd-card" id="card-${r.NPD_ItemId}">
+            <div class="npd-card-header">
+                <div>
+                    <div class="npd-card-code">${fmt(r.Item_Code)}</div>
+                    <div class="npd-card-name">${fmt(r.Item_Name)}</div>
+                </div>
+                <span class="badge bg-dark" style="font-size:0.60rem">${fmt(r.DepartmentName)}</span>
+            </div>
+            <div class="npd-card-grid">
+                <div>
+                    <div class="npd-card-label">Date</div>
+                    <div class="npd-card-value">${fmtD(r.Date)}</div>
+                </div>
+                <div>
+                    <div class="npd-card-label">Customer</div>
+                    <div class="npd-card-value">${fmt(r.Customer_Name)}</div>
+                </div>
+                <div>
+                    <div class="npd-card-label">Component</div>
+                    <div class="npd-card-value">${fmt(r.Component_Name)}</div>
+                </div>
+                <div>
+                    <div class="npd-card-label">Machine</div>
+                    <div class="npd-card-value">${fmt(r.MachineName)}</div>
+                </div>
+                <div>
+                    <div class="npd-card-label">Material</div>
+                    <div class="npd-card-value">${fmt(r.Material_Type)}</div>
+                </div>
+                <div>
+                    <div class="npd-card-label">Rate</div>
+                    <div class="npd-card-value fw-bold">${r.Rate_of_Product > 0 ? '₹' + r.Rate_of_Product.toFixed(2) : '—'}</div>
+                </div>
+                <div>
+                    <div class="npd-card-label">RM Size</div>
+                    <div class="npd-card-value">${fmt(r.RM_Size)}</div>
+                </div>
+                <div>
+                    <div class="npd-card-label">SIR Date</div>
+                    <div class="npd-card-value">${fmt(r.SIR_DateTime)}</div>
+                </div>
+            </div>
+            <div class="npd-card-actions">
+                <button class="btn btn-outline-info btn-sm btn-docs"
+                        data-id="${r.NPD_ItemId}">
+                    <i class="bi bi-eye me-1"></i>Docs
+                </button>
+                <button class="btn btn-outline-primary btn-sm btn-edit"
+                        data-id="${r.NPD_ItemId}">
+                    <i class="bi bi-pencil-square me-1"></i>Edit
+                </button>
+                <button class="btn btn-outline-danger btn-sm btn-del"
+                        data-id="${r.NPD_ItemId}"
+                        data-label="${fmt(r.Item_Code)}">
+                    <i class="bi bi-trash3 me-1"></i>Delete
+                </button>
+            </div>
+        </div>`;
+    }
+
+    // ════════════════════════════════════════════
+    // FILTER
+    // ════════════════════════════════════════════
+    window.applyFilter = function () {
+        const q = $('#searchInput').val().toLowerCase().trim();
+
+        filteredData = allData.filter(r =>
+            !q ||
+            (r.Item_Code      || '').toLowerCase().includes(q) ||
+            (r.Item_Name      || '').toLowerCase().includes(q) ||
+            (r.Customer_Name  || '').toLowerCase().includes(q) ||
+            (r.Component_Name || '').toLowerCase().includes(q) ||
+            (r.Material_Type  || '').toLowerCase().includes(q)
+        );
+
+        currentPage = 1;
+        window.currentPage = 1;
+        renderTable();
+    };
+
+    // ════════════════════════════════════════════
+    // PAGINATION
+    // ════════════════════════════════════════════
+    function updatePaginationUI(start, end) {
+        $('#pageInfo').text(
+            filteredData.length === 0
+                ? 'No records'
+                : `${start + 1}–${end} of ${filteredData.length}`);
+
+        $('#btnFirst,#btnPrev').prop('disabled', currentPage === 1);
+        $('#btnNext,#btnLast').prop('disabled',  currentPage === totalPages);
+
+        const container = $('#pageNumbers').empty();
+        const maxV = 5;
+        let sp = Math.max(1, currentPage - Math.floor(maxV / 2));
+        let ep = Math.min(totalPages, sp + maxV - 1);
+        if (ep - sp < maxV - 1) sp = Math.max(1, ep - maxV + 1);
+
+        for (let p = sp; p <= ep; p++) {
+            $('<button>').text(p)
+                .addClass('btn btn-outline-secondary btn-sm' +
+                    (p === currentPage ? ' active-page' : ''))
+                .on('click', () => goToPage(p))
+                .appendTo(container);
+        }
+    }
+
+    window.goToPage = function (p) {
+        if (p < 1 || p > totalPages) return;
+        currentPage = p;
+        window.currentPage = p;
+        renderTable();
+    };
+
+    window.changeRPP = function () {
+        rowsPerPage = parseInt($('#rppSelect').val());
+        currentPage = 1;
+        window.currentPage = 1;
+        renderTable();
+    };
+
+    // ════════════════════════════════════════════
+    // ADD MODAL
+    // ════════════════════════════════════════════
+    $('#btnAdd').on('click', function () {
+        clearForm();
+        $('#modalTitleText').text('Add NPD Item');
+        $('#fDate').val(new Date().toISOString().split('T')[0]);
+        $('#fItemCode').prop('disabled', false);
+        npdModal.show();
+    });
+
+    // ════════════════════════════════════════════
+    // EDIT
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-edit', function () {
+        const id = $(this).data('id');
+        const r  = allData.find(x => x.NPD_ItemId === id);
+        if (!r) return;
+
+        clearForm();
+        $('#modalTitleText').text('Edit NPD Item');
+        $('#fNPDItemId').val(r.NPD_ItemId);
+        $('#fDepartmentId').val(r.DepartmentId);
+        $('#fDate').val(r.Date ? new Date(r.Date).toISOString().split('T')[0] : '');
+        $('#fItemCode').prop('disabled', true);
+        $('#fItemName').val(r.Item_Name);
+        $('#fMarketingPerson').val(r.Marketing_Person);
+        $('#fCustomerName').val(r.Customer_Name);
+        $('#fContactPerson').val(r.Customer_Contact_Person);
+        $('#fContactDetails').val(r.Customer_Contact_Details);
+        $('#fComponentName').val(r.Component_Name);
+        $('#fSpecs').val(r.Specifications);
+        $('#fMaterialType').val(r.Material_Type);
+        $('#fShotWeight').val(r.Shot_Weight);
+        $('#fMaterialColor').val(r.Material_Color);
+        $('#fProductionPerson').val(r.Production_Person);
+        $('#fRMSize').val(r.RM_Size);
+        $('#fMachineId').val(r.MachineId);
+        $('#fCutting').val(r.Cutting);
+        $('#fPrintingMatter').val(r.Printing_Matter);
+        $('#fQualityPerson').val(r.Quality_Person);
+        $('#fSIRDateTime').val(r.SIR_DateTime);
+        $('#fSIRRemark').val(r.SIR_Remark);
+        $('#fDeliveryLocation').val(r.Delivery_Location);
+        $('#fTransportTerms').val(r.Transport_Delivery_Terms);
+        $('#fPackingDetails').val(r.Packing_Details);
+        $('#fComponentFitting').val(r.Component_Fitting);
+        $('#fPaymentTerms').val(r.Payment_Terms);
+        $('#fRateOfProduct').val(r.Rate_of_Product);
+        $('#fReworkDetails').val(r.Rework_Complaint_Details);
+
+        const files = [
+            r.Document_File_Name1, r.Document_File_Name2,
+            r.Document_File_Name3, r.Document_File_Name4,
+            r.Document_File_Name5
+        ];
+        files.forEach((f, i) => {
+            $(`#existingFile${i + 1}`).html(
+                f && f.trim()
+                    ? `<i class="bi bi-file-earmark-check text-primary me-1"></i>${f.substring(37)}`
+                    : ''
+            );
+        });
+
+        npdModal.show();
+    });
+
+    // ════════════════════════════════════════════
+    // SAVE
+    // ════════════════════════════════════════════
+    $('#btnSave').on('click', function () {
+        clearErrors();
+
+        const date     = $('#fDate').val();
+        const itemCode = $('#fItemCode').val().trim();
+        const itemName = $('#fItemName').val().trim();
+
+        let valid = true;
+        if (!date)     { showError('fDate','err-date','Date is required.');          valid = false; }
+        if (!itemCode) { showError('fItemCode','err-code','Item Code is required.'); valid = false; }
+        if (!itemName) { showError('fItemName','err-name','Item Name is required.'); valid = false; }
+        if (!valid) return;
+
+        const fd = new FormData();
+        fd.append('__RequestVerificationToken',
+            $('input[name="__RequestVerificationToken"]').val());
+
+        fd.append('NPD_ItemId',               $('#fNPDItemId').val());
+        fd.append('DepartmentId',             $('#fDepartmentId').val());
+        fd.append('Date',                     date);
+        fd.append('Item_Code',                itemCode);
+        fd.append('Item_Name',                itemName);
+        fd.append('Marketing_Person',         $('#fMarketingPerson').val());
+        fd.append('Customer_Name',            $('#fCustomerName').val());
+        fd.append('Customer_Contact_Person',  $('#fContactPerson').val());
+        fd.append('Customer_Contact_Details', $('#fContactDetails').val());
+        fd.append('Component_Name',           $('#fComponentName').val());
+        fd.append('Specifications',           $('#fSpecs').val());
+        fd.append('Material_Type',            $('#fMaterialType').val());
+        fd.append('Shot_Weight',              $('#fShotWeight').val()    || 0);
+        fd.append('Material_Color',           $('#fMaterialColor').val());
+        fd.append('Production_Person',        $('#fProductionPerson').val());
+        fd.append('RM_Size',                  $('#fRMSize').val());
+        fd.append('MachineId',                $('#fMachineId').val()     || 0);
+        fd.append('Cutting',                  $('#fCutting').val());
+        fd.append('Printing_Matter',          $('#fPrintingMatter').val());
+        fd.append('Quality_Person',           $('#fQualityPerson').val());
+        fd.append('SIR_DateTime',             $('#fSIRDateTime').val());
+        fd.append('SIR_Remark',               $('#fSIRRemark').val());
+        fd.append('Delivery_Location',        $('#fDeliveryLocation').val());
+        fd.append('Transport_Delivery_Terms', $('#fTransportTerms').val());
+        fd.append('Packing_Details',          $('#fPackingDetails').val());
+        fd.append('Component_Fitting',        $('#fComponentFitting').val());
+        fd.append('Payment_Terms',            $('#fPaymentTerms').val());
+        fd.append('Rate_of_Product',          $('#fRateOfProduct').val() || 0);
+        fd.append('Rework_Complaint_Details', $('#fReworkDetails').val());
+
+        for (let i = 1; i <= 5; i++) {
+            const f = $(`#file${i}`)[0].files[0];
+            if (f) fd.append(`file${i}`, f);
+        }
+
+        $.ajax({
+            url:         '/NPDItem/Save',
+            method:      'POST',
+            data:        fd,
+            processData: false,
+            contentType: false,
+            dataType:    'json',
+            success: function (d) {
+                if (!d.success) { showToast(d.message || 'Save failed.', 'danger'); return; }
+                npdModal.hide();
+                showToast(d.message, 'success');
+                loadData();
+            },
+            error: function () { showToast('Network error. Please try again.', 'danger'); }
+        });
+    });
+
+    // ════════════════════════════════════════════
+    // VIEW DOCUMENTS
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-docs', function () {
+        const id = $(this).data('id');
+        const r  = allData.find(x => x.NPD_ItemId === id);
+        if (!r) return;
+
+        const files = [
+            r.Document_File_Name1, r.Document_File_Name2,
+            r.Document_File_Name3, r.Document_File_Name4,
+            r.Document_File_Name5
+        ];
+
+        let html = '';
+        files.forEach(f => {
+            if (f && f.trim() !== '') {
+                const original = f.length > 37 ? f.substring(37) : f;
+                html += `
+                <div class="border rounded p-2 mb-2 d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-file-earmark-text text-primary me-2"></i>${original}
+                    </div>
+                    <a href="/uploads/npd/${f}" target="_blank"
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-eye"></i> View
+                    </a>
+                </div>`;
+            }
+        });
+
+        if (!html) {
+            html = '<div class="text-muted text-center py-3">No documents available.</div>';
+        }
+
+        $('#docsContainer').html(html);
+        docsModal.show();
+    });
+
+    // ════════════════════════════════════════════
+    // DELETE
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-del', function () {
+        pendingDeleteId = $(this).data('id');
+        $('#deleteLabel').text($(this).data('label'));
+        deleteModal.show();
+    });
+
+    $('#btnConfirmDelete').on('click', function () {
+        $.ajax({
+            url:      '/NPDItem/Delete',
+            method:   'POST',
+            dataType: 'json',
+            data: {
+                id: pendingDeleteId,
+                __RequestVerificationToken:
+                    $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function (d) {
+                deleteModal.hide();
+                if (d.success) {
+                    allData      = allData.filter(r => r.NPD_ItemId !== pendingDeleteId);
+                    filteredData = filteredData.filter(r => r.NPD_ItemId !== pendingDeleteId);
+                    renderTable();
+                    showToast('NPD Item deleted.', 'success');
+                } else {
+                    showToast('Delete failed.', 'danger');
+                }
+            },
+            error: function () { showToast('Network error.', 'danger'); }
+        });
+    });
+
+    // ════════════════════════════════════════════
+    // FILE NAME DISPLAY + SEQUENTIAL ENABLE/DISABLE
+    // ════════════════════════════════════════════
+    window.showFileName = function (input, targetId) {
+        $('#' + targetId).text(input.files[0] ? input.files[0].name : '');
+    };
+
+    function clearForm() {
+        $('#npdForm')[0].reset();
+        $('#fNPDItemId').val('0');
+        for (let i = 1; i <= 5; i++) {
+            $(`#fname${i}`).text('');
+            $(`#existingFile${i}`).html('');
+            $(`#file${i}`).val('').prop('disabled', i !== 1);
+        }
+        clearErrors();
+    }
+
+    // Initial sequential file setup
+    for (let i = 1; i <= 5; i++) {
+        if (i !== 1) $(`#file${i}`).prop('disabled', true);
+
+        $(`#file${i}`).on('change', function () {
+            const hasFile = this.files.length > 0;
+
+            if (hasFile && i < 5) {
+                $(`#file${i + 1}`).prop('disabled', false);
+            }
+
+            if (!hasFile) {
+                for (let j = i + 1; j <= 5; j++) {
+                    $(`#file${j}`).val('').prop('disabled', true);
+                    $(`#fname${j}`).text('');
+                }
+            }
+
+            showFileName(this, `fname${i}`);
+        });
+    }
+
+    // ════════════════════════════════════════════
+    // HELPERS
+    // ════════════════════════════════════════════
+    function clearErrors() {
+        $('.invalid-feedback.d-block').text('');
+        $('#npdForm .form-control, #npdForm .form-select').removeClass('is-invalid');
+    }
+
+    function showError(fieldId, errId, msg) {
+        $('#' + fieldId).addClass('is-invalid');
+        $('#' + errId).text(msg);
+    }
+
+    function showToast(msg, type) {
+        toastEl.className = `toast align-items-center text-white border-0 bg-${type}`;
+        $('#toastMsg').text(msg);
+        bsToast.show();
+    }
+
+    // Re-render on resize to switch between table and card view
+    let resizeTimer;
+    $(window).on('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+            if (filteredData.length) renderTable();
+        }, 200);
+    });
+
+});
+</script>
+}

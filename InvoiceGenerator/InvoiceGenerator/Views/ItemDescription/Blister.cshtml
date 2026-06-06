@@ -1,0 +1,1326 @@
+﻿@{
+    ViewData["Title"] = "Blister Master";
+}
+
+  <style>
+
+/* ════════════════════════════════════════
+   PAGE HEADER
+════════════════════════════════════════ */
+
+
+.page-header h6{
+    margin:0;
+    font-weight:700;
+}
+.page-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+}
+
+.header-controls{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-wrap:wrap;
+}
+
+/* ════════════════════════════════════════
+   TABLE
+════════════════════════════════════════ */
+#itemTable{
+    font-size:0.70rem;
+    min-width:2300px;
+    width:max-content;
+}
+
+#itemTable thead th{
+    font-size:0.67rem;
+    padding:4px 5px;
+    white-space:nowrap;
+    text-align:center;
+    background:#1a1a2e;
+    color:#fff;
+    position:sticky;
+    top:0;
+    z-index:2;
+}
+
+#itemTable tbody td{
+    padding:3px 5px;
+    vertical-align:middle;
+    white-space:nowrap;
+}
+
+#itemTable tbody tr:nth-child(odd) td{
+    background-color:#f8f9fa;
+}
+
+#itemTable tbody tr:nth-child(even) td{
+    background-color:#eef2ff;
+}
+
+#itemTable tbody tr:hover td{
+    background-color:#cfe2ff !important;
+    cursor:pointer;
+    transition:background-color 0.15s;
+}
+
+#itemTable .btn-sm{
+    padding:1px 4px;
+    font-size:0.65rem;
+}
+
+/* ════════════════════════════════════════
+   TABLE WRAP
+════════════════════════════════════════ */
+.table-wrap{
+    max-height:480px;
+    overflow-y:auto;
+    overflow-x:auto;
+    width:100%;
+    border:1px solid #dee2e6;
+    border-radius:4px;
+    -webkit-overflow-scrolling:touch;
+}
+
+/* ════════════════════════════════════════
+   PAGINATION
+════════════════════════════════════════ */
+.pagination-bar{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:5px;
+    margin-top:8px;
+    font-size:0.73rem;
+}
+
+.pagination-bar button{
+    min-width:28px;
+    height:26px;
+    font-size:0.68rem;
+    padding:0 5px;
+    border-radius:4px;
+}
+
+.pagination-bar button.active-page{
+    background:#0d6efd;
+    color:#fff;
+    border-color:#0d6efd;
+}
+
+#loadingRow td{
+    text-align:center;
+    padding:20px;
+    color:#888;
+}
+
+/* ════════════════════════════════════════
+   FORM SECTION
+════════════════════════════════════════ */
+.form-section-title{
+    font-size:0.72rem;
+    font-weight:700;
+    color:#fff;
+    background:#343a40;
+    padding:4px 10px;
+    border-radius:4px;
+    margin-bottom:8px;
+}
+
+/* ════════════════════════════════════════
+   MOBILE VIEW
+════════════════════════════════════════ */
+@@media (max-width:575px){
+
+    .page-header{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .header-controls{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .header-controls select,
+    .header-controls input,
+    .header-controls button{
+        width:100% !important;
+    }
+
+    .table-wrap{
+        overflow-x:auto;
+        overflow-y:auto;
+    }
+
+    #itemTable{
+        min-width:2300px;
+    }
+
+    .pagination-bar{
+        justify-content:center;
+    }
+
+    .pagination-bar #pageNumbers{
+        flex-wrap:wrap;
+    }
+
+    /* FULLSCREEN MODAL */
+    .modal-dialog{
+        margin:0 !important;
+        max-width:100% !important;
+    }
+
+    .modal-content{
+        min-height:100vh;
+        border-radius:0;
+    }
+
+    /* FORM FULL WIDTH */
+    .modal-body .col-md-2,
+    .modal-body .col-md-3,
+    .modal-body .col-md-4,
+    .modal-body .col-md-5,
+    .modal-body .col-md-6,
+    .modal-body .col-md-8,
+    .modal-body .col-md-9{
+        flex:0 0 100%;
+        max-width:100%;
+    }
+}
+
+/* ════════════════════════════════════════
+   SMALL TABLET
+════════════════════════════════════════ */
+@@media (min-width:576px) and (max-width:767px){
+
+    .page-header{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .header-controls{
+        flex-wrap:wrap;
+    }
+
+    #searchInput{
+        width:145px !important;
+    }
+
+    #itemTable{
+        font-size:0.64rem;
+    }
+
+    #itemTable thead th{
+        font-size:0.61rem;
+    }
+
+    .pagination-bar{
+        justify-content:center;
+    }
+
+    .modal-body .col-md-3{
+        flex:0 0 50%;
+        max-width:50%;
+    }
+}
+
+/* ════════════════════════════════════════
+   TABLET
+════════════════════════════════════════ */
+@@media (min-width:768px) and (max-width:991px){
+
+    #itemTable{
+        font-size:0.66rem;
+    }
+
+    #itemTable thead th{
+        font-size:0.63rem;
+    }
+
+    #searchInput{
+        width:150px !important;
+    }
+}
+
+</style>
+
+<!-- ── PAGE HEADER ── -->
+@* <div class="d-flex align-items-center justify-content-between mb-2"> *@
+    <div class="page-header">
+    <h6 class="mb-0 fw-bold">
+        <i class="bi bi-grid-3x3-gap me-2 text-primary"></i>
+        Blister Master
+    </h6>
+    @* <div class="d-flex align-items-center gap-2"> *@
+        <div class="header-controls">
+
+        <select id="deptFilter" class="form-select form-select-sm"
+                style="width:150px" onchange="applyFilter()">
+            <option value="">All Departments</option>
+        </select>
+
+        <input type="text" id="searchInput"
+               class="form-control form-control-sm"
+               placeholder="🔍 Search code / desc..."
+               style="width:180px"
+               oninput="applyFilter()" />
+
+        <button class="btn btn-primary btn-sm" id="btnAddItem">
+            <i class="bi bi-plus-lg me-1"></i>Add Item
+        </button>
+    </div>
+</div>
+
+<!-- ── TABLE ── -->
+<div class="table-wrap">
+    <table class="table table-bordered mb-0" id="itemTable">
+        <thead>
+<tr>
+    <th>#</th>
+    <th>Department</th>
+    <th>Machine</th>
+    <th>Item Code</th>
+    <th>Description</th>
+    <th>Cycle Time</th>
+    <th>No of Cavity</th>
+    <th>Std. Shot Weight</th>
+    <th>Remark</th>
+    <th>Finish Weight</th>
+    <th>Remark</th>
+    <th>MRP Rate RM</th>
+    <th>Remark</th>
+    <th>MRP Rate Sale</th>
+    <th>Remark</th>
+    <th>Opening Stock</th>
+    <th>MIN Qty.</th>
+    <th>MAX Qty.</th>
+    <th>Packing Type</th>
+    <th>Packing Qty.</th>
+    <th>Sale Transport</th>
+    <th>Action</th>
+</tr>
+</thead>
+<tbody id="tableBody">
+            <tr id="loadingRow">
+                <td colspan="22">
+                    <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                    Loading data...
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ── PAGINATION ── -->
+<div class="pagination-bar">
+    <span id="pageInfo" class="text-muted"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnFirst" onclick="goToPage(1)">«</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnPrev"  onclick="goToPage(currentPage-1)">‹</button>
+    <span id="pageNumbers" class="d-flex gap-1"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnNext"  onclick="goToPage(currentPage+1)">›</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnLast"  onclick="goToPage(totalPages)">»</button>
+    <select id="rppSelect" class="form-select form-select-sm"
+            style="width:75px" onchange="changeRPP()">
+        <option value="10" selected>10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+    </select>
+    <span class="text-muted">/ page</span>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ADD / EDIT MODAL  (tabbed sections)
+══════════════════════════════════════════════ -->
+
+<div class="modal fade" id="itemModal" tabindex="-1">
+<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+<div class="modal-content">
+
+<!-- HEADER -->
+<div class="modal-header bg-dark text-white py-2">
+    <h6 class="modal-title mb-0">
+        <i class="bi bi-box-seam me-2"></i>
+        <span id="modalTitleText">Add Item</span>
+    </h6>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+</div>
+
+<!-- BODY -->
+<div class="modal-body">
+<form id="itemForm">
+
+<input type="hidden" id="fItemId" value="0"/>
+
+<div class="row g-2">
+
+<!-- Department -->
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Department <span class="text-danger">*</span></label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-building"></i></span>
+        <select id="fDeptId" class="form-select"></select>
+        <div class="invalid-feedback d-block" id="err-dept"></div>
+    </div>
+</div>
+
+<!-- Item Code -->
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Item Code <span class="text-danger">*</span></label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+        <input type="text" id="fItemCode" class="form-control" placeholder="Enter item code"/>
+        <div class="invalid-feedback d-block" id="err-itemCode"></div>
+    </div>
+</div>
+
+<!-- Description -->
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Description <span class="text-danger">*</span></label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+        <input type="text" id="fItemDesc" class="form-control" placeholder="Enter item description"/>
+         <div class="invalid-feedback d-block" id="err-itemDesc"></div>
+    </div>
+</div>
+
+
+
+<!-- Machine -->
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Machine <span class="text-danger">*</span></label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-gear"></i></span>
+        <select id="fMachineId" class="form-select"></select>
+        <div class="invalid-feedback d-block" id="err-machine"></div>
+    </div>
+</div>
+
+
+<!-- PRODUCTION -->
+
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Cycle Time</label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-stopwatch"></i></span>
+        <input type="number" id="fCycleTime" class="form-control" placeholder="sec"/>
+    </div>
+</div>
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Cavity</label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-grid"></i></span>
+        <input type="number" id="fCavity" class="form-control" placeholder="No"/>
+    </div>
+</div>
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Shot Weight<span class="text-danger">*</span></label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-speedometer"></i></span>
+        <input type="number" id="fShotWt" class="form-control" placeholder="gm"/>
+        <div class="invalid-feedback d-block" id="err-shot"></div>
+    </div>
+</div>
+
+
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Remark</label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text">
+            <i class="bi bi-chat-left-text"></i>
+        </span>
+        <input type="text" id="fRemarkShot"
+               class="form-control"
+               placeholder="Enter remark (optional)" />
+    </div>
+</div>
+
+
+
+
+
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">
+        Min Qty <span class="text-danger">*</span>
+    </label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text">
+            <i class="bi bi-arrow-down"></i>
+        </span>
+        <input type="number" id="fMinStock"
+               class="form-control"
+               placeholder="Minimum" />
+                <div class="invalid-feedback d-block" id="err-min"></div>
+    </div>
+</div>
+
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">
+        Max Qty <span class="text-danger">*</span>
+    </label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text">
+            <i class="bi bi-arrow-up"></i>
+        </span>
+        <input type="number" id="fMaxStock"
+               class="form-control"
+               placeholder="Maximum" />
+               <div class="invalid-feedback d-block" id="err-max"></div>
+    </div>
+</div>
+
+<!-- PRICING -->
+
+
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Finish Weight<span class="text-danger">*</span></label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-box"></i></span>
+        <input type="number" id="fFinishWt" class="form-control" placeholder="gm"/>
+        <div class="invalid-feedback d-block" id="err-finish"></div>
+    </div>
+</div>
+
+
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Remark</label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text">
+            <i class="bi bi-chat-left-text"></i>
+        </span>
+        <input type="text" id="fRemarkFinish"
+               class="form-control"
+               placeholder="Enter remark (optional)" />
+    </div>
+</div>
+
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Packing Type</label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text">
+            <i class="bi bi-box"></i>
+        </span>
+        
+               <select id="fPackingId" class="form-select">
+    <option value="">-- Select Packing --</option>
+</select>
+    </div>
+</div>
+
+
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Packing Qty</label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text">
+            <i class="bi bi-123"></i>
+        </span>
+        <input type="number" id="fPackQty"
+               class="form-control"
+               placeholder="Quantity" />
+    </div>
+</div>
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">MRP RM<span class="text-danger">*</span></label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-currency-rupee"></i></span>
+        <input type="number" id="fMrpRM" class="form-control" placeholder="₹"/>
+        <div class="invalid-feedback d-block" id="err-mrpRM"></div>
+    </div>
+</div>
+
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Remark</label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text">
+            <i class="bi bi-chat-left-text"></i>
+        </span>
+        <input type="text" id="fRemarkRM"
+               class="form-control"
+               placeholder="Enter remark (optional)" />
+    </div>
+</div>
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Opening Stock</label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text">
+            <i class="bi bi-box-seam"></i>
+        </span>
+        <input type="number" id="fOpenStock"
+               class="form-control"
+               placeholder="0" />
+    </div>
+</div>
+
+<!-- TRANSPORT -->
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Transport Cost</label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-truck"></i></span>
+        <input type="number" id="fTransCost" class="form-control" placeholder="₹"/>
+    </div>
+</div>
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">MRP Sale<span class="text-danger">*</span></label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-cash"></i></span>
+        <input type="number" id="fMrpSale" class="form-control" placeholder="₹"/>
+        <div class="invalid-feedback d-block" id="err-mrpSale"></div>
+    </div>
+</div>
+
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Sale Remark</label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text">
+            <i class="bi bi-chat-left-text"></i>
+        </span>
+        <input type="text" id="fRemarkSale"
+               class="form-control"
+               placeholder="Enter remark (optional)" />
+    </div>
+</div>
+
+
+</div>
+
+</form>
+</div>
+
+<!-- FOOTER -->
+<div class="modal-footer py-2">
+    <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+        <i class="bi bi-x-lg me-1"></i>Cancel
+    </button>
+    <button class="btn btn-primary btn-sm" id="btnSaveItem">
+        <i class="bi bi-check-lg me-1"></i>Save
+    </button>
+</div>
+
+</div>
+</div>
+</div>
+<!-- ── DELETE CONFIRM MODAL ── -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Confirm Delete
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center small">
+                <p class="mb-1">Delete item</p>
+                <strong id="deleteItemCode"></strong>?
+            </div>
+            <div class="modal-footer justify-content-center py-2">
+                <button class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger btn-sm"
+                        id="btnConfirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index:9999">
+    <div id="toast" class="toast align-items-center text-white border-0"
+         role="alert" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body small" id="toastMsg"></div>
+            <button type="button"
+                    class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<!-- jQuery (required) -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+$(function () {
+
+    // ════════════════════════════════════════════
+    // STATE
+    // ════════════════════════════════════════════
+    let allData      = [];   
+    let filteredData = [];  
+    let currentPage  = 1;
+    let rowsPerPage  = 10;
+    let totalPages   = 1;
+    let pendingDeleteId = null;
+    let allPacking = []; 
+
+    // Bootstrap modals
+    const itemModal   = new bootstrap.Modal($('#itemModal')[0]);
+    const deleteModal = new bootstrap.Modal($('#deleteModal')[0]);
+    const toastEl     = $('#toast')[0];
+    const bsToast     = new bootstrap.Toast(toastEl, { delay: 3000 });
+
+    // ════════════════════════════════════════════
+    // LOAD ALL DATA — jQuery AJAX
+    // ════════════════════════════════════════════
+    // function loadData() {
+    //     $('#loadingRow').show();
+    //     $('#tableBody tr:not(#loadingRow)').remove();
+
+    //     $.ajax({
+    //         url:      '/ItemDescription/GetAll',
+    //         method:   'GET',
+    //         dataType: 'json',
+    //         success: function (data) {
+    //             allData = data;
+    //             applyFilter();
+    //             $('#loadingRow').hide();
+    //         },
+    //         error: function () {
+    //             $('#loadingRow td').html(
+    //                 '<i class="bi bi-exclamation-triangle text-danger me-1"></i>' +
+    //                 'Failed to load data.');
+    //         }
+    //     });
+    // }
+    function loadData() {
+
+    const deptId = $('#deptFilter').val();   // 👈 get selected department
+
+    if (!deptId) return; // optional safety
+
+    $('#loadingRow').show();
+    $('#tableBody tr:not(#loadingRow)').remove();
+
+    $.ajax({
+        url: '/ItemDescription/GetAll',
+        method: 'GET',
+        data: { departmentId: deptId },   // 👈 IMPORTANT
+        dataType: 'json',
+
+        success: function (data) {
+            allData = data;
+            applyFilter();
+            $('#loadingRow').hide();
+        },
+
+        error: function () {
+            $('#loadingRow td').html(
+                '<i class="bi bi-exclamation-triangle text-danger me-1"></i>' +
+                'Failed to load data.');
+        }
+    });
+
+}
+    // ════════════════════════════════════════════
+    // LOAD DROPDOWNS
+    // ════════════════════════════════════════════
+ 
+function loadDropdowns() {
+
+    let allMachines = [];
+
+    $.ajax({
+        url: '/ItemDescription/GetDropdowns',
+        method: 'GET',
+        dataType: 'json',
+
+        success: function (d) {
+
+            // ✅ Store data
+            allMachines = d.machines;
+            allPacking  = d.packing;  
+
+            // ================================
+            // ✅ FILTER ONLY BLISTER DEPARTMENT
+            // ================================
+            const blisterDept = d.departments.filter(dep =>
+                (dep.Department || '')
+                    .toLowerCase()
+                    .trim()
+                    .includes('blister')
+            );
+
+            // ================================
+            // ✅ HEADER DROPDOWN
+            // ================================
+            let deptOpts = '';
+
+            blisterDept.forEach(dep => {
+                deptOpts += `<option value="${dep.DepartmentId}">
+                                ${dep.Department}
+                             </option>`;
+            });
+
+            $('#deptFilter').html(deptOpts);
+
+            // ================================
+            // ✅ MODAL DEPARTMENT DROPDOWN
+            // ================================
+            let mDeptOpts = '';
+
+            blisterDept.forEach(dep => {
+                mDeptOpts += `<option value="${dep.DepartmentId}">
+                                ${dep.Department}
+                             </option>`;
+            });
+
+            $('#fDeptId').html(mDeptOpts);
+
+            // ================================
+            // ✅ DEFAULT SELECT
+            // ================================
+            if (blisterDept.length > 0) {
+
+                const deptId = blisterDept[0].DepartmentId;
+
+                $('#deptFilter').val(deptId);
+                $('#fDeptId').val(deptId);
+
+                bindMachines(deptId);
+                bindPacking(deptId);
+                loadData();
+                applyFilter();
+            }
+
+            // ================================
+            // ✅ DEPARTMENT CHANGE → MACHINE
+            // ================================
+
+            $('#fDeptId').on('change', function () {
+
+              const deptId = $(this).val();
+              
+              bindMachines(deptId);   
+              bindPacking(deptId);   
+
+            });
+
+            // ================================
+            // ✅ PACKING DROPDOWN (NEW)
+            // ================================
+            function bindPacking(deptId) {
+
+                const filteredPacking = allPacking.filter(p =>
+                    String(p.DepartmentId) === String(deptId)
+                );
+            
+                let packOpts = '<option value="">-- Select Packing --</option>';
+            
+                filteredPacking.forEach(p => {
+                    packOpts += `<option value="${p.PackingId}">
+                                    ${p.Packing_Type}
+                                 </option>`;
+                });
+            
+                $('#fPackingId').html(packOpts);
+            }
+            $('#fPackingId').html(packOpts);   
+
+        },
+
+        error: function () {
+            console.error("Failed to load dropdowns");
+        }
+    });
+
+    // ================================
+    // 🔁 COMMON FUNCTION
+    // ================================
+    function bindMachines(deptId) {
+
+        const filteredMachines = allMachines.filter(m =>
+            String(m.DepartmentId) === String(deptId)
+        );
+
+        let opts = '<option value="">-- Select Machine --</option>';
+
+        filteredMachines.forEach(m => {
+            opts += `<option value="${m.MachineId}">
+                        ${m.MachineName}
+                     </option>`;
+        });
+
+        $('#fMachineId').html(opts);
+    }
+}
+    // ════════════════════════════════════════════
+    // RENDER TABLE
+    // ════════════════════════════════════════════
+    function renderTable() {
+        totalPages = Math.max(1,
+            Math.ceil(filteredData.length / rowsPerPage));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end   = Math.min(start + rowsPerPage, filteredData.length);
+        const slice = filteredData.slice(start, end);
+
+        const tbody = $('#tableBody');
+        tbody.find('tr:not(#loadingRow)').remove();
+
+        if (slice.length === 0) {
+            tbody.append(
+                `<tr><td colspan="22" class="text-center text-muted py-3">
+                    No records found.
+                 </td></tr>`);
+        } else {
+            slice.forEach((r, idx) => {
+                tbody.append(buildRow(r, start + idx + 1));
+            });
+        }
+
+        updatePaginationUI(start, end);
+    }
+
+function buildRow(r, sr) {
+
+    const fmt = v => (v !== null && v !== undefined && v !== '') ? v : '—';
+
+    return `
+    <tr>
+        <td>${sr}</td>
+        <td>${fmt(r.Department)}</td>
+        <td>${fmt(r.MachineName)}</td>
+        <td>${fmt(r.Item_Code)}</td>
+        <td>${fmt(r.Item_Description)}</td>
+        <td>${fmt(r.Cycle_Time)}</td>
+        <td>${fmt(r.No_of_Cavity)}</td>
+
+        <td>${fmt(r.Std_Shot_Weight)}</td>
+        <td>${fmt(r.Remark_Std_Shot_Weight)}</td>
+
+        <td>${fmt(r.Finish_Weight)}</td>
+        <td>${fmt(r.Remark_Finish_Weight)}</td>
+
+        <td>${fmt(r.MRP_Rate_RM)}</td>
+        <td>${fmt(r.Remark_MRP_Rate_RM)}</td>
+
+        <td>${fmt(r.MRP_Rate_Sale)}</td>
+        <td>${fmt(r.Remark_MRP_Rate_Sale)}</td>
+
+        <td>${fmt(r.Opening_Stock)}</td>
+        <td>${fmt(r.MIN_Stock)}</td>
+        <td>${fmt(r.MAX_Stock)}</td>
+
+        <!-- ✅ Packing Fix -->
+        <td>${fmt(r.Packing_Type) || getPackingName(r.PackingId)}</td>
+
+        <td>${fmt(r.Packing_Qty)}</td>
+        <td>${fmt(r.Sale_Trans_Cost)}</td>
+
+        <td>
+            <button class="btn btn-primary btn-sm btn-edit" data-id="${r.ItemId}">Edit</button>
+            <button class="btn btn-danger btn-sm btn-del" data-id="${r.ItemId}" data-code="${r.Item_Code}">Delete</button>
+        </td>
+    </tr>`;
+}
+    // ════════════════════════════════════════════
+    // FILTER
+    // ════════════════════════════════════════════
+    window.applyFilter = function() {
+        const q    = $('#searchInput').val().toLowerCase().trim();
+        const dept = $('#deptFilter').val();
+
+        filteredData = allData.filter(r => {
+    const matchDept = !dept ||
+        String(r.DepartmentId) === String(dept);
+
+    const matchQ = !q ||
+        (r.Item_Code || '').toLowerCase().includes(q) ||
+        (r.Item_Description || '').toLowerCase().includes(q);
+
+    return matchDept && matchQ;
+});
+
+        currentPage = 1;
+        renderTable();
+    };
+     $('#deptFilter').on('change', function () {
+        loadData();
+    });
+
+    // ════════════════════════════════════════════
+    // PAGINATION
+    // ════════════════════════════════════════════
+    function updatePaginationUI(start, end) {
+        $('#pageInfo').text(
+            filteredData.length === 0
+                ? 'No records'
+                : `${start+1}–${end} of ${filteredData.length}`);
+
+        $('#btnFirst,#btnPrev').prop('disabled', currentPage === 1);
+        $('#btnNext,#btnLast').prop('disabled',  currentPage === totalPages);
+
+        const container = $('#pageNumbers').empty();
+        const maxV = 5;
+        let sp = Math.max(1, currentPage - Math.floor(maxV/2));
+        let ep = Math.min(totalPages, sp + maxV - 1);
+        if (ep - sp < maxV - 1) sp = Math.max(1, ep - maxV + 1);
+
+        for (let p = sp; p <= ep; p++) {
+            $('<button>')
+                .text(p)
+                .addClass('btn btn-outline-secondary btn-sm'
+                    + (p === currentPage ? ' active-page' : ''))
+                .on('click', () => goToPage(p))
+                .appendTo(container);
+        }
+    }
+
+    window.goToPage = function(p) {
+        if (p < 1 || p > totalPages) return;
+        currentPage = p;
+        renderTable();
+    };
+
+    window.changeRPP = function() {
+        rowsPerPage = parseInt($('#rppSelect').val());
+        currentPage = 1;
+        renderTable();
+    };
+
+    // ════════════════════════════════════════════
+    // ADD MODAL
+    // ════════════════════════════════════════════
+    $('#btnAddItem').on('click', function () {
+        clearForm();
+        $('#modalTitleText').text('Add Item');
+        // $('#fDate').val(new Date().toISOString().split('T')[0]);
+         $('#fItemCode').prop('disabled', false);
+        itemModal.show();
+    });
+
+    // ════════════════════════════════════════════
+    // EDIT — load record via AJAX
+    // ════════════════════════════════════════════
+
+$(document).on('click', '.btn-edit', function () {
+
+    const id = $(this).data('id');
+
+    $.ajax({
+        url: '/ItemDescription/GetById?id=' + id,
+        method: 'GET',
+        dataType: 'json',
+
+        success: function (r) {
+
+            $('#modalTitleText').text('Edit Item');
+            clearForm();
+
+            $('#fItemId').val(r.ItemId);
+            $('#fItemCode').val(r.Item_Code);
+            $('#fItemDesc').val(r.Item_Description);
+            $('#fItemCode').prop('disabled', true);
+            $('#fCycleTime').val(r.Cycle_Time);
+            $('#fCavity').val(r.No_of_Cavity);
+            $('#fShotWt').val(r.Std_Shot_Weight);
+            $('#fRemarkShot').val(r.Remark_Std_Shot_Weight);
+            $('#fFinishWt').val(r.Finish_Weight);
+            $('#fRemarkFinish').val(r.Remark_Finish_Weight);
+            $('#fMrpRM').val(r.MRP_Rate_RM);
+            $('#fRemarkRM').val(r.Remark_MRP_Rate_RM);
+            $('#fMrpSale').val(r.MRP_Rate_Sale);
+            $('#fRemarkSale').val(r.Remark_MRP_Rate_Sale);
+            $('#fTransCost').val(r.Sale_Trans_Cost);
+
+            // ✅ Department first
+            $('#fDeptId').val(r.DepartmentId).trigger('change');
+
+            // ✅ Then machine
+            setTimeout(() => {
+                $('#fMachineId').val(r.MachineId);
+            }, 100);
+
+            $('#fMinStock').val(r.MIN_Stock);
+            $('#fMaxStock').val(r.MAX_Stock);
+            $('#fOpenStock').val(r.Opening_Stock);
+            // ✅ FIXED PACKING
+            // $('#fPackingId').val(r.PackingId);
+ $('#fPackingId option').each(function () {
+    if ($(this).text().trim() === (r.Packing_Type || '').trim()) {
+        $('#fPackingId').val($(this).val());
+    }
+});
+itemModal.show();
+        },
+
+        // error: function () {
+        //     showToast('Failed to load item.', 'danger');
+        // }
+        error: function (xhr) {
+    console.log("ERROR:", xhr.responseText);
+
+    let msg = "Failed to load item.";
+
+    if (xhr.responseJSON && xhr.responseJSON.message) {
+        msg = xhr.responseJSON.message;
+    }
+
+    showToast(msg, 'danger');
+}
+    });
+});
+
+    // ════════════════════════════════════════════
+    // SAVE — jQuery AJAX POST
+    // ════════════════════════════════════════════
+   
+$('#btnSaveItem').on('click', function () {
+
+    clearErrors();
+    let isValid = true;
+
+    // ✅ VALIDATIONS
+    if (!$('#fItemCode').val().trim()) {
+        showError('fItemCode', 'err-itemCode', 'Item Code is required');
+        isValid = false;
+    }
+
+    if (!$('#fItemDesc').val().trim()) {
+        showError('fItemDesc', 'err-itemDesc', 'Description is required');
+        isValid = false;
+    }
+
+    if (!$('#fDeptId').val()) {
+        showError('fDeptId', 'err-dept', 'Department is required');
+        isValid = false;
+    }
+
+    if (!$('#fMachineId').val()) {
+        showError('fMachineId', 'err-machine', 'Machine is required');
+        isValid = false;
+    }
+
+    if (!$('#fMinStock').val()) {
+        showError('fMinStock', 'err-min', 'Min Qty is required');
+        isValid = false;
+    }
+
+    if (!$('#fMaxStock').val()) {
+        showError('fMaxStock', 'err-max', 'Max Qty is required');
+        isValid = false;
+    }
+
+    // ✅ NEW VALIDATIONS
+
+if (!$('#fShotWt').val()) {
+    showError('fShotWt', 'err-shot', 'Shot Weight is required');
+    isValid = false;
+}
+
+if (!$('#fFinishWt').val()) {
+    showError('fFinishWt', 'err-finish', 'Finish Weight is required');
+    isValid = false;
+}
+
+if (!$('#fMrpRM').val()) {
+    showError('fMrpRM', 'err-mrpRM', 'MRP RM is required');
+    isValid = false;
+}
+
+if (!$('#fMrpSale').val()) {
+    showError('fMrpSale', 'err-mrpSale', 'MRP Sale is required');
+    isValid = false;
+}
+
+    // ❌ STOP if invalid
+    if (!isValid) return;
+
+    const token = $('input[name="__RequestVerificationToken"]').val();
+
+    // ✅ PAYLOAD (move inside click)
+    const payload = {
+        ItemId:               $('#fItemId').val(),
+        Item_Code:            $('#fItemCode').val().trim(),
+        Item_Description:     $('#fItemDesc').val().trim(),
+        Cycle_Time:           $('#fCycleTime').val() || 20,
+        No_of_Cavity:         $('#fCavity').val() || 1,
+        Std_Shot_Weight:      $('#fShotWt').val() || 0,
+        Finish_Weight:        $('#fFinishWt').val() || 0,
+        MRP_Rate_RM:          $('#fMrpRM').val() || 0,
+        MRP_Rate_Sale:        $('#fMrpSale').val() || 0,
+        Ext_Mould_PVC_RMType: $('#fExtMould').val(),
+
+        DepartmentId:         $('#fDeptId').val(),
+        MachineId:            $('#fMachineId').val(),
+
+        Date:                 $('#fDate').val() || new Date().toISOString(),
+
+        MIN_Stock:            $('#fMinStock').val() || 0,
+        MAX_Stock:            $('#fMaxStock').val() || 0,
+        Opening_Stock:        $('#fOpenStock').val() || 0,
+
+        RM_SizeId_1:          $('#fRMSize1').val() || null,
+        Sheet_Qty_1:          $('#fSheetQty1').val() || 0,
+        RM_SizeId_2:          $('#fRMSize2').val() || null,
+        Sheet_Qty_2:          $('#fSheetQty2').val() || 0,
+        RM_SizeId_3:          $('#fRMSize3').val() || null,
+        Sheet_Qty_3:          $('#fSheetQty3').val() || 0,
+        RM_SizeId_4:          $('#fRMSize4').val() || null,
+        Sheet_Qty_4:          $('#fSheetQty4').val() || 0,
+
+        // PackingId:            $('#fPackingId').val() || null,
+        Packing_Type: $('#fPackingId').val() ? $('#fPackingId option:selected').text() : '',
+        Packing_Qty:          $('#fPackQty').val() || 1,
+
+        // Inner_PackingId:      $('#fInnerPackingId').val() || null,
+        Inner_Packing_Type: $('#fInnerPackingId').val() ? $('#fInnerPackingId option:selected').text() : '',
+        Inner_Packing_Qty:    $('#fInnerPackQty').val() || 0,
+
+        Lab:                  $('#fLab').val() || 0,
+
+        Remark_Std_Shot_Weight: $('#fRemarkShot').val(),
+        Remark_Finish_Weight:   $('#fRemarkFinish').val(),
+        Remark_MRP_Rate_RM:     $('#fRemarkRM').val(),
+        Remark_MRP_Rate_Sale:   $('#fRemarkSale').val(),
+
+        Sale_Trans_Cost:        $('#fTransCost').val() || 0,
+
+        __RequestVerificationToken: token
+    };
+
+    // ✅ AJAX CALL
+    $.ajax({
+        url: '/ItemDescription/Save',
+        method: 'POST',
+        data: payload,
+        dataType: 'json',
+
+        success: function (d) {
+            if (!d.success) {
+                showToast(d.message || 'Save failed.', 'danger');
+                return;
+            }
+
+            itemModal.hide();
+            showToast(d.message, 'success');
+            loadData();
+        },
+
+        // error: function () {
+        //     showToast('Network error.', 'danger');
+        // }
+        error: function (xhr, status, error) {
+    let msg = "Something went wrong!";
+
+    if (xhr.responseJSON && xhr.responseJSON.message) {
+        msg = xhr.responseJSON.message;   // from backend (JSON)
+    }
+    else if (xhr.responseText) {
+        msg = xhr.responseText;           // plain text error
+    }
+    else if (error) {
+        msg = error;                      // JS error
+    }
+
+    showToast(msg, 'danger');
+}
+    });
+});
+    // ════════════════════════════════════════════
+    // DELETE
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-del', function () {
+        pendingDeleteId = $(this).data('id');
+        $('#deleteItemCode').text($(this).data('code'));
+        deleteModal.show();
+    });
+
+    $('#btnConfirmDelete').on('click', function () {
+        const token = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url:      '/ItemDescription/Delete',
+            method:   'POST',
+            data:     { id: pendingDeleteId,
+                        __RequestVerificationToken: token },
+            dataType: 'json',
+            success: function (d) {
+                deleteModal.hide();
+                if (d.success) {
+                    // Remove from local arrays — no full reload needed
+                    allData      = allData.filter(
+                        r => r.ItemId !== pendingDeleteId);
+                    filteredData = filteredData.filter(
+                        r => r.ItemId !== pendingDeleteId);
+                    renderTable();
+                    showToast('Item deleted.', 'success');
+                    loadData();
+                } else {
+                    showToast('Delete failed.', 'danger');
+                }
+            },
+            error: function () {
+                showToast('Network error.', 'danger');
+            }
+        });
+    });
+    // ════════════════════════════════════════════
+    // HELPERS
+    // ════════════════════════════════════════════
+    function getPackingName(id) {
+    const p = allPacking.find(x =>
+        String(x.PackingId) === String(id)
+    );
+    return p ? p.Packing_Type : '—';
+}
+    function clearForm() {
+        $('#itemForm')[0].reset();
+        $('#fItemId').val('0');
+        $('#fItemCode').prop('disabled', false);
+        clearErrors();
+    }
+
+    function clearErrors() {
+        $('.invalid-feedback.d-block').text('');
+        $('#itemForm .form-control, #itemForm .form-select')
+            .removeClass('is-invalid');
+    }
+
+    function showError(fieldId, errId, msg) {
+        $('#' + fieldId).addClass('is-invalid');
+        $('#' + errId).text(msg);
+    }
+
+    function showToast(msg, type) {
+        toastEl.className =
+            `toast align-items-center text-white border-0 bg-${type}`;
+        $('#toastMsg').text(msg);
+        bsToast.show();
+    }
+
+    // ── INIT ──   
+    loadDropdowns();
+    loadData();
+
+});
+</script>
+}

@@ -1,0 +1,500 @@
+﻿@model AIResumeScreeningSystem.ViewModels.Dashboard.AdminDashboardViewModel
+@using AIResumeScreeningSystem.ViewModels.Dashboard
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    ViewData["ActivePage"] = "AdminDashboard";
+}
+
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h4 class="fw-bold mb-0">
+            <i class="bi bi-shield-check me-2 text-primary"></i>Admin Dashboard
+        </h4>
+        <small class="text-muted">System-wide overview · @DateTime.UtcNow.ToString("dddd, MMMM dd yyyy")</small>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="Admin" asp-action="Users" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-people me-1"></i>Manage Users
+        </a>
+        <a asp-controller="Report" asp-action="Index" class="btn btn-primary btn-sm">
+            <i class="bi bi-bar-chart me-1"></i>Reports
+        </a>
+    </div>
+</div>
+
+<!-- ── Row 1: Primary KPI Cards ─────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+    @foreach (var (label, value, icon, color, sub) in new[] {
+        ("Total Users",       Model.TotalUsers.ToString(),       "bi-people",          "primary", $"+{Model.NewUsersThisMonth} this month"),
+        ("Total Jobs",        Model.TotalJobs.ToString(),        "bi-briefcase",       "success", $"{Model.ActiveJobs} active"),
+        ("Applications",      Model.TotalApplications.ToString(),"bi-send",            "info",    $"+{Model.NewApplicationsThisMonth} this month"),
+        ("Avg Match Score",   Model.AverageMatchScore + "%",     "bi-bar-chart-steps", "warning", "AI-calculated"),
+        ("Shortlisted",       Model.ShortlistedApplications.ToString(), "bi-star",    "secondary","candidates"),
+        ("Approved",          Model.ApprovedApplications.ToString(),    "bi-check-circle","success","hired")
+    })
+    {
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body py-3 px-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="rounded-circle bg-@color bg-opacity-10
+                            d-flex align-items-center justify-content-center"
+                             style="width:40px;height:40px;">
+                            <i class="bi @icon text-@color"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-0 text-@color">@value</h3>
+                    <p class="text-muted small mb-0 fw-500">@label</p>
+                    <small class="text-muted" style="font-size:11px;">@sub</small>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- ── Row 2: Secondary KPI Cards ───────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+    @foreach (var (label, value, icon, color) in new[] {
+        ("Candidates",       Model.TotalCandidates.ToString(),      "bi-person-badge",    "primary"),
+        ("Recruiters",       Model.TotalRecruiters.ToString(),      "bi-person-workspace","success"),
+        ("Resumes Parsed",   $"{Model.ParsedResumes}/{Model.TotalResumes}", "bi-file-earmark-check", "info"),
+        ("Interview Qs",     Model.TotalInterviewQuestions.ToString(),"bi-chat-left-quote","warning"),
+        ("AI Evaluations",   Model.AIEvaluationsRun.ToString(),     "bi-cpu",             "secondary"),
+        ("Parse Failures",   Model.FailedParseCount.ToString(),     "bi-exclamation-triangle", Model.FailedParseCount > 0 ? "danger" : "success")
+    })
+    {
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body py-3 px-3">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi @icon text-@color"></i>
+                        <small class="text-muted fw-500">@label</small>
+                    </div>
+                    <h4 class="fw-bold mb-0 text-@color">@value</h4>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- ── Row 3: Charts Row 1 ───────────────────────────────────────────────── -->
+<div class="row g-4 mb-4">
+
+    <!-- Applications Trend (line chart) -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-600">
+                    <i class="bi bi-graph-up me-2 text-primary"></i>Applications Trend
+                </h6>
+                <small class="text-muted">Last 6 months</small>
+            </div>
+            <div class="card-body">
+                <canvas id="trendChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applications by Status (doughnut) -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header py-3">
+                <h6 class="mb-0 fw-600">
+                    <i class="bi bi-pie-chart me-2 text-primary"></i>Status Breakdown
+                </h6>
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <canvas id="statusChart" height="200" style="max-height:220px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Row 4: Charts Row 2 ───────────────────────────────────────────────── -->
+<div class="row g-4 mb-4">
+
+    <!-- Top Skills Distribution (horizontal bar) -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header py-3">
+                <h6 class="mb-0 fw-600">
+                    <i class="bi bi-tags me-2 text-primary"></i>Top Skills in Candidate Pool
+                </h6>
+            </div>
+            <div class="card-body">
+                <canvas id="skillsChart" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Growth (bar chart) -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header py-3">
+                <h6 class="mb-0 fw-600">
+                    <i class="bi bi-person-plus me-2 text-primary"></i>User Growth
+                </h6>
+            </div>
+            <div class="card-body">
+                <canvas id="growthChart" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Row 5: Top Jobs + Top Candidates ─────────────────────────────────── -->
+<div class="row g-4 mb-4">
+
+    <!-- Top Jobs -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header py-3 d-flex justify-content-between">
+                <h6 class="mb-0 fw-600">
+                    <i class="bi bi-briefcase me-2 text-primary"></i>Top Jobs by Applications
+                </h6>
+                <a asp-controller="Job" asp-action="Index"
+                   class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                @foreach (var job in Model.TopJobs)
+                {
+                    <div class="d-flex align-items-center gap-3 px-4 py-3 border-bottom">
+                        <div class="rounded-circle bg-primary bg-opacity-10 d-flex
+                            align-items-center justify-content-center flex-shrink-0"
+                             style="width:40px;height:40px;">
+                            <i class="bi bi-briefcase text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <a asp-controller="Job" asp-action="Details"
+                                   asp-route-id="@job.JobId"
+                                   class="fw-600 text-dark text-decoration-none d-block text-truncate">
+                                @job.Title
+                            </a>
+                            <small class="text-muted">
+                                @job.Company ·
+                                <span class="@(job.Status == "Active" ? "text-success" : "text-secondary")">
+                                    @job.Status
+                                </span>
+                            </small>
+                        </div>
+                        <div class="text-end flex-shrink-0">
+                            <div class="fw-600 text-primary">@job.ApplicationCount</div>
+                            <small class="text-muted">apps</small>
+                        </div>
+                        <div class="text-end flex-shrink-0">
+                            <div class="fw-600 text-warning">@job.ShortlistedCount</div>
+                            <small class="text-muted">shortlisted</small>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Candidates -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header py-3 d-flex justify-content-between">
+                <h6 class="mb-0 fw-600">
+                    <i class="bi bi-person-badge me-2 text-primary"></i>
+                    Top Candidates by AI Score
+                </h6>
+                <a asp-controller="Candidate" asp-action="Index"
+                   class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                @foreach (var candidate in Model.TopCandidates)
+                {
+                    <div class="d-flex align-items-center gap-3 px-4 py-3 border-bottom">
+                        @if (!string.IsNullOrEmpty(candidate.ProfileImagePath))
+                        {
+                            <img src="@candidate.ProfileImagePath"
+                                 class="rounded-circle flex-shrink-0"
+                                 style="width:40px;height:40px;object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-primary text-white d-flex
+                                align-items-center justify-content-center
+                                fw-bold flex-shrink-0"
+                                 style="width:40px;height:40px;">
+                                @candidate.InitialsAvatar
+                            </div>
+                        }
+                        <div class="flex-grow-1 overflow-hidden">
+                            <a asp-controller="Candidate" asp-action="Details"
+                                   asp-route-id="@candidate.CandidateId"
+                                   class="fw-600 text-dark text-decoration-none d-block">
+                                @candidate.Name
+                            </a>
+                            <div class="d-flex gap-1 flex-wrap mt-1">
+                                @foreach (var skill in candidate.TopSkills)
+                                {
+                                    <span class="badge bg-primary bg-opacity-10 text-primary"
+                                          style="font-size:10px;">@skill</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="text-end flex-shrink-0">
+                            <div class="fw-bold @(candidate.HighestMatchScore >= 75 ? "text-success" :
+                                                                                                                    candidate.HighestMatchScore >= 50 ? "text-primary" : "text-warning")">
+                                @candidate.HighestMatchScore.ToString("F0")%
+                            </div>
+                            <small class="text-muted">best match</small>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Row 6: Activity Feed ───────────────────────────────────────────────── -->
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header py-3">
+                <h6 class="mb-0 fw-600">
+                    <i class="bi bi-activity me-2 text-primary"></i>Recent Activity
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                @foreach (var item in Model.RecentActivity)
+                {
+                    <div class="d-flex align-items-start gap-3 px-4 py-3 border-bottom">
+                        <div class="rounded-circle bg-light d-flex align-items-center
+                            justify-content-center flex-shrink-0 mt-1"
+                             style="width:36px;height:36px;">
+                            <i class="bi @item.Icon @item.IconColorClass"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-500 small">@item.Title</div>
+                            <div class="text-muted small">@item.Description</div>
+                        </div>
+                        <small class="text-muted flex-shrink-0">@item.TimeAgo</small>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- System Health -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header py-3">
+                <h6 class="mb-0 fw-600">
+                    <i class="bi bi-heart-pulse me-2 text-success"></i>System Health
+                </h6>
+            </div>
+            <div class="card-body">
+
+                @foreach (var (label, value, color, icon) in new[] {
+                    ("AI Parse Rate",
+                     Model.TotalResumes > 0
+                         ? $"{Math.Round((double)Model.ParsedResumes / Model.TotalResumes * 100, 0)}%"
+                         : "N/A",
+                     "success", "bi-file-check"),
+                    ("Pending Parse Queue",
+                     Model.PendingParseQueue.ToString(),
+                     Model.PendingParseQueue > 5 ? "warning" : "success",
+                     "bi-hourglass-split"),
+                    ("Failed Parses",
+                     Model.FailedParseCount.ToString(),
+                     Model.FailedParseCount > 0 ? "danger" : "success",
+                     "bi-exclamation-triangle"),
+                    ("AI Evaluations Run",
+                     Model.AIEvaluationsRun.ToString(),
+                     "primary", "bi-cpu"),
+                    ("Interview Qs Generated",
+                     Model.TotalInterviewQuestions.ToString(),
+                     "info", "bi-chat-left-quote")
+                })
+                {
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi @icon text-@color"></i>
+                            <span class="small text-muted">@label</span>
+                        </div>
+                        <span class="fw-600 text-@color small">@value</span>
+                    </div>
+                }
+
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between small mb-1">
+                        <span class="text-muted">Resume Parse Rate</span>
+                        <span class="fw-600">
+                            @(Model.TotalResumes > 0
+                                ? $"{Math.Round((double)Model.ParsedResumes / Model.TotalResumes * 100, 0)}%"
+                                : "0%")
+                        </span>
+                    </div>
+                    <div class="progress" style="height:8px;border-radius:4px;">
+                        <div class="progress-bar bg-success"
+                             style="width:@(Model.TotalResumes > 0
+                                                                                     ? Math.Round((double)Model.ParsedResumes / Model.TotalResumes * 100, 0)
+                                                                                     : 0)%;transition:width 1s;"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Admin: Users Table shortcut ───────────────────────────────────────── -->
+<div class="row g-4 mt-1">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header py-3 d-flex justify-content-between">
+                <h6 class="mb-0 fw-600">
+                    <i class="bi bi-people me-2 text-primary"></i>Quick User Summary
+                </h6>
+                <a asp-controller="Admin" asp-action="Users"
+                   class="btn btn-sm btn-outline-primary">View All Users</a>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 text-center">
+                    @foreach (var (role, count, color, icon) in new[] {
+                        ("Admin",     1,                     "danger",  "bi-shield-check"),
+                        ("Recruiter", Model.TotalRecruiters, "primary", "bi-person-workspace"),
+                        ("Candidate", Model.TotalCandidates, "success", "bi-person-badge")
+                    })
+                    {
+                        <div class="col-md-4">
+                            <div class="p-4 rounded-3 bg-@color bg-opacity-10">
+                                <i class="bi @icon text-@color fs-2 mb-2 d-block"></i>
+                                <h3 class="fw-bold text-@color mb-0">@count</h3>
+                                <p class="text-muted mb-2">@role (s)</p>
+                                <a asp-controller="Admin" asp-action="Users"
+                                       asp-route-role="@role"
+                                       class="btn btn-sm btn-outline-@color">
+                                    View @role (s)
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const chartDefaults = {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        };
+
+        // ── Trend Line Chart ────────────────────────────────────────────────
+        new Chart(document.getElementById('trendChart'), {
+        type: 'line',
+        data: {
+        labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                        Model.ApplicationsTrend.Labels)),
+        datasets: [{
+        label: 'Applications',
+        data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                            Model.ApplicationsTrend.Values)),
+        borderColor: '#1a56db',
+        backgroundColor: 'rgba(26,86,219,0.08)',
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#1a56db',
+        pointRadius: 4
+        }]
+        },
+        options: {
+        ...chartDefaults,
+        plugins: { legend: { display: false } },
+        scales: {
+        y: { beginAtZero: true, grid: { color: '#f3f4f6' },
+        ticks: { stepSize: 1 } },
+        x: { grid: { display: false } }
+        }
+        }
+        });
+
+        // ── Status Doughnut ─────────────────────────────────────────────────
+        new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+        labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                        Model.ApplicationsByStatus.Labels)),
+        datasets: [{
+        data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                            Model.ApplicationsByStatus.Values)),
+        backgroundColor: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                            Model.ApplicationsByStatus.BackgroundColors)),
+        borderWidth: 2,
+        borderColor: '#fff'
+        }]
+        },
+        options: {
+        responsive: true,
+        cutout: '65%',
+        plugins: {
+        legend: {
+        display: true,
+        position: 'bottom',
+        labels: { boxWidth: 12, padding: 10, font: { size: 11 } }
+        }
+        }
+        }
+        });
+
+        // ── Top Skills Horizontal Bar ────────────────────────────────────────
+        new Chart(document.getElementById('skillsChart'), {
+        type: 'bar',
+        data: {
+        labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                        Model.TopSkillsDistribution.Labels)),
+        datasets: [{
+        label: 'Candidates',
+        data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                            Model.TopSkillsDistribution.Values)),
+        backgroundColor: 'rgba(26,86,219,0.75)',
+        borderRadius: 6
+        }]
+        },
+        options: {
+        indexAxis: 'y',
+        ...chartDefaults,
+        scales: {
+        x: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+        y: { grid: { display: false } }
+        }
+        }
+        });
+
+        // ── User Growth Bar Chart ────────────────────────────────────────────
+        new Chart(document.getElementById('growthChart'), {
+        type: 'bar',
+        data: {
+        labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                        Model.UserGrowth.Labels)),
+        datasets: [{
+        label: 'New Users',
+        data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                            Model.UserGrowth.Values)),
+        backgroundColor: 'rgba(5,150,105,0.75)',
+        borderRadius: 6
+        }]
+        },
+        options: {
+        ...chartDefaults,
+        scales: {
+        y: { beginAtZero: true, grid: { color: '#f3f4f6' },
+        ticks: { stepSize: 1 } },
+        x: { grid: { display: false } }
+        }
+        }
+        });
+    </script>
+}

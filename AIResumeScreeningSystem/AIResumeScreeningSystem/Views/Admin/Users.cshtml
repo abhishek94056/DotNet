@@ -1,0 +1,189 @@
+﻿@{
+    ViewData["Title"] = "Manage Users";
+    ViewData["ActivePage"] = "Users";
+    var users = ViewBag.Users as List<(AIResumeScreeningSystem.Models.ApplicationUser User, List<string> Roles)>
+                ?? new();
+    int total = ViewBag.Total ?? 0;
+    int page = ViewBag.Page ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0">
+            <i class="bi bi-people me-2 text-primary"></i>Manage Users
+        </h4>
+        <small class="text-muted">@total user(s) total</small>
+    </div>
+</div>
+
+<!-- Search & Filter -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body py-3">
+        <form asp-action="Users" method="get" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <input name="keyword" class="form-control form-control-sm"
+                       placeholder="🔍 Search name or email..."
+                       value="@ViewBag.Keyword" />
+            </div>
+            <div class="col-md-3">
+                <select name="role" class="form-select form-select-sm">
+                    <option value="">All Roles</option>
+                    <option value="Admin" selected="@(ViewBag.RoleFilter == "Admin")">Admin</option>
+                    <option value="Recruiter" selected="@(ViewBag.RoleFilter == "Recruiter")">Recruiter</option>
+                    <option value="Candidate" selected="@(ViewBag.RoleFilter == "Candidate")">Candidate</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                <a asp-action="Users" class="btn btn-outline-secondary btn-sm ms-1">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var (user, roles) in users)
+                    {
+                        var role = roles.FirstOrDefault() ?? "None";
+                        var roleColor = role switch
+                        {
+                            "Admin" => "danger",
+                            "Recruiter" => "primary",
+                            "Candidate" => "success",
+                            _ => "secondary"
+                        };
+                        <tr class="@(!user.IsActive ? "opacity-50" : "")">
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    @if (!string.IsNullOrEmpty(user.ProfileImagePath))
+                                    {
+                                        <img src="@user.ProfileImagePath"
+                                             class="rounded-circle"
+                                             style="width:36px;height:36px;object-fit:cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle bg-@roleColor text-white
+                                                    d-flex align-items-center justify-content-center
+                                                    fw-bold"
+                                             style="width:36px;height:36px;font-size:13px;">
+                                            @user.FirstName[0]@user.LastName[0]
+                                        </div>
+                                    }
+                                    <div>
+                                        <div class="fw-600 small">
+                                            @user.FirstName @user.LastName
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(user.PhoneNumber))
+                                        {
+                                            <small class="text-muted">@user.PhoneNumber</small>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <small class="text-muted">@user.Email</small>
+                            </td>
+                            <td>
+                                <select class="form-select form-select-sm"
+                                        style="width:120px;"
+                                        onchange="changeRole('@user.Id', this.value)">
+                                    @foreach (var r in new[] { "Admin", "Recruiter", "Candidate" })
+                                    {
+                                        <option value="@r" selected="@(role == r)">@r</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <span class="badge @(user.IsActive ? "bg-success" : "bg-secondary")">
+                                    @(user.IsActive ? "Active" : "Inactive")
+                                </span>
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    @user.CreatedAt.ToString("MMM dd, yyyy")
+                                </small>
+                            </td>
+                            <td class="text-end pe-3">
+                                <form asp-action="ToggleUserActive"
+                                      asp-route-userId="@user.Id"
+                                      method="post" class="d-inline">
+                                    <button type="submit"
+                                            class="btn btn-sm @(user.IsActive ? "btn-outline-danger" : "btn-outline-success")">
+                                        @(user.IsActive ? "Deactivate" : "Activate")
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages > 1)
+        {
+            <div class="d-flex justify-content-between px-3 py-3 border-top">
+                <small class="text-muted">Page @(page) of @totalPages</small>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == page ? "active" : "")">
+                                <a class="page-link" asp-action="Users"
+                                   asp-route-page="@i"
+                                   asp-route-keyword="@ViewBag.Keyword"
+                                   asp-route-role="@ViewBag.RoleFilter">@i</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Hidden forms for role changes
+        function changeRole(userId, newRole) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/Admin/ChangeUserRole';
+
+            const token = document.querySelector(
+                'input[name="__RequestVerificationToken"]')?.value;
+            if (token) {
+                const t = document.createElement('input');
+                t.type = 'hidden'; t.name = '__RequestVerificationToken'; t.value = token;
+                form.appendChild(t);
+            }
+
+            [['userId', userId], ['newRole', newRole]].forEach(([n, v]) => {
+                const inp = document.createElement('input');
+                inp.type = 'hidden'; inp.name = n; inp.value = v;
+                form.appendChild(inp);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+    @Html.AntiForgeryToken()
+}

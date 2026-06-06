@@ -1,0 +1,259 @@
+﻿@model AIResumeScreeningSystem.ViewModels.Candidate.CandidateProfileViewModel
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="d-flex align-items-center gap-2 mb-4">
+    <a asp-action="Profile" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+        <h4 class="fw-bold mb-0">Edit My Profile</h4>
+        <small class="text-muted">Update your professional information</small>
+    </div>
+</div>
+
+<form asp-action="EditProfile" method="post" enctype="multipart/form-data" novalidate>
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="ExistingProfileImagePath" type="hidden" />
+
+    <div class="row g-4">
+
+        <!-- LEFT: Photo + Basic -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-600"><i class="bi bi-camera me-2 text-primary"></i>Profile Photo</h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        @if (!string.IsNullOrEmpty(Model.ExistingProfileImagePath))
+                        {
+                            <img src="@Model.ExistingProfileImagePath" id="profilePreview"
+                                 class="rounded-circle" style="width:100px;height:100px;object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center
+                                justify-content-center fw-bold mx-auto" id="profileInitials"
+                                 style="width:100px;height:100px;font-size:2rem;">
+                                @(!string.IsNullOrEmpty(Model.FirstName) ? Model.FirstName[0].ToString().ToUpper() : "?")
+                            </div>
+                        }
+                    </div>
+                    <label class="btn btn-outline-primary btn-sm" for="ProfileImage">
+                        <i class="bi bi-upload me-1"></i>Choose Photo
+                    </label>
+                    <input asp-for="ProfileImage" type="file" id="ProfileImage"
+                           class="d-none" accept="image/*" onchange="previewImage(this)" />
+                    <small class="text-muted d-block mt-2">JPG, PNG, GIF up to 2MB</small>
+                    <span asp-validation-for="ProfileImage" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-600"><i class="bi bi-toggle-on me-2 text-primary"></i>Availability</h6>
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch">
+                        <input asp-for="IsAvailable" class="form-check-input" role="switch"
+                               style="width:2.5rem;height:1.3rem;" />
+                        <label asp-for="IsAvailable" class="form-check-label ms-2 fw-500"></label>
+                    </div>
+                    <small class="text-muted">Show recruiters you're open to opportunities</small>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-600"><i class="bi bi-link-45deg me-2 text-primary"></i>Social Links</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="LinkedInUrl" class="form-label small fw-500"></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="bi bi-linkedin text-primary"></i>
+                            </span>
+                            <input asp-for="LinkedInUrl" class="form-control border-start-0 ps-0"
+                                   placeholder="https://linkedin.com/in/..." />
+                        </div>
+                        <span asp-validation-for="LinkedInUrl" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="GitHubUrl" class="form-label small fw-500"></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="bi bi-github"></i>
+                            </span>
+                            <input asp-for="GitHubUrl" class="form-control border-start-0 ps-0"
+                                   placeholder="https://github.com/..." />
+                        </div>
+                        <span asp-validation-for="GitHubUrl" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-0">
+                        <label asp-for="PortfolioUrl" class="form-label small fw-500"></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <i class="bi bi-globe text-secondary"></i>
+                            </span>
+                            <input asp-for="PortfolioUrl" class="form-control border-start-0 ps-0"
+                                   placeholder="https://yoursite.com" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Full Details -->
+        <div class="col-lg-8">
+
+            <!-- Basic Info -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-600"><i class="bi bi-person me-2 text-primary"></i>Personal Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="FirstName" class="form-label small fw-500"></label>
+                            <input asp-for="FirstName" class="form-control" />
+                            <span asp-validation-for="FirstName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="LastName" class="form-label small fw-500"></label>
+                            <input asp-for="LastName" class="form-control" />
+                            <span asp-validation-for="LastName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="PhoneNumber" class="form-label small fw-500"></label>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="+1 234 567 8900" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Location" class="form-label small fw-500"></label>
+                            <input asp-for="Location" class="form-control" placeholder="City, Country" />
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Headline" class="form-label small fw-500"></label>
+                            <input asp-for="Headline" class="form-control"
+                                   placeholder="e.g. Senior .NET Developer | 5 years experience" />
+                            <span asp-validation-for="Headline" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Professional Summary -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-600"><i class="bi bi-card-text me-2 text-primary"></i>Professional Summary</h6>
+                </div>
+                <div class="card-body">
+                    <textarea asp-for="Summary" class="form-control" rows="5"
+                              placeholder="Describe your professional background, key skills, and what you're looking for..."></textarea>
+                    <small class="text-muted">This appears at the top of your profile</small>
+                </div>
+            </div>
+
+            <!-- Work Experience -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-600"><i class="bi bi-briefcase me-2 text-primary"></i>Current Role</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="CurrentJobTitle" class="form-label small fw-500"></label>
+                            <input asp-for="CurrentJobTitle" class="form-control"
+                                   placeholder="e.g. Software Engineer" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="CurrentCompany" class="form-label small fw-500"></label>
+                            <input asp-for="CurrentCompany" class="form-control"
+                                   placeholder="e.g. Acme Corp" />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="TotalExperienceYears" class="form-label small fw-500"></label>
+                            <div class="input-group">
+                                <input asp-for="TotalExperienceYears" class="form-control"
+                                       type="number" min="0" max="60" />
+                                <span class="input-group-text">yrs</span>
+                            </div>
+                            <span asp-validation-for="TotalExperienceYears" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Education -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-600"><i class="bi bi-mortarboard me-2 text-primary"></i>Education</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label asp-for="HighestEducation" class="form-label small fw-500"></label>
+                            <select asp-for="HighestEducation" class="form-select">
+                                <option value="">-- Select --</option>
+                                <option>High School</option>
+                                <option>Diploma</option>
+                                <option>Bachelor's Degree</option>
+                                <option>Master's Degree</option>
+                                <option>PhD / Doctorate</option>
+                                <option>Certification</option>
+                                <option>Self-taught</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label asp-for="University" class="form-label small fw-500"></label>
+                            <input asp-for="University" class="form-control"
+                                   placeholder="University or Institution name" />
+                        </div>
+                        <div class="col-md-2">
+                            <label asp-for="GraduationYear" class="form-label small fw-500"></label>
+                            <input asp-for="GraduationYear" class="form-control"
+                                   type="number" min="1950" max="2100" placeholder="2020" />
+                            <span asp-validation-for="GraduationYear" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="d-flex gap-3">
+                <button type="submit" class="btn btn-primary px-5 py-2 fw-600">
+                    <i class="bi bi-save me-2"></i>Save Profile
+                </button>
+                <a asp-action="Profile" class="btn btn-outline-secondary px-4">Cancel</a>
+            </div>
+
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    let preview = document.getElementById('profilePreview');
+                    if (!preview) {
+                        const initials = document.getElementById('profileInitials');
+                        if (initials) {
+                            initials.outerHTML = `<img id="profilePreview" class="rounded-circle"
+                                style="width:100px;height:100px;object-fit:cover;" />`;
+                            preview = document.getElementById('profilePreview');
+                        }
+                    }
+                    if (preview) preview.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}

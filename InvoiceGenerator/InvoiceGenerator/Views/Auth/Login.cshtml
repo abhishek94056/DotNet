@@ -1,36 +1,10 @@
 ﻿@model InvoiceGenerator.ViewModels.LoginViewModel
-@{ ViewData["Title"] = "Login"; Layout = null; }
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login — Invoice Generator</title>
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
-    <style>
-        body { background: #f0f2f5; }
-        .login-card {
-            max-width: 420px;
-            margin: 40px auto;
-            border-radius: 12px;
-            box-shadow: 0 4px 24px rgba(0,0,0,.10);
-        }
-        .login-header {
-            background: #212529;
-            color: #fff;
-            border-radius: 12px 12px 0 0;
-            padding: 24px;
-            text-align: center;
-        }
-        .login-header img { height: 48px; margin-bottom: 8px; }
-    </style>
-</head>
-<body>
-
+@{ 
+    ViewData["Title"] = "Login";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/Auth/Login.css" />
+}
 <div class="login-card card border-0">
 
     <div class="login-header">
@@ -93,7 +67,7 @@
                     </span>
                     <input asp-for="Password" type="password"
                            class="form-control"
-                           placeholder="••••••••"
+                           placeholder="Password"
                            autocomplete="current-password"
                            id="passwordInput" />
                     <button type="button"
@@ -118,13 +92,13 @@
             </button>
         </form>
 
-        <hr class="my-3" />
+        @* <hr class="my-3" />
 
         <div class="text-center small">
             Don't have an account?
             <a asp-action="Register" class="fw-bold">Register</a>
         </div>
-
+        / *@
     </div>
 </div>
 <div class="position-fixed top-0 start-0 p-3" style="z-index:9999">
@@ -137,21 +111,6 @@
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    function togglePwd() {
-        const inp  = document.getElementById('passwordInput');
-        const icon = document.getElementById('eyeIcon');
-        if (inp.type === 'password') {
-            inp.type = 'text';
-            icon.className = 'bi bi-eye-slash';
-        } else {
-            inp.type = 'password';
-            icon.className = 'bi bi-eye';
-        }
-    }
-    <script>
-</script>
-</script>
-</body>
-</html>
+@section Scripts {
+    <script src="~/js/Auth/Login.js"></script>
+}

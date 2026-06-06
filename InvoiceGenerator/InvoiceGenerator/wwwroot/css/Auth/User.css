@@ -1,0 +1,223 @@
+﻿/* ══════════════════════════════════════════════
+   User Master — User.css
+   Full responsive stylesheet
+══════════════════════════════════════════════ */
+
+/* ── Table font & density ── */
+#userTable {
+    font-size: 0.75rem;
+}
+
+    #userTable thead th {
+        font-size: 0.72rem;
+        padding: 5px 6px;
+        white-space: nowrap;
+    }
+
+    #userTable tbody td {
+        padding: 4px 6px;
+        vertical-align: middle;
+    }
+
+    #userTable tbody tr:nth-child(odd) td {
+        background-color: #f8f9fa !important;
+    }
+
+    #userTable tbody tr:nth-child(even) td {
+        background-color: #eef2ff !important;
+    }
+
+    #userTable tbody tr:hover td {
+        background-color: #cfe2ff !important;
+        cursor: pointer;
+    }
+
+    /* ── Action buttons tiny ── */
+    #userTable .btn-sm {
+        padding: 1px 5px;
+        font-size: 0.7rem;
+    }
+
+    /* ── Badge size ── */
+    #userTable .badge {
+        font-size: 0.68rem;
+    }
+
+
+/* ══════════════════════════════════════════════
+   PAGE HEADER — responsive
+══════════════════════════════════════════════ */
+
+.page-header-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+    .page-header-bar h6 {
+        margin-bottom: 0;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+.page-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+#searchInput {
+    width: 180px;
+    font-size: 0.78rem;
+    min-width: 0;
+}
+
+/* Mobile: stack header vertically, search goes full-width */
+@media (max-width: 480px) {
+    .page-header-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-header-actions {
+        width: 100%;
+    }
+
+    #searchInput {
+        width: 100%;
+        flex: 1 1 120px;
+    }
+}
+
+
+/* ══════════════════════════════════════════════
+   PAGINATION BAR — responsive
+══════════════════════════════════════════════ */
+
+.pagination-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    font-size: 0.78rem;
+}
+
+    .pagination-bar .page-info {
+        color: #555;
+        white-space: nowrap;
+    }
+
+    .pagination-bar button {
+        min-width: 28px;
+        height: 28px;
+        font-size: 0.72rem;
+        padding: 0 5px;
+        border-radius: 4px;
+        line-height: 1;
+    }
+
+        .pagination-bar button.active-page {
+            background-color: #dc3545;
+            color: #fff;
+            border-color: #dc3545;
+        }
+
+        .pagination-bar button:disabled {
+            opacity: 0.45;
+            pointer-events: none;
+        }
+
+/* Rows-per-page select */
+#rowsPerPageSelect {
+    width: 75px;
+    height: 28px;
+    font-size: 0.72rem;
+    padding: 0 4px;
+}
+
+/* Mobile: center pagination, record-count on its own line */
+@media (max-width: 576px) {
+    .pagination-bar {
+        justify-content: center;
+        gap: 3px;
+    }
+
+        .pagination-bar .page-info:first-child {
+            width: 100%;
+            text-align: center;
+            order: -1;
+        }
+}
+
+
+/* ══════════════════════════════════════════════
+   TABLE — horizontal scroll on small screens
+   (Bootstrap .table-responsive already handles
+   this; these rules are an extra safety net)
+══════════════════════════════════════════════ */
+
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+    border-radius: 4px;
+}
+
+
+/* ══════════════════════════════════════════════
+   ADD USER MODAL — responsive form
+══════════════════════════════════════════════ */
+
+/* Tighten up the modal on very small screens */
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+
+    .modal-body .row.g-2 > [class^="col-md-"] {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+
+/* ══════════════════════════════════════════════
+   STATUS CONFIRM MODAL
+══════════════════════════════════════════════ */
+
+#statusModal .modal-body {
+    font-size: 0.82rem;
+}
+
+
+/* ══════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════ */
+
+#toast {
+    min-width: 220px;
+    font-size: 0.8rem;
+}
+
+
+/* ══════════════════════════════════════════════
+   UTILITY — small input group text
+══════════════════════════════════════════════ */
+
+.input-group-sm .input-group-text {
+    font-size: 0.78rem;
+    padding: 4px 8px;
+}
+
+.form-label.small {
+    font-size: 0.75rem;
+}
+
+.invalid-feedback {
+    font-size: 0.72rem;
+    min-height: 14px;
+}

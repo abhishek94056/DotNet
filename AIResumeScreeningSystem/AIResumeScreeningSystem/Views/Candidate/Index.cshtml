@@ -1,0 +1,199 @@
+﻿@model AIResumeScreeningSystem.ViewModels.Candidate.CandidateListViewModel
+@{ ViewData["Title"] = "Candidates"; }
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0"><i class="bi bi-people me-2 text-primary"></i>Candidate Pool</h4>
+        <small class="text-muted">@Model.TotalCount candidate(s) found</small>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    @foreach (var (label, count, color, icon) in new[] {
+        ("Total", Model.TotalCandidates.ToString(), "primary", "bi-people"),
+        ("Available", Model.AvailableCandidates.ToString(), "success", "bi-person-check"),
+        ("New This Month", Model.NewThisMonthCount.ToString(), "info", "bi-person-plus"),
+        ("Shown", Model.TotalCount.ToString(), "secondary", "bi-filter")
+    })
+    {
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted small mb-1">@label</p>
+                            <h3 class="fw-bold mb-0 text-@color">@count</h3>
+                        </div>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-@color bg-opacity-10"
+                             style="width:46px;height:46px;">
+                            <i class="bi @icon text-@color fs-5"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Search Bar -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body py-3">
+        <form asp-action="Index" method="get" class="row g-2 align-items-end">
+            <div class="col-12 col-md-4">
+                <input asp-for="Search.Keyword" class="form-control form-control-sm"
+                       placeholder="🔍 Name, title, skill, company..." />
+            </div>
+            <div class="col-6 col-md-2">
+                <input asp-for="Search.Location" class="form-control form-control-sm"
+                       placeholder="Location" />
+            </div>
+            <div class="col-6 col-md-2">
+                <input asp-for="Search.Skill" class="form-control form-control-sm"
+                       placeholder="Skill (e.g. C#)" />
+            </div>
+            <div class="col-4 col-md-1">
+                <input asp-for="Search.MinExperience" type="number" min="0"
+                       class="form-control form-control-sm" placeholder="Min Exp" />
+            </div>
+            <div class="col-4 col-md-1">
+                <input asp-for="Search.MaxExperience" type="number" min="0"
+                       class="form-control form-control-sm" placeholder="Max Exp" />
+            </div>
+            <div class="col-4 col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-primary btn-sm flex-grow-1">Filter</button>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">✕</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Candidate Cards Grid -->
+@if (!Model.Candidates.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-people text-muted" style="font-size:3.5rem;"></i>
+        <h5 class="text-muted mt-3">No candidates found</h5>
+        <p class="text-muted small">Try adjusting your search filters.</p>
+    </div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        @foreach (var candidate in Model.Candidates)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100 candidate-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            @if (!string.IsNullOrEmpty(candidate.ProfileImagePath))
+                            {
+                                <img src="@candidate.ProfileImagePath" class="rounded-circle flex-shrink-0"
+                                     style="width:52px;height:52px;object-fit:cover;" />
+                            }
+                            else
+                            {
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center
+                                            justify-content-center fw-bold flex-shrink-0"
+                                     style="width:52px;height:52px;font-size:1.2rem;">
+                                    @candidate.InitialsAvatar
+                                </div>
+                            }
+                            <div class="overflow-hidden">
+                                <a asp-action="Details" asp-route-id="@candidate.Id"
+                                   class="fw-bold text-dark text-decoration-none d-block text-truncate">
+                                    @candidate.FullName
+                                </a>
+                                @if (!string.IsNullOrEmpty(candidate.Headline))
+                                {
+                                    <small class="text-muted d-block text-truncate">@candidate.Headline</small>
+                                }
+                                <span class="badge @candidate.AvailabilityBadgeClass mt-1" style="font-size:10px;">
+                                    @(candidate.IsAvailable ? "Available" : "Unavailable")
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Meta -->
+                        <div class="d-flex flex-wrap gap-2 mb-3 text-muted small">
+                            @if (!string.IsNullOrEmpty(candidate.Location))
+                            {
+                                <span><i class="bi bi-geo-alt me-1"></i>@candidate.Location</span>
+                            }
+                            <span><i class="bi bi-briefcase me-1"></i>@candidate.TotalExperienceYears yr(s)</span>
+                            @if (!string.IsNullOrEmpty(candidate.HighestEducation))
+                            {
+                                <span><i class="bi bi-mortarboard me-1"></i>@candidate.HighestEducation</span>
+                            }
+                        </div>
+
+                        <!-- Skills Preview -->
+                        <div class="d-flex flex-wrap gap-1 mb-3">
+                            @foreach (var skill in candidate.Skills.Take(4))
+                            {
+                                <span class="badge bg-primary bg-opacity-10 text-primary" style="font-size:10px;">
+                                    @skill.SkillName
+                                </span>
+                            }
+                            @if (candidate.Skills.Count > 4)
+                            {
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary" style="font-size:10px;">
+                                    +@(candidate.Skills.Count - 4)
+                                </span>
+                            }
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="d-flex justify-content-between text-muted small mb-3 border-top pt-2">
+                            <span><i class="bi bi-send me-1"></i>@candidate.TotalApplications Apps</span>
+                            <span><i class="bi bi-star me-1"></i>@candidate.ShortlistedCount Shortlisted</span>
+                            <span><i class="bi bi-file-earmark me-1"></i>@candidate.TotalResumes CV</span>
+                        </div>
+
+                        <a asp-action="Details" asp-route-id="@candidate.Id"
+                           class="btn btn-outline-primary btn-sm w-100">
+                            <i class="bi bi-eye me-1"></i>View Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+                Showing @((Model.CurrentPage - 1) * Model.PageSize + 1)–@(Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalCount))
+                of @Model.TotalCount
+            </small>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-Search.Page="@(Model.CurrentPage - 1)"
+                       asp-route-Search.Keyword="@Model.Search.Keyword">«</a>
+                </li>
+                @for (var i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" asp-action="Index"
+                           asp-route-Search.Page="@i"
+                           asp-route-Search.Keyword="@Model.Search.Keyword">@i</a>
+                    </li>
+                }
+                <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index"
+                       asp-route-Search.Page="@(Model.CurrentPage + 1)"
+                       asp-route-Search.Keyword="@Model.Search.Keyword">»</a>
+                </li>
+            </ul>
+        </nav>
+    }
+}
+
+<style>
+    .candidate-card { transition: transform .15s; }
+    .candidate-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.1) !important; }
+</style>

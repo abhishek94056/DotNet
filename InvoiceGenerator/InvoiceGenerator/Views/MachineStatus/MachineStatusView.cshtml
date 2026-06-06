@@ -1,0 +1,484 @@
+﻿@model List<MachineStatusViewModel>
+@{
+    ViewBag.Title = "Machine Status Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string activeFilter = ViewBag.Filter as string ?? "All";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg:         #eceff4;
+    --surface:    #ffffff;
+    --border:     #dde2ec;
+    --text:       #1e2535;
+    --muted:      #7b8aab;
+
+    --idle:       #f59e0b;
+    --idle-bg:    #fff8ec;
+    --inuse:      #16a34a;
+    --inuse-bg:   #edfaf3;
+    --breakdown:  #dc2626;
+    --breakdown-bg:#fff0f0;
+    --shutdown:   #6366f1;
+    --shutdown-bg:#f0f0ff;
+    --prev:       #0ea5e9;
+    --prev-bg:    #f0f9ff;
+
+    --header-green: #16a34a;
+    --header-red:   #dc2626;
+    --header-orange:#f59e0b;
+    --header-indigo:#6366f1;
+    --header-sky:   #0ea5e9;
+    --header-gray:  #94a3b8;
+
+    --shadow: 0 2px 12px rgba(30,37,53,.08);
+    --shadow-hover: 0 6px 24px rgba(30,37,53,.14);
+}
+
+body {
+    background: var(--bg);
+    font-family: 'Nunito', sans-serif;
+    color: var(--text);
+    padding: 20px 20px 40px;
+    min-height: 100vh;
+}
+
+/* ── Page title ── */
+.dash-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 14px;
+}
+.dash-title span { color: #16a34a; }
+
+/* ── Filter tab bar ── */
+.filter-bar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    box-shadow: var(--shadow);
+    align-items: center;
+}
+
+.filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    text-decoration: none;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid transparent;
+    transition: all .18s;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.filter-btn:hover {
+    background: var(--bg);
+    color: var(--text);
+}
+.filter-btn.active {
+    background: var(--text);
+    color: #fff;
+    border-color: var(--text);
+}
+.filter-btn.active.f-idle       { background: var(--idle);     border-color: var(--idle); }
+.filter-btn.active.f-inuse      { background: var(--inuse);    border-color: var(--inuse); }
+.filter-btn.active.f-breakdown  { background: var(--breakdown);border-color: var(--breakdown); }
+.filter-btn.active.f-shutdown   { background: var(--shutdown); border-color: var(--shutdown); }
+.filter-btn.active.f-prev       { background: var(--prev);     border-color: var(--prev); }
+/* Left + Right colour bar on card based on status */
+.machine-card.s-idle       { border-left: 4px solid var(--idle);      border-right: 4px solid var(--idle);border-top: 4px solid var(--idle); border-bottom: 4px solid var(--idle); }
+.machine-card.s-inuse      { border-left: 4px solid var(--inuse);     border-right: 4px solid var(--inuse); border-top: 4px solid var(--inuse);     border-bottom: 4px solid var(--inuse); }
+.machine-card.s-breakdown  { border-left: 4px solid var(--breakdown); border-right: 4px solid var(--breakdown); border-top: 4px solid var(--breakdown); border-bottom: 4px solid var(--breakdown);}
+.machine-card.s-shutdown   { border-left: 4px solid var(--shutdown);  border-right: 4px solid var(--shutdown); border-top: 4px solid var(--shutdown);  border-bottom: 4px solid var(--shutdown); }
+.machine-card.s-prev       { border-left: 4px solid var(--prev);      border-right: 4px solid var(--prev);  border-top: 4px solid var(--prev);      border-bottom: 4px solid var(--prev); }
+
+/* Card header bg by status */
+.machine-card.s-idle      .card-header { background: var(--idle-bg);      border-bottom-color: var(--idle); }
+.machine-card.s-inuse     .card-header { background: var(--inuse-bg);     border-bottom-color: var(--inuse); }
+.machine-card.s-breakdown .card-header { background: var(--breakdown-bg); border-bottom-color: var(--breakdown); }
+.machine-card.s-shutdown  .card-header { background: var(--shutdown-bg);  border-bottom-color: var(--shutdown); }
+.machine-card.s-prev      .card-header { background: var(--prev-bg);      border-bottom-color: var(--prev); }
+
+/* Card footer bg by status */
+.machine-card.s-idle      .card-footer { background: var(--idle-bg);      border-top-color: var(--idle); }
+.machine-card.s-inuse     .card-footer { background: var(--inuse-bg);     border-top-color: var(--inuse); }
+.machine-card.s-breakdown .card-footer { background: var(--breakdown-bg); border-top-color: var(--breakdown); }
+.machine-card.s-shutdown  .card-footer { background: var(--shutdown-bg);  border-top-color: var(--shutdown); }
+.machine-card.s-prev      .card-footer { background: var(--prev-bg);      border-top-color: var(--prev); }
+.filter-count {
+    background: rgba(255,255,255,.25);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    font-weight: 700;
+}
+.filter-btn:not(.active) .filter-count {
+    background: var(--border);
+    color: var(--muted);
+}
+
+.filter-divider {
+    width: 1px; height: 24px;
+    background: var(--border);
+    margin: 0 4px;
+}
+
+/* ── Refresh icon btn ── */
+.refresh-btn {
+    margin-left: auto;
+    width: 34px; height: 34px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted);
+    transition: all .18s;
+    flex-shrink: 0;
+}
+.refresh-btn:hover { background: var(--text); color: #fff; border-color: var(--text); }
+
+/* ── Cards grid ── */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+/* ── Single card ── */
+.machine-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: box-shadow .2s, transform .2s;
+    animation: cardIn .35s ease both;
+}
+.machine-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+@@keyframes cardIn {
+    from { opacity:0; transform: translateY(10px); }
+    to   { opacity:1; transform: translateY(0); }
+}
+
+/* nth-child stagger */
+.machine-card:nth-child(1) { animation-delay:.04s }
+.machine-card:nth-child(2) { animation-delay:.08s }
+.machine-card:nth-child(3) { animation-delay:.12s }
+.machine-card:nth-child(4) { animation-delay:.16s }
+.machine-card:nth-child(5) { animation-delay:.20s }
+.machine-card:nth-child(6) { animation-delay:.24s }
+
+/* Card header */
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+}
+
+.machine-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    flex: 1;
+    color: var(--text);
+}
+
+/* Status badge in header */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 24px;
+    border-radius: 5px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 0 6px;
+    letter-spacing: .3px;
+}
+
+.badge-idle       { background: var(--idle);      color: #fff; }
+.badge-inuse      { background: var(--inuse);     color: #fff; }
+.badge-breakdown  { background: var(--breakdown); color: #fff; }
+.badge-shutdown   { background: var(--shutdown);  color: #fff; }
+.badge-prev       { background: var(--prev);      color: #fff; }
+.badge-unknown    { background: var(--header-gray); color:#fff; }
+
+/* Three number counters in header */
+.header-counters {
+    display: flex;
+    gap: 6px;
+}
+.hc {
+    min-width: 34px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 5px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px; font-weight: 700;
+    background: #e2e8f0;
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+.hc.highlight { background: var(--inuse); color: #fff; border-color: var(--inuse); }
+
+/* Card body */
+.card-body {
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.4;
+}
+
+.info-icon {
+    width: 18px; height: 18px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+}
+
+/* status dot icon */
+.dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+.dot-idle       { background: var(--idle); }
+.dot-inuse      { background: var(--inuse); }
+.dot-breakdown  { background: var(--breakdown); }
+.dot-shutdown   { background: var(--shutdown); }
+.dot-prev       { background: var(--prev); }
+
+/* work icon */
+.wrench-icon { color: #94a3b8; font-size:13px; }
+
+/* item icon */
+.item-icon { color: #f59e0b; font-size:13px; }
+
+/* person icon */
+.person-icon { color: #3b82f6; font-size:13px; }
+
+/* Card footer counters */
+.card-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border-top: 1px solid var(--border);
+}
+
+.footer-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 4px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    border-right: 1px solid var(--border);
+}
+.footer-num:last-child { border-right: none; }
+.footer-num.zero { color: var(--muted); }
+
+/* Empty state */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-size: 15px;
+}
+
+/* Left-side colour bar on card based on status */
+.machine-card.s-idle       { border-left: 4px solid var(--idle); }
+.machine-card.s-inuse      { border-left: 4px solid var(--inuse); }
+.machine-card.s-breakdown  { border-left: 4px solid var(--breakdown); }
+.machine-card.s-shutdown   { border-left: 4px solid var(--shutdown); }
+.machine-card.s-prev       { border-left: 4px solid var(--prev); }
+</style>
+
+@{
+    // helper: css class for status
+    Func<string, string> statusClass = s => s?.ToLower() switch {
+        "idle"                   => "idle",
+        "in-use"                 => "inuse",
+        "breakdown"              => "breakdown",
+        "shutdown"               => "shutdown",
+        "preventive maintenance" => "prev",
+        _                        => "unknown"
+    };
+
+    Func<string, string> badgeClass = s => "badge-" + statusClass(s);
+    Func<string, string> cardClass  = s => "s-" + statusClass(s);
+
+    Func<string, string> shortStatus = s => s?.ToLower() switch {
+        "idle"                   => "0",
+        "in-use"                 => "●",
+        "breakdown"              => "BD",
+        "shutdown"               => "SD",
+        "preventive maintenance" => "PM",
+        _                        => "?"
+    };
+}
+
+<div class="dash-title">Machine <span>Status</span> Dashboard</div>
+
+<!-- Filter tab bar -->
+<div class="filter-bar">
+    <a href="@Url.Action("Index","MachineStatus",new{filter="All"})"
+       class="filter-btn @(activeFilter=="All"?"active":"")">
+        All <span class="filter-count">@ViewBag.AllCount</span>
+    </a>
+    <div class="filter-divider"></div>
+    <a href="@Url.Action("Index","MachineStatus",new{filter="Idle"})"
+       class="filter-btn f-idle @(activeFilter=="Idle"?"active":"")">
+        Idle <span class="filter-count">@ViewBag.IdleCount</span>
+    </a>
+    <a href="@Url.Action("Index","MachineStatus",new{filter="Breakdown"})"
+       class="filter-btn f-breakdown @(activeFilter=="Breakdown"?"active":"")">
+        Breakdown <span class="filter-count">@ViewBag.BreakdownCount</span>
+    </a>
+    <a href="@Url.Action("Index","MachineStatus",new{filter="Preventive Maintenance"})"
+       class="filter-btn f-prev @(activeFilter=="Preventive Maintenance"?"active":"")">
+        Preventive Maintenance <span class="filter-count">@ViewBag.PreventiveCount</span>
+    </a>
+    <a href="@Url.Action("Index","MachineStatus",new{filter="Shutdown"})"
+       class="filter-btn f-shutdown @(activeFilter=="Shutdown"?"active":"")">
+        Shutdown <span class="filter-count">@ViewBag.ShutdownCount</span>
+    </a>
+    <a href="@Url.Action("Index","MachineStatus",new{filter="In-use"})"
+       class="filter-btn f-inuse @(activeFilter=="In-use"?"active":"")">
+        In-use <span class="filter-count">@ViewBag.InUseCount</span>
+    </a>
+
+    <button class="refresh-btn" onclick="location.reload()" title="Refresh">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 4v6h-6"/><path d="M1 20v-6h6"/>
+            <path d="M3.51 9a9 9 0 0114.86-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        </svg>
+    </button>
+</div>
+
+<!-- Cards grid -->
+<div class="cards-grid">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">No machines found for the selected filter.</div>
+    }
+
+    @foreach (var m in Model)
+    {
+        string sc = statusClass(m.Status);
+        string bc = badgeClass(m.Status);
+        string cc = cardClass(m.Status);
+        bool c1hi = m.Counter1 > 0;
+
+        <div class="machine-card @cc">
+            <!-- Header: name | status badge | 3 counters -->
+            <div class="card-header">
+                <div class="machine-name">@m.MachineName</div>
+            </div>
+
+            <!-- Body: 4 rows of info -->
+            <div class="card-body">
+                <!-- Activity row (status icon) -->
+                @if (!string.IsNullOrEmpty(m.Activity))
+                {
+                    <div class="info-row">
+                        <div class="info-icon">
+                            <span class="dot dot-@sc"></span>
+                        </div>
+                        <span>@m.Activity</span>
+                    </div>
+                }
+
+                <!-- Work type row -->
+                @if (!string.IsNullOrEmpty(m.WorkType))
+                {
+                    <div class="info-row">
+                        <div class="info-icon">
+                            <!-- wrench svg -->
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+                            </svg>
+                        </div>
+                        <span>@m.WorkType</span>
+                    </div>
+                }
+
+                <!-- Item name row -->
+                @if (!string.IsNullOrEmpty(m.ItemName))
+                {
+                    <div class="info-row">
+                        <div class="info-icon">
+                            <!-- box svg -->
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>
+                            </svg>
+                        </div>
+                        <span style="font-size:12px;color:#475569;">@m.ItemName</span>
+                    </div>
+                }
+
+                <!-- Assigned to row -->
+                <div class="info-row">
+                    <div class="info-icon">
+                        <!-- person svg -->
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <span>@(string.IsNullOrEmpty(m.AssignedTo) ? "Not Assigned" : m.AssignedTo)</span>
+                </div>
+            </div>
+
+            <!-- Footer: three large numbers -->
+            <div class="card-footer">
+                <div class="footer-num @(m.Counter1==0?"zero":"")">@m.Counter1</div>
+                <div class="footer-num @(m.Counter2==0?"zero":"")">@m.Counter2</div>
+                <div class="footer-num @(m.Counter3==0?"zero":"")">@m.Counter3</div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    // Auto-refresh every 60 seconds
+    setTimeout(() => location.reload(), 60000);
+</script>

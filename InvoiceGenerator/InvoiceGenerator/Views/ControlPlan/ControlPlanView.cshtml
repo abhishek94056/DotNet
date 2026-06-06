@@ -1,0 +1,1012 @@
+﻿@{
+    ViewData["Title"] = "Control Plan – Item Wise";
+}
+
+<style>
+    :root {
+        --header-bg: #0f2d40;
+        --row-odd: #f8f9fa;
+        --row-even: #e8f4ff;
+        --row-hover: #b8d8f8;
+    }
+
+    /* HEADER */
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+        .page-header h6 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+    .header-controls {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    /* TABLE */
+    #cpTable {
+        width: 100%;
+        min-width: 3200px;
+        font-size: 0.69rem;
+    }
+
+        #cpTable thead th {
+            font-size: 0.66rem;
+            padding: 4px 5px;
+            white-space: nowrap;
+            text-align: center;
+            background: var(--header-bg);
+            color: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        #cpTable tbody td {
+            padding: 3px 5px;
+            vertical-align: middle;
+            white-space: nowrap;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #cpTable tbody tr:nth-child(odd) td {
+            background: var(--row-odd);
+        }
+
+        #cpTable tbody tr:nth-child(even) td {
+            background: var(--row-even);
+        }
+
+        #cpTable tbody tr:hover td {
+            background: var(--row-hover) !important;
+            cursor: pointer;
+        }
+
+        #cpTable .btn-sm {
+            padding: 1px 4px;
+            font-size: 0.65rem;
+        }
+
+    /* TABLE WRAPPER */
+    .table-wrap {
+        max-height: 450px;
+        overflow-y: auto;
+        overflow-x: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* PAGINATION */
+    .pagination-bar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 6px;
+        font-size: 0.72rem;
+    }
+
+        .pagination-bar button {
+            min-width: 28px;
+            height: 26px;
+            font-size: 0.68rem;
+            padding: 0 5px;
+            border-radius: 4px;
+        }
+
+            .pagination-bar button.active-pg {
+                background: #0ea5e9;
+                color: #fff;
+                border-color: #0ea5e9;
+            }
+
+    /* ZONE VALUES */
+    .zone-val {
+        color: #0369a1;
+        font-weight: 600;
+    }
+
+    /* SECTION HEADER */
+    .sec-hdr {
+        font-size: 0.70rem;
+        font-weight: 700;
+        color: #fff;
+        background: #0f2d40;
+        padding: 3px 10px;
+        border-radius: 4px;
+        margin: 10px 0 6px;
+    }
+
+    /* MODAL */
+    .modal .form-label {
+        margin-bottom: 3px;
+    }
+
+    .modal .input-group-text {
+        height: 31px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal .form-control-sm,
+    .modal .form-select-sm {
+        font-size: 0.75rem;
+    }
+
+    /* LOADING */
+    #loadingRow td {
+        text-align: center;
+        padding: 20px;
+        color: #888;
+    }
+
+    /* MOBILE */
+    @@media (max-width:575px) {
+
+        .page-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .header-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+            .header-controls select,
+            .header-controls input,
+            .header-controls button {
+                width: 100% !important;
+            }
+
+        #cpTable {
+            min-width: 3200px;
+        }
+
+        .pagination-bar {
+            justify-content: center;
+        }
+
+            .pagination-bar #pageNumbers {
+                flex-wrap: wrap;
+            }
+
+        .modal-dialog {
+            margin: .5rem;
+        }
+
+        .modal .row > div {
+            margin-bottom: 2px;
+        }
+
+        .sec-hdr {
+            text-align: center;
+        }
+    }
+
+    /* TABLET */
+    @@media (min-width:576px) and (max-width:991px) {
+
+        #cpTable {
+            min-width: 3000px;
+        }
+
+        .pagination-bar {
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- ── PAGE HEADER ── -->
+<div class="page-header">
+    <h6 class="mb-0 fw-bold">
+        <i class="bi bi-clipboard2-data me-2 text-primary"></i>
+        Control Plan – Item Wise
+        @* <span class="badge bg-primary ms-2" style="font-size:0.62rem">
+            Dept 1 Only
+        </span> *@
+    </h6>
+    <div class="header-controls">
+        <select id="deptFilter" class="form-select form-select-sm"
+                style="width:160px" onchange="onDeptChange()">
+            <option value="0">-- Department --</option>
+        </select>
+
+        <input type="text" id="searchInput"
+               class="form-control form-control-sm"
+               placeholder="🔍 Search..."
+               style="width:150px" oninput="applyFilter()" />
+
+        <button class="btn btn-primary btn-sm text-white"
+                id="btnAdd">
+            <i class="bi bi-plus-lg me-1"></i>Add Control Plan
+        </button>
+    </div>
+</div>
+
+
+<!-- ── TABLE ── -->
+<div class="table-wrap">
+    <table class="table table-bordered mb-0" id="cpTable">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Dept</th>
+                <th>Item Code</th>
+                <th>Description</th>
+                <th>Press. Time</th>
+                <th>Punch. Press.</th>
+                <th>Set mm</th>
+                <th>Cycle Delay</th>
+                <th>Vaccum</th>
+                <th>Cooling</th>
+                <th>Ejection</th>
+                <th>Winder</th>
+                <th>Z1</th>
+                <th>Z2</th>
+                <th>Z3</th>
+                <th>Z4</th>
+                <th>Z5</th>
+                <th>Z6</th>
+                <th>Z7</th>
+                <th>Z8</th>
+                <th>Z9</th>
+                <th>Z10</th>
+                <th>Z11</th>
+                <th>Z12</th>
+                <th>Z13</th>
+                <th>Z14</th>
+                <th>Z15</th>
+                <th>Z16</th>
+                <th>Packing</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <tr id="loadingRow">
+                <td colspan="32">
+                    <i class="bi bi-primary-circle text-primary me-2"></i>
+                    Select Department to load Control Plan records.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ── PAGINATION ── -->
+<div class="pagination-bar">
+    <span id="pageInfo" class="text-muted"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnFirst" onclick="goToPage(1)">«</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnPrev"  onclick="goToPage(currentPage-1)">‹</button>
+    <span id="pageNumbers" class="d-flex gap-1"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnNext"  onclick="goToPage(currentPage+1)">›</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnLast"  onclick="goToPage(totalPages)">»</button>
+    <select id="rppSelect" class="form-select form-select-sm"
+            style="width:75px" onchange="changeRPP()">
+        <option value="10" selected>10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+    </select>
+    <span class="text-muted">/ page</span>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ADD / EDIT MODAL
+══════════════════════════════════════════════ -->
+<div class="modal fade" id="cpModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered
+                modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header bg-dark text-white py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-clipboard2-data me-2"></i>
+                    <span id="modalTitleText">Add Control Plan</span>
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="cpForm" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="fSrNo"         value="0" />
+
+                    <!-- ── SECTION 1: Item ── -->
+                    <div class="sec-hdr">
+                        <i class="bi bi-upc-scan me-1"></i>
+                        Item Selection
+                    </div>
+                      <!-- Department -->
+                      <div class="row g-3">
+    <div class="col-md-4">
+        <label class="form-label fw-semibold small">
+            Department <span class="text-danger">*</span>
+        </label>
+
+        <div class="input-group input-group-sm">
+            <span class="input-group-text">
+                <i class="bi bi-diagram-3"></i>
+            </span>
+
+            <select id="fDepartmentId"
+                    class="form-select form-select-sm"
+                    onchange="onFormDepartmentChange()">
+                <option value="0">-- Select Department --</option>
+            </select>
+        </div>
+
+        <div class="invalid-feedback d-block"
+             id="err-department"></div>
+    </div>
+
+                    
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">
+                                Item Code
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-upc-scan"></i>
+                                </span>
+                                <select id="fItemId"
+                                        class="form-select form-select-sm"
+                                        onchange="onItemChange()">
+                                    <option value="0">
+                                        -- Select Item --
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-item"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">
+                                Description
+                            </label>
+                            <input type="text" id="fItemDesc"
+                                   class="form-control form-control-sm bg-light"
+                                   readonly placeholder="Auto-filled" />
+                        </div>
+                    </div>
+
+                    <!-- ── SECTION 2: Timing Parameters ── -->
+                    <div class="sec-hdr">
+                        <i class="bi bi-stopwatch me-1"></i>
+                        Timing Parameters
+                    </div>
+                    <div class="row g-2">
+                        @{
+                            var timingFields = new[]
+                            {
+                                ("fPressureTime",    "Pressure Time",    "e.g. 5 sec"),
+                                ("fPunchingPressure","Punching Pressure","e.g. 120 bar"),
+                                ("fSetMm",           "Set mm",           "e.g. 50 mm"),
+                                ("fCycleDelay",      "Cycle Delay Time", "e.g. 2 sec"),
+                                ("fVaccumTime",      "Vaccum Time",      "e.g. 3 sec"),
+                                ("fCoolingTime",     "Cooling Time",     "e.g. 8 sec"),
+                                ("fEjectionTime",    "Ejection Time",    "e.g. 2 sec"),
+                                ("fWinderTime",      "Winder Time",      "e.g. 1 sec")
+                            };
+                        }
+                        @foreach (var (id, label, ph) in timingFields)
+                        {
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold small">
+                                    @label
+                                </label>
+                                <input type="text" id="@id"
+                                       class="form-control form-control-sm"
+                                       placeholder="@ph" />
+                            </div>
+                        }
+                    </div>
+
+                    <!-- ── SECTION 3: Zone Temperatures (Z1–Z16) ── -->
+                    <div class="sec-hdr">
+                        <i class="bi bi-thermometer-half me-1"></i>
+                        Zone Temperatures (Z1 – Z16)
+                    </div>
+                    <div class="row g-2">
+                        @for (int z = 1; z <= 16; z++)
+                        {
+                            <div class="col-md-3 col-sm-6">
+                                <label class="form-label fw-semibold small">
+                                    Zone @z
+                                </label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"
+                                          style="font-size:0.65rem;
+                                                 background:#e0f2fe;
+                                                 color:#0369a1">
+                                        Z@z
+                                    </span>
+                                    <input type="text" id="fZone@(z)"
+                                           class="form-control form-control-sm"
+                                           placeholder="e.g. 180°C" />
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- ── SECTION 4: Packing ── -->
+                    <div class="sec-hdr">
+                        <i class="bi bi-box-seam me-1"></i>
+                        Packing Details
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <textarea id="fPackingDetails"
+                                      class="form-control form-control-sm"
+                                      rows="3"
+                                      placeholder="Enter packing details, qty per box, label info, etc."></textarea>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Cancel
+                </button>
+                <button type="button"
+                        class="btn btn-primary btn-sm text-white"
+                        id="btnSave">
+                    <i class="bi bi-floppy me-1"></i>Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ── DELETE CONFIRM MODAL ── -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Confirm Delete
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center small">
+                <p class="mb-1">Delete control plan for</p>
+                <strong id="deleteLabel"></strong>?
+            </div>
+            <div class="modal-footer justify-content-center py-2">
+                <button class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger btn-sm"
+                        id="btnConfirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index:9999">
+    <div id="toast" class="toast align-items-center text-white border-0"
+         role="alert" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body small" id="toastMsg"></div>
+            <button type="button"
+                    class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+$(function () {
+
+    // ════════════════════════════════════════════
+    // STATE
+    // ════════════════════════════════════════════
+    let allData         = [];
+    let filteredData    = [];
+    let currentPage     = 1;
+    let rowsPerPage     = 10;
+    let totalPages      = 1;
+    let pendingDeleteId = null;
+    let currentDeptId   = 0;
+    let itemDescMap     = {};
+
+    const cpModal     = new bootstrap.Modal($('#cpModal')[0]);
+    const deleteModal = new bootstrap.Modal($('#deleteModal')[0]);
+    const toastEl     = $('#toast')[0];
+    const bsToast     = new bootstrap.Toast(toastEl, { delay: 3000 });
+
+    // ── Field ID mappings ──
+    const timingMap = [
+        ['fPressureTime',    'pressure_Time'],
+        ['fPunchingPressure','punching_Pressure'],
+        ['fSetMm',           'set_mm'],
+        ['fCycleDelay',      'cycle_Delay_Time'],
+        ['fVaccumTime',      'vaccum_Time'],
+        ['fCoolingTime',     'cooling_Time'],
+        ['fEjectionTime',    'ejection_Time'],
+        ['fWinderTime',      'winder_Time']
+    ];
+
+    // ════════════════════════════════════════════
+    // LOAD DEPARTMENTS (only show dept=1 relevant)
+    // ════════════════════════════════════════════
+    $.ajax({
+        url: '/ControlPlan/GetDepartments',
+        method: 'GET', dataType: 'json',
+       success: function (depts) {
+
+    let headerOpts =
+        '<option value="0">-- Department --</option>';
+
+    let modalOpts =
+        '<option value="0">-- Select Department --</option>';
+
+    depts.forEach(d => {
+
+        headerOpts += `
+            <option value="${d.DepartmentId}">
+                ${d.Department}
+            </option>`;
+
+        modalOpts += `
+            <option value="${d.DepartmentId}">
+                ${d.Department}
+            </option>`;
+    });
+
+    $('#deptFilter').html(headerOpts);
+
+    $('#fDepartmentId').html(modalOpts);
+}
+    });
+    window.loadItemsForModal = function () {
+
+    const deptId =
+        parseInt($('#fDepartmentId').val()) || 0;
+
+    if (!deptId)
+    {
+        $('#fItemId').html(
+            '<option value="0">-- Select Item --</option>');
+        return;
+    }
+
+    loadItems(deptId);
+};
+
+
+
+window.onFormDepartmentChange = function () {
+
+    const deptId =
+        parseInt($('#fDepartmentId').val()) || 0;
+
+    if (!deptId) {
+        $('#fItemId').html(
+            '<option value="0">-- Select Item --</option>');
+        return;
+    }
+
+    loadItems(deptId);
+};
+    // ════════════════════════════════════════════
+    // DEPT CHANGE
+    // ════════════════════════════════════════════
+   window.onDeptChange = function ()
+{
+    currentDeptId =
+      parseInt($('#deptFilter').val()) || 0;
+
+    if (!currentDeptId)
+    {
+        allData = [];
+        filteredData = [];
+        renderTable();
+        return;
+    }
+
+    loadData();
+};
+
+    // ── Load items for modal ──
+    function loadItems(deptId) {
+        itemDescMap = {};
+        $.ajax({
+            url: '/ControlPlan/GetItemsByDept?deptId=' + deptId,
+            method: 'GET', dataType: 'json',
+            success: function (items) {
+                let opts =
+                    '<option value="0">-- Select Item --</option>';
+                items.forEach(i => {
+                    itemDescMap[i.itemId] = i.item_Description;
+                    opts += `<option value="${i.itemId}"
+                                     data-desc="${i.item_Description}">
+                                ${i.item_Code}
+                             </option>`;
+                });
+                $('#fItemId').html(opts);
+            }
+        });
+    }
+
+    // ── Item change → description ──
+    window.onItemChange = function () {
+        const sel  = $('#fItemId')[0];
+        const opt  = sel.options[sel.selectedIndex];
+        const desc = opt.getAttribute('data-desc') || '';
+        $('#fItemDesc').val(desc);
+    };
+
+    // ════════════════════════════════════════════
+    // LOAD DATA
+    // ════════════════════════════════════════════
+    function loadData() {
+        $('#loadingRow').show()
+            .find('td').html(
+                '<div class="spinner-border spinner-border-sm ' +
+                'text-primary me-2"></div>Loading...');
+        $('#tableBody tr:not(#loadingRow)').remove();
+
+        $.ajax({
+            url: '/ControlPlan/GetAll?deptId=' + currentDeptId,
+            method: 'GET', dataType: 'json',
+            success: function (data) {
+                allData = data;
+                applyFilter();
+                $('#loadingRow').hide();
+            },
+            error: function () {
+                $('#loadingRow td').html(
+                    '<i class="bi bi-exclamation-triangle ' +
+                    'text-danger me-1"></i>Failed to load data.');
+            }
+        });
+    }
+
+    // ════════════════════════════════════════════
+    // RENDER TABLE
+    // ════════════════════════════════════════════
+    function renderTable() {
+        totalPages = Math.max(1,
+            Math.ceil(filteredData.length / rowsPerPage));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end   = Math.min(start + rowsPerPage, filteredData.length);
+        const slice = filteredData.slice(start, end);
+
+        $('#tableBody tr:not(#loadingRow)').remove();
+
+        if (slice.length === 0) {
+            $('#tableBody').append(
+                `<tr><td colspan="32"
+                    class="text-center text-muted py-3">
+                    No records found.
+                 </td></tr>`);
+        } else {
+            slice.forEach((r, i) =>
+                $('#tableBody').append(buildRow(r, start+i+1)));
+        }
+
+        updatePagination(start, end);
+    }
+
+    function buildRow(r, sr) {
+        const fmt  = v => v || '—';
+        const fmtZ = v =>
+            v && v.trim()
+                ? `<span class="zone-val">${v}</span>` : '—';
+
+        const zonesCells = Array.from({length: 16}, (_, i) =>
+            `<td class="text-center">${fmtZ(r[`Zone_${i+1}`])}</td>`
+        ).join('');
+
+        return `
+        <tr id="row-${r.SrNo}">
+            <td class="text-center">${sr}</td>
+            <td>
+                <span class="badge bg-dark" style="font-size:0.60rem">
+                    ${fmt(r.Department)}
+                </span>
+            </td>
+            <td class="fw-bold text-primary">${fmt(r.Item_Code)}</td>
+            <td title="${fmt(r.Item_Description)}">
+                ${fmt(r.Item_Description)}
+            </td>
+            <td class="text-center">${fmt(r.Pressure_Time)}</td>
+            <td class="text-center">${fmt(r.Punching_Pressure)}</td>
+            <td class="text-center">${fmt(r.Set_mm)}</td>
+            <td class="text-center">${fmt(r.Cycle_Delay_Time)}</td>
+            <td class="text-center">${fmt(r.Vaccum_Time)}</td>
+            <td class="text-center">${fmt(r.Cooling_Time)}</td>
+            <td class="text-center">${fmt(r.Ejection_Time)}</td>
+            <td class="text-center">${fmt(r.Winder_Time)}</td>
+            ${zonesCells}
+            <td title="${fmt(r.Packing_Details)}">
+                ${fmt(r.Packing_Details)}
+            </td>
+            <td class="text-center">${fmt(r.Add_Date)}</td>
+         
+            <td class="text-center">
+                <button class="btn btn-outline-primary btn-sm btn-edit"
+                        data-id="${r.SrNo}" title="Edit">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm btn-del"
+                        data-id="${r.SrNo}"
+                        data-label="${fmt(r.Item_Code)}"
+                        title="Delete">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </td>
+        </tr>`;
+    }
+
+    // ════════════════════════════════════════════
+    // FILTER
+    // ════════════════════════════════════════════
+    window.applyFilter = function () {
+        const q = $('#searchInput').val().toLowerCase().trim();
+        filteredData = allData.filter(r =>
+            !q ||
+            (r.item_Code        || '').toLowerCase().includes(q) ||
+            (r.item_Description || '').toLowerCase().includes(q)
+        );
+        currentPage = 1;
+        renderTable();
+    };
+
+    // ════════════════════════════════════════════
+    // PAGINATION
+    // ════════════════════════════════════════════
+    function updatePagination(start, end) {
+        $('#pageInfo').text(
+            filteredData.length === 0
+                ? 'No records'
+                : `${start+1}–${end} of ${filteredData.length}`);
+
+        $('#btnFirst,#btnPrev').prop('disabled', currentPage === 1);
+        $('#btnNext,#btnLast').prop('disabled',  currentPage === totalPages);
+
+        const container = $('#pageNumbers').empty();
+        const maxV = 5;
+        let sp = Math.max(1, currentPage - Math.floor(maxV/2));
+        let ep = Math.min(totalPages, sp + maxV - 1);
+        if (ep - sp < maxV - 1) sp = Math.max(1, ep - maxV + 1);
+
+        for (let p = sp; p <= ep; p++) {
+            $('<button>').text(p)
+                .addClass('btn btn-outline-secondary btn-sm'
+                    + (p === currentPage ? ' active-pg' : ''))
+                .on('click', () => goToPage(p))
+                .appendTo(container);
+        }
+    }
+
+    window.goToPage = function (p) {
+        if (p < 1 || p > totalPages) return;
+        currentPage = p; renderTable();
+    };
+    window.changeRPP = function () {
+        rowsPerPage = parseInt($('#rppSelect').val());
+        currentPage = 1; renderTable();
+    };
+
+    // ════════════════════════════════════════════
+    // ADD MODAL
+    // ════════════════════════════════════════════
+    $('#btnAdd').on('click', function () {
+        clearForm();
+        $('#modalTitleText').text('Add Control Plan');
+        cpModal.show();
+    });
+
+    // ════════════════════════════════════════════
+    // EDIT — from allData
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-edit', function () {
+        const id = parseInt($(this).data('id'));
+        const r  = allData.find(x => x.SrNo === id);
+        if (!r) return;
+
+        clearForm();
+        $('#modalTitleText').text('Edit Control Plan');
+        $('#fSrNo').val(r.SrNo);
+        $('#fDepartmentId').val(r.DepartmentId);
+
+        loadItems(r.DepartmentId);
+
+        setTimeout(function () {
+        $('#fItemId').val(r.ItemId);
+        $('#fItemDesc').val(r.Item_Description);
+        }, 300);
+        $('#fItemDesc').val(r.Item_Description);
+
+        // Timing fields
+        timingMap.forEach(([fId, prop]) => {
+            $('#' + fId).val(r[prop] || '');
+        });
+
+        // Zone fields
+        for (let z = 1; z <= 16; z++) {
+            $(`#fZone${z}`).val(r[`Zone_${z}`] || '');
+        }
+
+        $('#fPackingDetails').val(r.Packing_Details || '');
+        cpModal.show();
+        });
+
+    // ════════════════════════════════════════════
+    // SAVE
+    // ════════════════════════════════════════════
+    $('#btnSave').on('click', function () {
+        clearErrors();
+        const deptId =
+    parseInt($('#fDepartmentId').val()) || 0;
+        const itemId = parseInt($('#fItemId').val()) || 0;
+        let valid = true;
+
+        if (!deptId)
+{
+    showError(
+        'fDepartmentId',
+        'err-department',
+        'Department required.');
+
+    valid = false;
+}
+        if (!itemId) {
+            showError('fItemId','err-item',
+                'Item required.'); valid = false;
+        }
+        if (!valid) return;
+
+        const token =
+            $('input[name="__RequestVerificationToken"]').val();
+
+        // Build form data
+        const data = {
+            SrNo:             $('#fSrNo').val(),
+            DepartmentId:     $('#fDepartmentId').val(),
+            ItemId:           itemId,
+            Pressure_Time:    $('#fPressureTime').val(),
+            Punching_Pressure:$('#fPunchingPressure').val(),
+            Set_mm:           $('#fSetMm').val(),
+            Cycle_Delay_Time: $('#fCycleDelay').val(),
+            Vaccum_Time:      $('#fVaccumTime').val(),
+            Cooling_Time:     $('#fCoolingTime').val(),
+            Ejection_Time:    $('#fEjectionTime').val(),
+            Winder_Time:      $('#fWinderTime').val(),
+            Packing_Details: $('#fPackingDetails').val(),
+            __RequestVerificationToken: token
+        };
+
+        // Zone fields
+        for (let z = 1; z <= 16; z++) {
+            data[`Zone_${z}`] = $(`#fZone${z}`).val();
+        }
+
+        $.ajax({
+            url:      '/ControlPlan/Save',
+            method:   'POST',
+            dataType: 'json',
+            data:     data,
+            success: function (d) {
+                if (!d.success) {
+                    showToast(d.message || 'Save failed.', 'danger');
+                    return;
+                }
+                cpModal.hide();
+                showToast(d.message, 'success');
+                loadData();
+            },
+            error: function () {
+                showToast('Network error.', 'danger');
+            }
+        });
+    });
+
+    // ════════════════════════════════════════════
+    // DELETE
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-del', function () {
+        pendingDeleteId = parseInt($(this).data('id'));
+        $('#deleteLabel').text($(this).data('label'));
+        deleteModal.show();
+    });
+
+    $('#btnConfirmDelete').on('click', function () {
+        const token =
+            $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url:      '/ControlPlan/Delete',
+            method:   'POST',
+            dataType: 'json',
+            data: { srNo: pendingDeleteId,
+                    __RequestVerificationToken: token },
+            success: function (d) {
+                deleteModal.hide();
+                if (d.success) {
+                    allData      = allData.filter(
+                        r => r.SrNo !== pendingDeleteId);
+                    filteredData = filteredData.filter(
+                        r => r.SrNo !== pendingDeleteId);
+                    renderTable();
+                    showToast('Control Plan deleted.', 'success');
+                } else {
+                    showToast('Delete failed.', 'danger');
+                }
+            },
+            error: function () {
+                showToast('Network error.', 'danger');
+            }
+        });
+    });
+
+    // ════════════════════════════════════════════
+    // HELPERS
+    // ════════════════════════════════════════════
+    function clearForm() {
+        $('#fSrNo').val('0');
+         $('#fDepartmentId').val('0');
+
+    $('#fItemId').html(
+        '<option value="0">-- Select Item --</option>');
+        $('#fItemId').val('0');
+        $('#fItemDesc').val('');
+        timingMap.forEach(([fId]) => $('#' + fId).val(''));
+        for (let z = 1; z <= 16; z++)
+            $(`#fZone${z}`).val('');
+        $('#fPackingDetails').val('');
+        clearErrors();
+    }
+
+    function clearErrors() {
+        $('.invalid-feedback.d-block').text('');
+        $('#cpForm .form-control, #cpForm .form-select')
+            .removeClass('is-invalid');
+    }
+
+    function showError(fieldId, errId, msg) {
+        $('#' + fieldId).addClass('is-invalid');
+        $('#' + errId).text(msg);
+    }
+
+    function showToast(msg, type) {
+        toastEl.className =
+            `toast align-items-center text-white border-0 bg-${type}`;
+        $('#toastMsg').text(msg);
+        bsToast.show();
+    }
+
+});
+</script>
+}

@@ -1,0 +1,1513 @@
+﻿@{
+    ViewData["Title"] = "Production Plan Master";
+}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    /* ════════════════════════════════════════
+       CSS VARIABLES
+    ════════════════════════════════════════ */
+    :root {
+        --header-bg: #1a1a2e;
+        --row-odd: #f8f9fa;
+        --row-even: #eef2ff;
+        --row-hover: #cfe2ff;
+        --accent: #0d6efd;
+        --sec-hdr-bg: #0d6efd;
+        --font-xs: 0.72rem;
+        --font-xxs: 0.69rem;
+        --font-tiny: 0.67rem;
+    }
+
+    /* ════════════════════════════════════════
+       PAGE HEADER
+    ════════════════════════════════════════ */
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+        .page-header h6 {
+            margin: 0;
+            font-weight: 700;
+            white-space: nowrap;
+            word-break: break-word;
+        }
+
+    .header-controls {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+        .header-controls select,
+        .header-controls input[type="text"] {
+            font-size: 0.78rem;
+        }
+
+    /* ════════════════════════════════════════
+       TABLE
+    ════════════════════════════════════════ */
+    #planTable {
+        width: 100%;
+        min-width: 1200px;
+        font-size: var(--font-xs);
+    }
+
+        #planTable thead th {
+            font-size: 0.67rem;
+            padding: 4px 5px;
+            white-space: nowrap;
+            text-align: center;
+            background: var(--header-bg);
+            color: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        #planTable tbody td {
+            padding: 3px 5px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        #planTable tbody tr:nth-child(odd) td {
+            background-color: var(--row-odd);
+        }
+
+        #planTable tbody tr:nth-child(even) td {
+            background-color: var(--row-even);
+        }
+
+        #planTable tbody tr:hover td {
+            background-color: var(--row-hover) !important;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        #planTable .btn-sm {
+            padding: 1px 4px;
+            font-size: 0.65rem;
+        }
+
+
+    /* ════════════════════════════════════════
+       SELECT2
+    ════════════════════════════════════════ */
+
+
+    .select2-wrapper {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        height: 31px !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 0 .25rem .25rem 0 !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .select2-selection__rendered {
+        line-height: normal !important;
+        display: flex !important;
+        align-items: center !important;
+        height: 100%;
+        padding-left: 6px !important;
+    }
+
+    .select2-selection__arrow {
+        height: 100% !important;
+        top: 0 !important;
+    }
+    /* ════════════════════════════════════════
+       TABLE WRAPPER
+    ════════════════════════════════════════ */
+    .table-wrap {
+        max-height: 450px;
+        overflow-y: auto;
+        overflow-x: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ════════════════════════════════════════
+       PAGINATION
+    ════════════════════════════════════════ */
+    .pagination-bar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 8px;
+        font-size: 0.72rem;
+    }
+
+        .pagination-bar button {
+            min-width: 28px;
+            height: 26px;
+            font-size: 0.68rem;
+            padding: 0 5px;
+            border-radius: 4px;
+        }
+
+            .pagination-bar button.active-pg {
+                background: #6f42c1;
+                color: #fff;
+                border-color: #6f42c1;
+            }
+
+    /* ════════════════════════════════════════
+       VALIDATION PANELS
+    ════════════════════════════════════════ */
+    .info-panel {
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 0.70rem;
+        text-align: center;
+        height: 100%;
+    }
+
+        .info-panel .val {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+    .panel-po {
+        background: #e8f8e8;
+        border: 1px solid #198754;
+    }
+
+    .panel-po-warn {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+    }
+
+    .panel-po-err {
+        background: #f8d7da;
+        border: 1px solid #dc3545;
+    }
+
+    .panel-plan {
+        background: #e8f0ff;
+        border: 1px solid #0d6efd;
+    }
+
+    .panel-fg {
+        background: #fff8e1;
+        border: 1px solid #ff9800;
+    }
+
+    .panel-rm {
+        background: #f0f0f0;
+        border: 1px solid #6c757d;
+    }
+
+    .panel-rm-ok {
+        background: #e8f8e8;
+        border: 1px solid #198754;
+    }
+
+    .panel-rm-err {
+        background: #f8d7da;
+        border: 1px solid #dc3545;
+    }
+
+    .rm-avail-ok {
+        background-color: #d1e7dd !important;
+    }
+
+    .rm-avail-err {
+        background-color: #f8d7da !important;
+    }
+
+    /* ════════════════════════════════════════
+       SECTION HEADER
+    ════════════════════════════════════════ */
+    .sec-hdr {
+        font-size: 0.70rem;
+        font-weight: 700;
+        color: #fff;
+        background: #6f42c1;
+        padding: 3px 10px;
+        border-radius: 4px;
+        margin: 10px 0 6px;
+    }
+
+    /* ════════════════════════════════════════
+       MODAL
+    ════════════════════════════════════════ */
+    .modal .form-label {
+        margin-bottom: 3px;
+    }
+
+    .modal .input-group-text {
+        height: 31px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal .form-control-sm,
+    .modal .form-select-sm {
+        font-size: 0.75rem;
+    }
+
+    /* ════════════════════════════════════════
+       LOADING
+    ════════════════════════════════════════ */
+    #loadingRow td {
+        text-align: center;
+        padding: 20px;
+        color: #888;
+    }
+
+    /* ════════════════════════════════════════
+       MOBILE RESPONSIVE
+    ════════════════════════════════════════ */
+    @@media (max-width:575px) {
+
+        .page-header {
+            flex-direction: column;
+            align-items: stretch;
+            overflow: hidden;
+        }
+
+            .page-header h6 {
+                font-size: 0.90rem;
+            }
+
+        .header-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+            .header-controls select,
+            .header-controls input,
+            .header-controls button {
+                width: 100% !important;
+            }
+
+        .table-wrap {
+            display: block;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #planTable {
+            min-width: 1200px;
+        }
+
+        .pagination-bar {
+            justify-content: center;
+        }
+
+            .pagination-bar #pageNumbers {
+                flex-wrap: wrap;
+            }
+
+            .pagination-bar button {
+                min-width: 30px;
+            }
+
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+
+        .modal .row > div {
+            margin-bottom: 2px;
+        }
+
+        .info-panel {
+            padding: 6px;
+        }
+
+            .info-panel .val {
+                font-size: 0.90rem;
+            }
+    }
+
+    /* ════════════════════════════════════════
+       TABLET RESPONSIVE
+    ════════════════════════════════════════ */
+    @@media (min-width:576px) and (max-width:991px) {
+
+        .page-header {
+            align-items: flex-start;
+        }
+
+        .header-controls {
+            justify-content: flex-end;
+        }
+
+        #planTable {
+            min-width: 1150px;
+        }
+
+        .pagination-bar {
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- ── PAGE HEADER ── -->
+<div class="page-header">
+    @* <h6 class="mb-0 fw-bold">
+        <i class="bi bi-kanban me-2 text-purple"
+           style="color:#6f42c1"></i>
+        Production Plan Master
+    </h6> *@
+
+    <h6 class="mb-0 fw-bold">
+        <i class="bi bi-clipboard-check me-2 text-primary"></i>
+        Production Plan Master
+    </h6>
+    <div class="header-controls">
+
+        <select id="headerDeptFilter"
+                class="form-select form-select-sm"
+                style="width:160px">
+            <option value="0">-- Select Department --</option>
+        </select>
+
+        <input type="text" id="searchInput"
+               class="form-control form-control-sm"
+               placeholder="🔍 Search..."
+               style="width:160px" oninput="applyFilter()" />
+
+     
+
+         <button class="btn btn-primary btn-sm" id="btnAdd">
+            <i class="bi bi-plus-lg me-1"></i>Add Plan
+        </button>
+    </div>
+</div>
+
+<!-- ── TABLE ── -->
+<div class="table-wrap">
+    <table class="table table-bordered mb-0" id="planTable">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Department</th>
+                <th>Machine</th>
+                <th>Item Code</th>
+                <th>Description</th>
+                <th>Plan Qty</th>
+                <th>Produce Qty</th>
+                <th>RM Required</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <tr id="loadingRow">
+                <td colspan="9">
+                    <i class="bi bi-info-circle me-2"
+                       style="color:#6f42c1"></i>
+                    Select a Department and click Load.
+                </td>
+            </tr>
+        </tbody>
+        @* <tfoot class="table-dark" id="planFoot" style="display:none">
+            <tr style="font-size:0.67rem;font-weight:700;">
+                <td colspan="5" class="text-end pe-2">Totals :</td>
+                <td class="text-end pe-2" id="footPlanQty"></td>
+                <td class="text-end pe-2" id="footProduceQty"></td>
+                <td class="text-end pe-2" id="footRM"></td>
+                <td colspan="1"></td>
+            </tr>
+        </tfoot> *@
+    </table>
+</div>
+
+<!-- ── PAGINATION ── -->
+<div class="pagination-bar">
+    <span id="pageInfo" class="text-muted"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnFirst" onclick="goToPage(1)">«</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnPrev"  onclick="goToPage(currentPage-1)">‹</button>
+    <span id="pageNumbers" class="d-flex gap-1"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnNext"  onclick="goToPage(currentPage+1)">›</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnLast"  onclick="goToPage(totalPages)">»</button>
+    <select id="rppSelect" class="form-select form-select-sm"
+            style="width:75px" onchange="changeRPP()">
+        <option value="10" selected>10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+    </select>
+    <span class="text-muted">/ page</span>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ADD / EDIT MODAL
+══════════════════════════════════════════════ -->
+<div class="modal fade" id="planModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered
+                modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header bg-dark text-white py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-kanban me-2"></i>
+                    <span id="modalTitleText">Add Production Plan</span>
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="planForm" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="fSrNo"         value="0" />
+                    <input type="hidden" id="fShotWeight"   value="0" />
+
+                    <!-- ── SECTION 1: Item Selection ── -->
+                    <div class="sec-hdr">
+                        <i class="bi bi-card-list me-1"></i>
+                        Item &amp; Machine Selection
+                    </div>
+                    <div class="row g-2">
+
+                        <!-- Department -->
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">
+        Department <span class="text-danger">*</span>
+    </label>
+
+    <div class="input-group input-group-sm">
+        <span class="input-group-text">
+            <i class="bi bi-building"></i>
+        </span>
+
+        <select id="fDepartmentId"
+                class="form-select form-select-sm"
+                onchange="onDepartmentChange()">
+
+            <option value="0">
+                - Department -
+            </option>
+
+        </select>
+    </div>
+
+    <div class="invalid-feedback d-block"
+         id="err-dept"></div>
+</div>
+
+                        <!-- Machine -->
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">
+                                Machine <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-cpu"></i>
+                                </span>
+                                <select id="fMachineId"
+                                        class="form-select form-select-sm">
+                                    <option value="0">- Machine -</option>
+                                </select>
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-machine"></div>
+                        </div>
+
+                        <!-- Item Code -->
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">
+                                Item Code <span class="text-danger">*</span>
+                            </label>
+                            @* <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-upc-scan"></i>
+                                </span>
+                                <select id="fItemId"
+                                        class="form-select form-select-sm"
+                                        onchange="onItemChange()">
+                                    <option value="0">-- Select Item --</option>
+                                </select>
+                            </div> *@
+
+                            <div class="input-group input-group-sm">
+                                @* <span class="input-group-text">
+                                    <i class="bi bi-upc-scan"></i>
+                                </span> *@
+
+                                <div class="select2-wrapper">
+                                    <select id="fItemId"
+                                            class="form-select form-select-sm"
+                                            onchange="onItemChange()">
+                                        <option value="0">-- Select Item --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-item"></div>
+                        </div>
+
+                        <!-- Item Description — readonly -->
+                        @* <div class="col-md-3">
+                            <label class="form-label fw-semibold small">
+                                Description
+                            </label>
+                            <input type="text" id="fItemDesc"
+                                   class="form-control form-control-sm bg-light"
+                                   readonly placeholder="Auto-filled" />
+                        </div> *@
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">
+                                Description
+                            </label>
+
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-card-text"></i>
+                                </span>
+
+                                <input type="text"
+                                       id="fItemDesc"
+                                       class="form-control form-control-sm bg-light"
+                                       readonly
+                                       placeholder="Auto-filled" />
+                            </div>
+                        </div>
+                        <!-- RM Size — cascade from item -->
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">
+                                RM Size <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-rulers"></i>
+                                </span>
+                                <select id="fSizeId"
+                                        class="form-select form-select-sm"
+                                        disabled
+                                        onchange="onSizeChange()">
+                                    <option value="0">
+                                        Select Item first
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-size"></div>
+                        </div>
+
+                        <!-- Plan Qty -->
+                        @* <div class="col-md-3">
+                            <label class="form-label fw-semibold small">
+                                Plan Qty <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" id="fPlanQty"
+                                   class="form-control form-control-sm"
+                                   min="1" step="1" placeholder="0"
+                                   oninput="onPlanQtyChange()" />
+                            <div class="invalid-feedback d-block"
+                                 id="err-qty"></div>
+                        </div> *@
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">
+                                Plan Qty <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-box-seam"></i>
+                                </span>
+
+                                <input type="number"
+                                       id="fPlanQty"
+                                       class="form-control form-control-sm"
+                                       min="1"
+                                       step="1"
+                                       placeholder="0"
+                                       oninput="onPlanQtyChange()" />
+                            </div>
+
+                            <div class="invalid-feedback d-block"
+                                 id="err-qty"></div>
+                        </div>
+                        <!-- Plan Date -->
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">
+                                Plan Date <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-calendar3"></i>
+                                </span>
+                                <input type="date" id="fPlanDate"
+                                       class="form-control form-control-sm" />
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-date"></div>
+                        </div>
+
+                        <!-- Remark -->
+                        @* <div class="col-md-3">
+                            <label class="form-label fw-semibold small">
+                                Remark
+                            </label>
+                            <input type="text" id="fRemark"
+                                   class="form-control form-control-sm"
+                                   placeholder="Optional remark" />
+                        </div> *@
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold small">
+                                Remark
+                            </label>
+
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-chat-left-text"></i>
+                                </span>
+
+                                <input type="text"
+                                       id="fRemark"
+                                       class="form-control form-control-sm"
+                                       placeholder="Optional remark" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── SECTION 2: Live Validation Panels ── -->
+                    <div class="sec-hdr">
+                        <i class="bi bi-clipboard2-check me-1"></i>
+                        Live Validation
+                    </div>
+                   <div class="row g-2" id="validationPanels"
+     style="display:none">
+
+                        <!-- PO Schedule Qty -->
+                        <div class="col-md-2">
+                            <div class="info-panel panel-po" id="pnlPO">
+                                <div class="small text-muted">PO Schedule Qty</div>
+                                <div class="val text-primary"
+                                     id="vPOQty">—</div>
+                            </div>
+                        </div>
+
+                        <!-- Added Plan Qty -->
+                        <div class="col-md-2">
+                            <div class="info-panel panel-plan">
+                                <div class="small text-muted">Added Plan Qty</div>
+                                <div class="val text-primary"
+                                     id="vPlanQtyAdded">—</div>
+                            </div>
+                        </div>
+
+                        <!-- FG Stock -->
+                        <div class="col-md-2">
+                            <div class="info-panel panel-fg">
+                                <div class="small text-muted">FG Stock</div>
+                                <div class="val"
+                                     style="color:#e65100"
+                                     id="vFGStock">—</div>
+                            </div>
+                        </div>
+
+                        <!-- RM Stock -->
+                        <div class="col-md-2">
+                            <div class="info-panel panel-rm" id="pnlRM">
+                                <div class="small text-muted">RM Stock</div>
+                                <div class="val" id="vRMStock">—</div>
+                            </div>
+                        </div>
+
+                        <!-- RM Used -->
+                        <div class="col-md-2">
+                            <div class="info-panel panel-rm">
+                                <div class="small text-muted">RM Used</div>
+                                <div class="val text-danger"
+                                     id="vRMUsed">—</div>
+                            </div>
+                        </div>
+
+                        <!-- RM Available -->
+                        <div class="col-md-2">
+                            <div class="info-panel panel-rm" id="pnlAvail`">
+                                <div class="small text-muted">RM Available</div>
+                                <div class="val" id="vRMAvail">—</div>
+                            </div>
+                        </div>
+
+                        <!-- RM Required for this plan -->
+                        <div class="col-md-3">
+                            <div class="info-panel panel-rm">
+                                <div class="small text-muted">
+                                    RM Required (this plan)
+                                </div>
+                                <div class="val text-warning"
+                                     id="vRMRequired">—</div>
+                            </div>
+                        </div>
+
+                        <!-- Alert message -->
+                        @* <div class="col-md-9 d-flex align-items-center">
+                            <div class="row g-2" id="validationPanels" style="display:none">
+                            </div>
+                        </div> *@
+                        <div class="col-md-9 d-flex align-items-center">
+    <div id="alertMsg"
+         class="alert mb-0 py-1 px-2 small w-100"
+         style="display:none">
+    </div>
+</div>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary btn-sm"
+                        id="btnSave">
+                    <i class="bi bi-floppy me-1"></i>Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ── DELETE CONFIRM MODAL ── -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Confirm Delete
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center small">
+                <p class="mb-1">Delete production plan</p>
+                <strong id="deleteLabel"></strong>?
+            </div>
+            <div class="modal-footer justify-content-center py-2">
+                <button class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger btn-sm"
+                        id="btnConfirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index:9999">
+    <div id="toast" class="toast align-items-center text-white border-0"
+         role="alert" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body small" id="toastMsg"></div>
+            <button type="button"
+                    class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(function () {
+
+    // ════════════════════════════════════════════
+    // STATE
+    // ════════════════════════════════════════════
+    let allData         = [];
+    let filteredData    = [];
+    let currentPage     = 1;
+    let rowsPerPage     = 10;
+    let totalPages      = 1;
+    let pendingDeleteId = null;
+    let currentDeptId   = 0;
+    let isEditMode      = false;
+
+    const planModal   = new bootstrap.Modal($('#planModal')[0]);
+    const deleteModal = new bootstrap.Modal($('#deleteModal')[0]);
+    const toastEl     = $('#toast')[0];
+    const bsToast     = new bootstrap.Toast(toastEl, { delay: 3500 });
+
+    // ════════════════════════════════════════════
+    // LOAD DEPARTMENTS
+    // ════════════════════════════════════════════
+   $.ajax({
+    url: '/ProductionPlan/GetDepartments',
+    method: 'GET',
+    dataType: 'json',
+
+    success: function (depts) {
+
+        let opts =
+            '<option value="0">- Department -</option>';
+
+        depts.forEach(d => {
+
+            opts += `
+                <option value="${d.DepartmentId}">
+                    ${d.Department}
+                </option>`;
+        });
+
+        // Header dropdown
+        $('#headerDeptFilter').html(opts);
+
+        // Modal dropdown
+        $('#fDepartmentId').html(opts);
+    }
+});
+
+    // ════════════════════════════════════════════
+    // SEARCH BUTTON
+    // ════════════════════════════════════════════
+    $('#headerDeptFilter').on('change', function () {
+
+    currentDeptId = parseInt($(this).val()) || 0;
+
+    // Reset if no department selected
+    if (!currentDeptId) {
+
+        $('#btnAdd').prop('disabled', true);
+
+        $('#tableBody').html(`
+            <tr id="loadingRow">
+                <td colspan="13" class="text-center text-muted py-3">
+                    Select a Department.
+                </td>
+            </tr>
+        `);
+
+        return;
+    }
+
+    // Enable Add button
+    $('#btnAdd').prop('disabled', false);
+
+
+    // Load table data
+    loadData();
+});
+    // ════════════════════════════════════════════
+    // LOAD MODAL DROPDOWNS FOR DEPT
+    // ════════════════════════════════════════════
+    function loadDropdownsForDept(deptId) {
+        // Machines
+        $.ajax({
+            url: '/ProductionPlan/GetMachinesByDept?deptId=' + deptId,
+            method: 'GET', dataType: 'json',
+            success: function (machines) {
+                let opts = '<option value="0">- Machine -</option>';
+                machines.forEach(m => {
+                    opts += `<option value="${m.machineId}">
+                                ${m.machineName}</option>`;
+                });
+                $('#fMachineId').html(opts);
+            }
+        });
+
+        // Items
+        $.ajax({
+            url: '/ProductionPlan/GetItemsByDept?deptId=' + deptId,
+            method: 'GET', dataType: 'json',
+            success: function (items) {
+                let opts =
+                    '<option value="0">-- Select Item --</option>';
+                items.forEach(i => {
+                    opts += `<option value="${i.itemId}">
+                                ${i.item_Code}</option>`;
+                });
+                $('#fItemId').html(opts);
+        setTimeout(() => {
+        applyItemSelect2();
+        }, 100);
+                $('#fSizeId')
+                    .html('<option value="0">Select Item first</option>')
+                    .prop('disabled', true);
+            }
+        });
+    }
+    window.onDepartmentChange = function () {
+
+    const deptId =
+        parseInt($('#fDepartmentId').val()) || 0;
+
+    if (!deptId) return;
+
+    loadDropdownsForDept(deptId);
+};
+    // ════════════════════════════════════════════
+    // ITEM CHANGE → description + sizes + panels
+    // ════════════════════════════════════════════
+    window.onItemChange = function () {
+        const itemId = parseInt($('#fItemId').val()) || 0;
+        const deptId = parseInt($('#fDepartmentId').val()) || 0;
+
+        if (!itemId) {
+            $('#fItemDesc').val('');
+            $('#fSizeId')
+                .html('<option value="0">Select Item first</option>')
+                .prop('disabled', true);
+            resetPanels();
+            return;
+        }
+
+        // Item description + shot weight
+        $.ajax({
+            url: '/ProductionPlan/GetItemDescription?itemId=' + itemId,
+            method: 'GET', dataType: 'json',
+            success: function (d) {
+                $('#fItemDesc').val(d.item_Description || '');
+                $('#fShotWeight').val(d.std_Shot_Weight || 0);
+            }
+        });
+
+        // Sizes cascade
+        $.ajax({
+            url: `/ProductionPlan/GetSizesByDeptItem?deptId=${deptId}&itemId=${itemId}`,
+            method: 'GET', dataType: 'json',
+            success: function (sizes) {
+                let opts =
+                    '<option value="0">-- Select Size --</option>';
+                sizes.forEach(s => {
+                   opts += `<option value="${s.sizeId}">
+            ${s.itemSize_Code}
+         </option>`;
+                });
+                $('#fSizeId').html(opts).prop('disabled', false);
+            }
+        });
+
+        // PO Schedule + Plan qty panels
+        loadPOAndPlanQty(deptId, itemId);
+
+        // FG Stock
+        $.ajax({
+            url: `/ProductionPlan/GetFGQty?deptId=${deptId}&itemId=${itemId}`,
+            method: 'GET', dataType: 'json',
+            success: function (d) {
+                $('#vFGStock').text(d.fG_Qty ?? 0);
+                $('#validationPanels').show();
+            }
+        });
+    };
+
+    function loadPOAndPlanQty(deptId, itemId) {
+        // PO Schedule qty
+        $.ajax({
+            url: `/ProductionPlan/GetPOScheduleQty?deptId=${deptId}&itemId=${itemId}`,
+            method: 'GET', dataType: 'json',
+            success: function (d) {
+                const qty = d.poSchedule_Qty || 0;
+                $('#vPOQty').text(qty);
+                const pnl = $('#pnlPO');
+                pnl.removeClass('panel-po panel-po-warn panel-po-err');
+                pnl.addClass(qty > 0 ? 'panel-po' : 'panel-po-err');
+            }
+        });
+
+        // Added plan qty
+        $.ajax({
+            url: `/ProductionPlan/GetAddedPlanQty?deptId=${deptId}&itemId=${itemId}`,
+            method: 'GET', dataType: 'json',
+            success: function (d) {
+                $('#vPlanQtyAdded').text(d.addedPlan_Qty || 0);
+            }
+        });
+    }
+
+    // ════════════════════════════════════════════
+    // SIZE CHANGE → RM stock info
+    // ════════════════════════════════════════════
+    window.onSizeChange = function () {
+         $('#validationPanels').show();
+          
+        const sizeId = parseInt($('#fSizeId').val()) || 0;
+        const itemId = parseInt($('#fItemId').val()) || 0;
+       const deptId = parseInt($('#fDepartmentId').val()) || 0;
+
+        if (!sizeId || !itemId) return;
+
+        $.ajax({
+            url:  '/ProductionPlan/GetRMStockInfo',
+            type: 'POST',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify({
+                departmentId: deptId,
+                itemId:       itemId,
+                sizeId:       sizeId
+            }),
+            success: function (d) {
+                $('#vRMStock').text(d.stock_RM_Qty?.toFixed(2) ?? '—');
+                $('#vRMUsed').text(d.used_RM_Qty?.toFixed(2) ?? '—');
+                const avail = d.available_RM_Qty || 0;
+                $('#vRMAvail').text(avail.toFixed(2));
+                const pnlA = $('#pnlAvail');
+                pnlA.removeClass('panel-rm panel-rm-ok panel-rm-err');
+                pnlA.addClass(avail > 0 ? 'panel-rm-ok' : 'panel-rm-err');
+                $('#fShotWeight').val(d.shot_Weight || 0);
+                calcRMRequired();
+            }
+        });
+    };
+
+    // ── Plan Qty change → update RM required ──
+    window.onPlanQtyChange = function () {
+         $('#validationPanels').show();
+
+        calcRMRequired();
+    };
+
+    function calcRMRequired() {
+        const qty       = parseInt($('#fPlanQty').val()) || 0;
+        const shotWt    = parseFloat($('#fShotWeight').val()) || 0;
+        const rmRequired = (qty * shotWt / 1000).toFixed(2);
+        $('#vRMRequired').text(rmRequired);
+    }
+
+    // ════════════════════════════════════════════
+    // LOAD DATA
+    // ════════════════════════════════════════════
+    function loadData() {
+        $('#loadingRow').show()
+            .find('td').html(
+                '<div class="spinner-border spinner-border-sm ' +
+                'me-2" style="color:#6f42c1"></div>Loading...');
+        $('#tableBody tr:not(#loadingRow)').remove();
+
+        $.ajax({
+            url: '/ProductionPlan/GetAll?deptId=' + currentDeptId,
+            method: 'GET', dataType: 'json',
+            success: function (data) {
+                allData = data;
+                applyFilter();
+                $('#loadingRow').hide();
+            },
+            error: function () {
+                $('#loadingRow td').html(
+                    '<i class="bi bi-exclamation-triangle ' +
+                    'text-danger me-1"></i>Failed to load data.');
+            }
+        });
+    }
+
+    // ════════════════════════════════════════════
+    // RENDER TABLE
+    // ════════════════════════════════════════════
+    function renderTable() {
+        totalPages = Math.max(1,
+            Math.ceil(filteredData.length / rowsPerPage));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end   = Math.min(start + rowsPerPage, filteredData.length);
+        const slice = filteredData.slice(start, end);
+
+        $('#tableBody tr:not(#loadingRow)').remove();
+
+        if (slice.length === 0) {
+            $('#planFoot').hide();
+            $('#tableBody').append(
+                `<tr><td colspan="13"
+                    class="text-center text-muted py-3">
+                    No records found.
+                 </td></tr>`);
+        } else {
+            slice.forEach((r, i) =>
+                $('#tableBody').append(buildRow(r, start+i+1)));
+        }
+
+        updatePagination(start, end);
+    }
+
+    function buildRow(r, sr) {
+        const fmt = v => v || '—';
+
+        // Produce vs Plan indicator
+        const pct  = r.plan_Qty > 0
+            ? Math.round((r.produce_Qty / r.plan_Qty) * 100) : 0;
+        const barColor = pct >= 100 ? '#198754'
+                       : pct >= 50  ? '#ffc107' : '#dc3545';
+        const bar = `
+            <div style="font-size:0.60rem;margin-bottom:1px">
+                ${r.Produce_Qty}/${r.Plan_Qty}
+                (${pct}%)
+            </div>
+            <div style="background:#e9ecef;border-radius:3px;height:5px">
+                <div style="width:${Math.min(pct,100)}%;height:5px;
+                    background:${barColor};border-radius:3px"></div>
+            </div>`;
+
+        return `
+        <tr id="row-${r.SrNo}">
+            <td class="text-center">${sr}</td>
+            <td>
+                <span class="badge bg-dark" style="font-size:0.60rem">
+                    ${fmt(r.DepartmentName)}
+                </span>
+            </td>
+            <td>${fmt(r.MachineName)}</td>
+            <td class="fw-bold" style="color:#6f42c1">
+                ${fmt(r.Item_Code)}
+            </td>
+            <td title="${fmt(r.Item_Description)}">
+                ${fmt(r.Item_Description)}
+            </td>
+            <td class="text-center fw-bold">${r.Plan_Qty ?? '—'}</td>
+            <td class="text-center">${bar}</td>
+            <td class="text-end pe-2">
+                ${r.RM_Required > 0 ? r.RM_Required.toFixed(2) : '—'}
+            </td>
+            <td class="text-center">
+                <button class="btn btn-outline-primary btn-sm btn-edit"
+                        data-id="${r.SrNo}" title="Edit">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm btn-del"
+                        data-id="${r.SrNo}"
+                        data-label="${fmt(r.Item_Code)}"
+                        title="Delete">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </td>
+        </tr>`;
+    }
+
+
+    // ════════════════════════════════════════════
+    // FILTER
+    // ════════════════════════════════════════════
+    window.applyFilter = function () {
+        const q = $('#searchInput').val().toLowerCase().trim();
+        filteredData = allData.filter(r =>
+            !q ||
+            (r.item_Code        || '').toLowerCase().includes(q) ||
+            (r.item_Description || '').toLowerCase().includes(q) ||
+            (r.machineName      || '').toLowerCase().includes(q) ||
+            (r.itemSize_Code    || '').toLowerCase().includes(q) ||
+            (r.remark           || '').toLowerCase().includes(q)
+        );
+        currentPage = 1;
+        renderTable();
+    };
+
+    // ════════════════════════════════════════════
+    // PAGINATION
+    // ════════════════════════════════════════════
+    function updatePagination(start, end) {
+        $('#pageInfo').text(
+            filteredData.length === 0
+                ? 'No records'
+                : `${start+1}–${end} of ${filteredData.length}`);
+
+        $('#btnFirst,#btnPrev').prop('disabled', currentPage === 1);
+        $('#btnNext,#btnLast').prop('disabled',  currentPage === totalPages);
+
+        const container = $('#pageNumbers').empty();
+        const maxV = 5;
+        let sp = Math.max(1, currentPage - Math.floor(maxV/2));
+        let ep = Math.min(totalPages, sp + maxV - 1);
+        if (ep - sp < maxV - 1) sp = Math.max(1, ep - maxV + 1);
+
+        for (let p = sp; p <= ep; p++) {
+            $('<button>').text(p)
+                .addClass('btn btn-outline-secondary btn-sm'
+                    + (p === currentPage ? ' active-pg' : ''))
+                .on('click', () => goToPage(p))
+                .appendTo(container);
+        }
+    }
+
+    window.goToPage = function (p) {
+        if (p < 1 || p > totalPages) return;
+        currentPage = p; renderTable();
+    };
+    window.changeRPP = function () {
+        rowsPerPage = parseInt($('#rppSelect').val());
+        currentPage = 1; renderTable();
+    };
+
+    // ════════════════════════════════════════════
+    // ADD MODAL
+    // ════════════════════════════════════════════
+    $('#btnAdd').on('click', function () {
+        clearForm(false);
+        $('#modalTitleText').text('Add Production Plan');
+        $('#fPlanDate').val(new Date().toISOString().split('T')[0]);
+        planModal.show();
+    });
+
+    // ════════════════════════════════════════════
+    // EDIT
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-edit', function () {
+        const id = parseInt($(this).data('id'));
+        const r  = allData.find(x => x.SrNo === id);
+        if (!r) return;
+
+        clearForm(true);
+        $('#modalTitleText').text('Edit Production Plan');
+        $('#fSrNo').val(r.SrNo);
+        $('#fDepartmentId').val(r.DepartmentId);
+
+        // Lock cascade dropdowns in edit mode
+        $('#fMachineId').val(r.MachineId).prop('disabled', true);
+        $('#fItemId').val(r.ItemId).prop('disabled', true);
+        $('#fItemDesc').val(r.Item_Description);
+
+        // Populate size (since disabled, just show the value)
+        $('#fSizeId').html(
+            `<option value="${r.SizeId}">${r.ItemSize_Code}</option>`)
+            .val(r.SizeId).prop('disabled', true);
+
+        $('#fPlanQty').val(r.Plan_Qty);
+        // $('#fPlanDate').val(
+        //     r.Add_Date
+        //         ? r.Add_Date.split('-').reverse().join('-') : '');
+        $('#fPlanDate').val(r.Add_Date || '');
+        $('#fRemark').val(r.Remark);
+
+        planModal.show();
+    });
+
+    // ════════════════════════════════════════════
+    // SAVE — with business rule validation
+    // ════════════════════════════════════════════
+    $('#btnSave').on('click', function () {
+        clearErrors();
+        hideAlert();
+
+        const machineId = parseInt($('#fMachineId').val()) || 0;
+        const itemId    = parseInt($('#fItemId').val())    || 0;
+        const sizeId    = parseInt($('#fSizeId').val())    || 0;
+        const deptId    = parseInt($('#fDepartmentId').val()) || 0;
+        const planQty   = parseInt($('#fPlanQty').val())   || 0;
+        const planDate  = $('#fPlanDate').val();
+
+        let valid = true;
+        if (!machineId) {
+            showError('fMachineId','err-machine','Machine required.'); valid=false; }
+        if (!itemId) {
+            showError('fItemId','err-item','Item required.'); valid=false; }
+        if (!sizeId) {
+            showError('fSizeId','err-size','Size required.'); valid=false; }
+        if (planQty <= 0) {
+            showError('fPlanQty','err-qty','Plan Qty must be > 0.'); valid=false; }
+        if (!planDate) {
+            showError('fPlanDate','err-date','Plan Date required.'); valid=false; }
+        if (!valid) return;
+
+        // ── Business Rules (same as original JS) ──
+        if (!isEditMode) {
+            const deptId = parseInt($('#fDepartmentId').val()) || 0;
+            const poQty      = parseInt($('#vPOQty').text()) || 0;
+            const addedPlan  = parseInt($('#vPlanQtyAdded').text()) || 0;
+            const rmAvail    = parseFloat($('#vRMAvail').text()) || 0;
+            const rmRequired = parseFloat($('#vRMRequired').text()) || 0;
+            const newTotal   = addedPlan + planQty;
+            if (!deptId) {
+    showError(
+        'fDepartmentId',
+        'err-dept',
+        'Department required.'
+    );
+
+    valid = false;
+}
+            if (poQty === 0) {
+                showAlert(`No PO Schedule found for this item. 
+                    Cannot add plan without a PO.`, 'danger');
+                return;
+            }
+            if (newTotal > poQty) {
+                showAlert(`Plan Qty (${newTotal}) exceeds PO Schedule 
+                    Qty (${poQty}).`, 'danger');
+                return;
+            }
+            if (Math.floor(rmAvail) < Math.floor(rmRequired)) {
+                showAlert(`Required RM (${rmRequired} kg) exceeds 
+                    Available RM Stock (${rmAvail} kg).`, 'danger');
+                return;
+            }
+        }
+
+        const token =
+            $('input[name="__RequestVerificationToken"]').val();
+
+        $.ajax({
+            url:      '/ProductionPlan/Save',
+            method:   'POST',
+            dataType: 'json',
+            data: {
+                SrNo:         $('#fSrNo').val(),
+                MachineId:    machineId,
+                ItemId:       itemId,
+                SizeId:       sizeId,
+                Plan_Qty:     planQty,
+                Plan_Date:    planDate,
+                Remark:       $('#fRemark').val(),
+                DepartmentId: deptId,
+                __RequestVerificationToken: token
+            },
+            success: function (d) {
+                if (!d.success) {
+                    showToast(d.message || 'Save failed.', 'danger');
+                    return;
+                }
+                planModal.hide();
+                showToast(d.message, 'success');
+                loadData();
+            },
+            error: function () {
+                showToast('Network error.', 'danger');
+            }
+        });
+    });
+
+    // ════════════════════════════════════════════
+    // DELETE
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-del', function () {
+        pendingDeleteId = parseInt($(this).data('id'));
+        $('#deleteLabel').text($(this).data('label'));
+        deleteModal.show();
+    });
+
+    $('#btnConfirmDelete').on('click', function () {
+        const token =
+            $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url:      '/ProductionPlan/Delete',
+            method:   'POST',
+            dataType: 'json',
+            data: { srNo: pendingDeleteId,
+                    __RequestVerificationToken: token },
+            success: function (d) {
+                deleteModal.hide();
+                if (d.success) {
+                    allData      = allData.filter(
+                        r => r.SrNo !== pendingDeleteId);
+                    filteredData = filteredData.filter(
+                        r => r.SrNo !== pendingDeleteId);
+                    renderTable();
+                    showToast('Production Plan deleted.', 'success');
+                } else {
+                    showToast('Delete failed.', 'danger');
+                }
+            },
+            error: function () {
+                showToast('Network error.', 'danger');
+            }
+        });
+    });
+
+    // ════════════════════════════════════════════
+    // HELPERS
+    // ════════════════════════════════════════════
+    function clearForm(editMode) {
+        isEditMode = editMode;
+        $('#fSrNo').val('0');
+        $('#fMachineId').val('0').prop('disabled', false);
+        $('#fItemId').val('0').prop('disabled', false);
+        $('#fSizeId')
+            .html('<option value="0">Select Item first</option>')
+            .prop('disabled', true);
+        $('#fItemDesc,#fPlanQty,#fRemark').val('');
+        $('#fPlanDate,#fShotWeight').val('');
+        $('#validationPanels').hide();
+        resetPanels();
+        clearErrors();
+        hideAlert();
+    }
+
+    function resetPanels() {
+        $('#vPOQty,#vPlanQtyAdded,#vFGStock').text('—');
+        $('#vRMStock,#vRMUsed,#vRMAvail,#vRMRequired').text('—');
+        $('#pnlPO').removeClass('panel-po-warn panel-po-err')
+                   .addClass('panel-po');
+        $('#pnlAvail').removeClass('panel-rm-ok panel-rm-err')
+                      .addClass('panel-rm');
+    }
+
+    function clearErrors() {
+        $('.invalid-feedback.d-block').text('');
+        $('#planForm .form-control, #planForm .form-select')
+            .removeClass('is-invalid');
+    }
+
+    function showError(fieldId, errId, msg) {
+        $('#' + fieldId).addClass('is-invalid');
+        $('#' + errId).text(msg);
+    }
+
+    function showAlert(msg, type) {
+        $('#alertMsg')
+            .attr('class', `alert mb-0 py-1 px-2 small w-100 alert-${type}`)
+            .html(`<i class="bi bi-exclamation-triangle me-1"></i>${msg}`)
+            .show();
+    }
+
+    function hideAlert() {
+        $('#alertMsg').hide().text('');
+    }
+
+    function showToast(msg, type) {
+        toastEl.className =
+            `toast align-items-center text-white border-0 bg-${type}`;
+        $('#toastMsg').text(msg);
+        bsToast.show();
+    }
+        function applyItemSelect2() {
+
+        // destroy old
+        if ($('#fItemId').hasClass("select2-hidden-accessible")) {
+        $('#fItemId').select2('destroy');
+        }
+
+        // apply select2
+        $('#fItemId').select2({
+        placeholder: "Search Item Code",
+        width: 'resolve',
+        dropdownParent: $('#planModal')
+        });
+        }
+        function applyItemSelect2() {
+
+        // destroy old instance
+        if ($('#fItemId').hasClass("select2-hidden-accessible")) {
+        $('#fItemId').select2('destroy');
+        }
+
+        // apply select2
+        $('#fItemId').select2({
+        placeholder: "Search Item Code",
+        allowClear: true,
+        width: 'resolve',
+        dropdownParent: $('#rejModal')
+        });
+        }
+});
+</script>
+}

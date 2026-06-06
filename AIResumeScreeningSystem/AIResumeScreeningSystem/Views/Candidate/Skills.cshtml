@@ -1,0 +1,210 @@
+﻿@model List<AIResumeScreeningSystem.ViewModels.Candidate.CandidateSkillViewModel>
+@{
+    ViewData["Title"] = "My Skills";
+    var addSkillModel = ViewBag.AddSkillModel as AIResumeScreeningSystem.ViewModels.Candidate.AddSkillViewModel;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0"><i class="bi bi-tags me-2 text-primary"></i>My Skills</h4>
+        <small class="text-muted">@Model.Count skill(s) in your profile</small>
+    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSkillModal">
+        <i class="bi bi-plus-lg me-2"></i>Add Skill
+    </button>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-tags text-muted" style="font-size:3rem;"></i>
+            <h5 class="text-muted mt-3">No skills added yet</h5>
+            <p class="text-muted small mb-3">Adding skills improves your AI match score for jobs</p>
+            <button class="btn btn-primary px-4" data-bs-toggle="modal" data-bs-target="#addSkillModal">
+                <i class="bi bi-plus-lg me-2"></i>Add Your First Skill
+            </button>
+        </div>
+    </div>
+}
+else
+{
+    @foreach (var group in Model.GroupBy(s => s.Category).OrderBy(g => g.Key.ToString()))
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-600">
+                    <i class="bi bi-tag me-2 text-primary"></i>@group.Key — <span class="text-muted small">@group.Count() skill(s)</span>
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    @foreach (var skill in group.OrderByDescending(s => s.ProficiencyLevel))
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="border rounded-3 p-3 h-100 position-relative">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <span class="fw-600">@skill.SkillName</span>
+                                        @if (skill.IsVerified)
+                                        {
+                                            <i class="bi bi-patch-check-fill text-primary ms-1" title="Verified"></i>
+                                        }
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-link text-muted p-0"
+                                                data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                                            <li>
+                                                <button class="dropdown-item small"
+                                                        onclick="openEditModal(@skill.Id, '@skill.SkillName', @((int)skill.ProficiencyLevel), @skill.YearsOfExperience)">
+                                                    <i class="bi bi-pencil me-2"></i>Edit
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <form asp-action="RemoveSkill"
+                                                      asp-route-skillId="@skill.SkillId" method="post">
+                                                    <button type="submit" class="dropdown-item small text-danger"
+                                                            onclick="return confirm('Remove @skill.SkillName?')">
+                                                        <i class="bi bi-trash me-2"></i>Remove
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small class="text-muted">@skill.ProficiencyDisplay</small>
+                                    @if (skill.YearsOfExperience > 0)
+                                    {
+                                        <small class="text-muted">@skill.YearsOfExperience yr(s)</small>
+                                    }
+                                </div>
+                                <div class="progress" style="height:6px;border-radius:3px;">
+                                    <div class="progress-bar @skill.ProficiencyBarClass"
+                                         style="width:@skill.ProficiencyPercent%;transition:width 0.5s;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+}
+
+<!-- Add Skill Modal -->
+<div class="modal fade" id="addSkillModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow border-0" style="border-radius:16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Add a Skill</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="AddSkill" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-500">Select Existing Skill</label>
+                        <select name="SkillId" class="form-select" id="existingSkillSelect">
+                            <option value="0">-- Select a skill --</option>
+                            @if (addSkillModel != null)
+                            {
+                                @foreach (var s in addSkillModel.AvailableSkills)
+                                {
+                                    <option value="@s.Value">@s.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="text-center text-muted small my-2">— or —</div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-500">Add New Skill Name</label>
+                        <input name="NewSkillName" class="form-control" placeholder="e.g. Kubernetes" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-500">Category</label>
+                        <select name="NewSkillCategory" class="form-select">
+                            @foreach (var cat in Enum.GetValues<AIResumeScreeningSystem.Models.SkillCategory>())
+                            {
+                                <option value="@((int)cat)">@cat</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-7">
+                            <label class="form-label small fw-500">Proficiency Level</label>
+                            <select name="ProficiencyLevel" class="form-select">
+                                @foreach (var p in Enum.GetValues<AIResumeScreeningSystem.Models.ProficiencyLevel>())
+                                {
+                                    <option value="@((int)p)">@p</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-5">
+                            <label class="form-label small fw-500">Years of Exp.</label>
+                            <input name="YearsOfExperience" type="number" class="form-control"
+                                   min="0" max="50" value="0" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-plus-lg me-1"></i>Add Skill
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Skill Modal -->
+<div class="modal fade" id="editSkillModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow border-0" style="border-radius:16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Edit Skill: <span id="editSkillName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="UpdateSkill" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="candidateSkillId" id="editCandidateSkillId" />
+                    <div class="mb-3">
+                        <label class="form-label small fw-500">Proficiency Level</label>
+                        <select name="proficiencyLevel" id="editProficiency" class="form-select">
+                            @foreach (var p in Enum.GetValues<AIResumeScreeningSystem.Models.ProficiencyLevel>())
+                            {
+                                <option value="@((int)p)">@p</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label small fw-500">Years of Experience</label>
+                        <input type="number" name="yearsOfExperience" id="editYears"
+                               class="form-control" min="0" max="50" />
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-save me-1"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openEditModal(id, name, proficiency, years) {
+            document.getElementById('editSkillName').textContent = name;
+            document.getElementById('editCandidateSkillId').value = id;
+            document.getElementById('editProficiency').value = proficiency;
+            document.getElementById('editYears').value = years;
+            new bootstrap.Modal(document.getElementById('editSkillModal')).show();
+        }
+    </script>
+}

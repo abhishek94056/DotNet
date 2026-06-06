@@ -1,0 +1,244 @@
+﻿@model AIResumeScreeningSystem.ViewModels.AI.ChatbotViewModel
+@{ ViewData["Title"] = "AI Recruiter Assistant"; }
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <!-- Header -->
+        <div class="card shadow-sm mb-0"
+             style="border-bottom-left-radius:0;border-bottom-right-radius:0;
+                    background:linear-gradient(135deg,#1e3a5f,#1a56db);border:none;">
+            <div class="card-body py-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-white d-flex align-items-center
+                                justify-content-center"
+                         style="width:44px;height:44px;">
+                        <i class="bi bi-cpu text-primary fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="text-white fw-bold mb-0">AI Recruiter Assistant</h5>
+                        <small class="text-white-50">
+                            <span class="me-1" style="display:inline-block;width:8px;height:8px;
+                                  background:#22c55e;border-radius:50%;"></span>
+                            Online · Powered by Claude
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Window -->
+        <div class="card shadow-sm border-top-0"
+             style="border-top-left-radius:0;border-top-right-radius:0;">
+            <div class="card-body p-0">
+
+                <!-- Messages Area -->
+                <div id="chatMessages"
+                     style="height:460px;overflow-y:auto;padding:1.5rem;
+                            background:#f9fafb;scroll-behavior:smooth;">
+
+                    <!-- Welcome Message -->
+                    <div class="d-flex gap-2 mb-4">
+                        <div class="rounded-circle bg-primary text-white d-flex
+                                    align-items-center justify-content-center flex-shrink-0"
+                             style="width:36px;height:36px;">
+                            <i class="bi bi-cpu" style="font-size:14px;"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="bg-white border rounded-3 p-3 shadow-sm d-inline-block"
+                                 style="max-width:85%;">
+                                <p class="mb-2 text-dark small">
+                                    👋 Hello! I'm your AI Recruiter Assistant. I can help with:
+                                </p>
+                                <ul class="mb-0 small text-muted ps-3">
+                                    <li>Understanding match scores and skill gaps</li>
+                                    <li>Resume improvement advice</li>
+                                    <li>Interview preparation tips</li>
+                                    <li>Job search strategies</li>
+                                    <li>Platform navigation help</li>
+                                </ul>
+                            </div>
+                            <div class="text-muted mt-1" style="font-size:11px;">Just now</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Quick Prompts -->
+                <div class="border-top p-3 bg-white">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        @foreach (var prompt in new[] {
+                            "How can I improve my match score?",
+                            "Tips for writing a better resume",
+                            "How does AI ranking work?",
+                            "Interview preparation advice"
+                        })
+                        {
+                            <button class="btn btn-sm btn-outline-primary"
+                                    onclick="sendQuickPrompt('@prompt')">
+                                @prompt
+                            </button>
+                        }
+                    </div>
+
+                    <!-- Input -->
+                    <div class="d-flex gap-2">
+                        <input type="text" id="userInput"
+                               class="form-control"
+                               placeholder="Type your message..."
+                               onkeypress="if(event.key==='Enter') sendMessage()"
+                               style="border-radius:24px;" />
+                        <button class="btn btn-primary px-4"
+                                onclick="sendMessage()"
+                                style="border-radius:24px;" id="sendBtn">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        let messageHistory = [];
+        const context = '@Model.Context';
+
+        function sendQuickPrompt(text) {
+            userInput.value = text;
+            sendMessage();
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            userInput.value = '';
+            sendBtn.disabled = true;
+
+            // Add user message
+            appendMessage('user', message);
+            messageHistory.push({ role: 'user', content: message });
+
+            // Typing indicator
+            const typingId = appendTyping();
+
+            try {
+                const token = document.querySelector(
+                    'input[name="__RequestVerificationToken"]')?.value;
+
+                const res = await fetch('/AI/ChatMessage', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token || ''
+                    },
+                    body: JSON.stringify({
+                        message,
+                        history: messageHistory,
+                        context
+                    })
+                });
+
+                removeTyping(typingId);
+
+                if (res.ok) {
+                    const data = await res.json();
+                    appendMessage('assistant', data.response, data.timestamp);
+                    messageHistory.push({
+                        role: 'assistant', content: data.response
+                    });
+                } else {
+                    appendMessage('assistant',
+                        'Sorry, I encountered an error. Please try again.');
+                }
+            } catch {
+                removeTyping(typingId);
+                appendMessage('assistant', 'Connection error. Please try again.');
+            }
+
+            sendBtn.disabled = false;
+            userInput.focus();
+        }
+
+        function appendMessage(role, content, time) {
+            const isUser = role === 'user';
+            const timeStr = time || new Date().toLocaleTimeString('en', {
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            const div = document.createElement('div');
+            div.className = `d-flex gap-2 mb-3 ${isUser ? 'flex-row-reverse' : ''}`;
+            div.innerHTML = `
+                <div class="rounded-circle ${isUser ? 'bg-primary' : 'bg-success'}
+                            text-white d-flex align-items-center justify-content-center flex-shrink-0"
+                     style="width:36px;height:36px;">
+                    <i class="bi ${isUser ? 'bi-person' : 'bi-cpu'}"
+                       style="font-size:14px;"></i>
+                </div>
+                <div>
+                    <div class="${isUser ? 'bg-primary text-white' : 'bg-white border'}
+                                rounded-3 p-3 shadow-sm"
+                         style="max-width:85%;display:inline-block;">
+                        <p class="mb-0 small" style="white-space:pre-wrap;">${escapeHtml(content)}</p>
+                    </div>
+                    <div class="text-muted mt-1 ${isUser ? 'text-end' : ''}"
+                         style="font-size:11px;">${timeStr}</div>
+                </div>`;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function appendTyping() {
+            const id = 'typing_' + Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = 'd-flex gap-2 mb-3';
+            div.innerHTML = `
+                <div class="rounded-circle bg-success text-white d-flex
+                            align-items-center justify-content-center"
+                     style="width:36px;height:36px;">
+                    <i class="bi bi-cpu" style="font-size:14px;"></i>
+                </div>
+                <div class="bg-white border rounded-3 p-3 shadow-sm">
+                    <div class="d-flex gap-1 align-items-center" style="height:20px;">
+                        <span class="typing-dot" style="width:8px;height:8px;
+                              background:#6b7280;border-radius:50%;animation:blink 1s infinite;"></span>
+                        <span class="typing-dot" style="width:8px;height:8px;
+                              background:#6b7280;border-radius:50%;animation:blink 1s .2s infinite;"></span>
+                        <span class="typing-dot" style="width:8px;height:8px;
+                              background:#6b7280;border-radius:50%;animation:blink 1s .4s infinite;"></span>
+                    </div>
+                </div>`;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return id;
+        }
+
+        function removeTyping(id) {
+            document.getElementById(id)?.remove();
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+    <style>
+        @@keyframes blink {
+            0%, 80%, 100% { opacity: 0; }
+            40% { opacity: 1; }
+        }
+    </style>
+    @Html.AntiForgeryToken()
+}

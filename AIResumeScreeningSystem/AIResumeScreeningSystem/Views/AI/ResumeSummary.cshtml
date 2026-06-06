@@ -1,0 +1,157 @@
+﻿@model AIResumeScreeningSystem.ViewModels.AI.ResumeSummaryViewModel
+@{
+    ViewData["Title"] = "AI Resume Summary";
+}
+
+<div class="d-flex align-items-center gap-2 mb-4">
+    <a asp-controller="Resume" asp-action="Details" asp-route-id="@Model.ResumeId"
+           class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+        <h4 class="fw-bold mb-0">
+            <i class="bi bi-file-earmark-person me-2 text-primary"></i>AI Resume Analysis
+        </h4>
+        <small class="text-muted">@Model.CandidateName — @Model.FileName</small>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-circle me-2"></i>@Model.Error
+    </div>
+}
+else if (Model.IsLoaded)
+{
+    <!-- Quality Scores -->
+    <div class="row g-3 mb-4">
+        @foreach (var (label, score, color) in new[] {
+            ("Overall Quality", Model.ResumeQualityScore, "success"),
+            ("Content Completeness", Model.ContentCompletenessScore, "primary"),
+            ("Presentation", Model.PresentationScore, "info")
+        })
+        {
+            <div class="col-md-4">
+                <div class="card shadow-sm text-center border-0">
+                    <div class="card-body py-4">
+                        <svg width="100" height="100" viewBox="0 0 100 100" class="mb-2">
+                            <circle cx="50" cy="50" r="40"
+                                    fill="none" stroke="#e5e7eb" stroke-width="10" />
+                            <circle cx="50" cy="50" r="40"
+                                    fill="none"
+                                    stroke="@(color == "success" ? "#059669" : color == "primary" ? "#1a56db" : "#0891b2")"
+                                    stroke-width="10"
+                                    stroke-dasharray="@(2 * Math.PI * 40 * score / 100) @(2 * Math.PI * 40)"
+                                    stroke-dashoffset="@(2 * Math.PI * 40 * 0.25)"
+                                    stroke-linecap="round"
+                                    transform="rotate(-90 50 50)" />
+                            <text x="50" y="55" text-anchor="middle"
+                                  font-size="18" font-weight="bold" fill="#111827">@score%</text>
+                        </svg>
+                        <p class="text-muted small mb-0 fw-500">@label</p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+
+            @if (!string.IsNullOrEmpty(Model.ExecutiveSummary))
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-person-badge me-2 text-primary"></i>Executive Summary
+                        </h6>
+                    </div>
+                    <div class="card-body text-muted" style="line-height:1.8;">
+                        @Model.ExecutiveSummary
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.TechnicalProfile))
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-cpu me-2 text-primary"></i>Technical Profile
+                        </h6>
+                    </div>
+                    <div class="card-body text-muted" style="line-height:1.8;">
+                        @Model.TechnicalProfile
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.ImprovementSuggestions))
+            {
+                <div class="card shadow-sm border-warning border-opacity-25">
+                    <div class="card-header py-3 bg-warning bg-opacity-5">
+                        <h6 class="mb-0 fw-600 text-warning">
+                            <i class="bi bi-lightbulb me-2"></i>Improvement Suggestions
+                        </h6>
+                    </div>
+                    <div class="card-body text-muted" style="line-height:1.8;">
+                        @Model.ImprovementSuggestions
+                        @if (Model.ImprovementTips.Any())
+                        {
+                            <ul class="mt-2 mb-0">
+                                @foreach (var tip in Model.ImprovementTips)
+                                {
+                                    <li class="mb-1">@tip</li>
+                                }
+                            </ul>
+                        }
+                    </div>
+                </div>
+            }
+
+        </div>
+
+        <div class="col-lg-4">
+
+            @if (Model.TopSkills.Any())
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-star me-2 text-warning"></i>Top Skills
+                        </h6>
+                    </div>
+                    <div class="card-body d-flex flex-wrap gap-2">
+                        @foreach (var skill in Model.TopSkills)
+                        {
+                            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                                @skill
+                            </span>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (Model.Achievements.Any())
+            {
+                <div class="card shadow-sm">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-trophy me-2 text-warning"></i>Key Achievements
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0 ps-3">
+                            @foreach (var a in Model.Achievements)
+                            {
+                                <li class="text-muted small mb-2">@a</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+}

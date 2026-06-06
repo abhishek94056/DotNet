@@ -1,0 +1,103 @@
+﻿@{
+    ViewData["Title"] = "My Applications";
+    var applications = ViewBag.Applications as dynamic ?? new List<dynamic>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0">
+            <i class="bi bi-collection me-2 text-primary"></i>My Applications
+        </h4>
+        <small class="text-muted">Track all your job applications</small>
+    </div>
+    <a asp-controller="Job" asp-action="Browse" class="btn btn-primary btn-sm">
+        <i class="bi bi-search me-1"></i>Browse More Jobs
+    </a>
+</div>
+
+@if (applications == null || !((IEnumerable<dynamic>)applications).Any())
+{
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-briefcase text-muted" style="font-size:3.5rem;"></i>
+            <h5 class="text-muted mt-3">No applications yet</h5>
+            <p class="text-muted small mb-4">
+                Start applying to jobs to see your applications here
+            </p>
+            <a asp-controller="Job" asp-action="Browse" class="btn btn-primary px-4">
+                <i class="bi bi-search me-2"></i>Browse Jobs
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var app in (IEnumerable<dynamic>)applications)
+        {
+            string statusClass = ((string)app.Status.ToString()) switch
+            {
+                "Submitted" => "bg-secondary",
+                "UnderReview" => "bg-info text-dark",
+                "Shortlisted" => "bg-warning text-dark",
+                "InterviewScheduled" => "bg-primary",
+                "Approved" => "bg-success",
+                "Rejected" => "bg-danger",
+                _ => "bg-secondary"
+            };
+
+            decimal score = app.AIMatchScore ?? 0;
+            string scoreColor = score >= 75 ? "success" : score >= 50 ? "primary" :
+                                score >= 30 ? "warning" : "danger";
+
+            <div class="col-12">
+                <div class="card shadow-sm @(app.Status.ToString() == "Approved" ? "border-success border-2" :
+                                                                                      app.Status.ToString() == "Shortlisted" ? "border-warning border-2" :
+                                                                                      app.Status.ToString() == "Rejected" ? "border-danger" : "")">
+                    <div class="card-body">
+                        <div class="row align-items-center g-3">
+                            <div class="col">
+                                <a asp-action="Details" asp-route-id="@app.Id"
+                                       class="fw-bold text-dark text-decoration-none d-block">
+                                    @app.JobTitle
+                                </a>
+                                <small class="text-muted">
+                                    <i class="bi bi-building me-1"></i>@app.Company
+                                </small>
+                            </div>
+                            <div class="col-auto text-center">
+                                @if (score > 0)
+                                {
+                                    <div class="fw-bold text-@scoreColor" style="font-size:1.5rem;">
+                                        @score.ToString("F0")%
+                                    </div>
+                                    <small class="text-muted">AI Match</small>
+                                }
+                                else
+                                {
+                                    <div class="text-muted small">
+                                        <i class="bi bi-hourglass-split"></i>
+                                        <div>Calculating...</div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="col-auto text-center">
+                                <span class="badge @statusClass px-3 py-2">@app.Status</span>
+                                <div class="text-muted mt-1"
+                                     style="font-size:11px;">
+                                    @(((DateTime)app.AppliedAt).ToString("MMM dd, yyyy"))
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <a asp-action="Details" asp-route-id="@app.Id"
+                                       class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye me-1"></i>View
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

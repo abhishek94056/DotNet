@@ -1,0 +1,460 @@
+﻿@model List<MachineModel>
+@{
+    ViewBag.Title = "Machine Schedule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var timeSlots = new List<string>();
+    for (int h = 7; h < 19; h++)
+        timeSlots.Add($"{h}:00");
+    timeSlots.Add("19:00");
+
+    var machines = Model
+        .GroupBy(x => x.MachineName)
+        .OrderBy(g => g.Key)
+        .ToList();
+
+    double dayStartMinutes = 7 * 60;
+    double totalMinutes    = 12 * 60;
+
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg:         #0f1117;
+    --panel:      #181c26;
+    --panel2:     #1e2330;
+    --border:     #2b3045;
+    --text:       #dde3f0;
+    --muted:      #6370899;
+    --accent:     #38bdf8;
+    --working:    #22c55e;
+    --working2:   #4ade80;
+    --breakdown:  #ef4444;
+    --breakdown2: #f87171;
+    --ideal:      #f59e0b;
+    --ideal2:     #fbbf24;
+    --idle:       #64748b;
+    --row-h:      54px;
+    --label-w:    130px;
+}
+
+body {
+    background: var(--bg);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    padding: 28px 20px;
+    min-height: 100vh;
+}
+
+/* ── Header ── */
+.ms-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.ms-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+.ms-title em { color: var(--accent); font-style: normal; }
+
+.legend {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    color: #8892aa;
+}
+.legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 2px;
+}
+
+/* ── Chart card ── */
+.chart-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* ── Chart wrapper ── */
+.chart-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Time axis (top) ── */
+.time-axis {
+    display: flex;
+    margin-left: var(--label-w);
+    border-bottom: 1px solid var(--border);
+    background: var(--panel2);
+}
+.time-tick {
+    flex: 1;
+    min-width: 52px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .4px;
+    color: #7a8299;
+    padding: 8px 0 8px 4px;
+    border-left: 1px solid var(--border);
+    white-space: nowrap;
+}
+.time-tick:first-child { border-left: none; }
+
+/* ── Rows ── */
+.chart-row {
+    display: flex;
+    align-items: center;
+    height: var(--row-h);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    cursor: default;
+    transition: background .15s;
+}
+.chart-row:last-child { border-bottom: none; }
+.chart-row:hover { background: rgba(56,189,248,.03); }
+
+.row-label {
+    width: var(--label-w);
+    min-width: var(--label-w);
+    padding: 0 14px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text);
+    border-right: 1px solid var(--border);
+    background: var(--panel2);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+/* ── Bar area ── */
+.bar-area {
+    flex: 1;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Grid lines inside bar area */
+.bar-area::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent calc(100% / 12 - 1px),
+        rgba(255,255,255,.035) calc(100% / 12 - 1px),
+        rgba(255,255,255,.035) calc(100% / 12)
+    );
+    pointer-events: none;
+}
+
+/* ── Individual bar ── */
+.bar {
+    position: absolute;
+    top: 9px;
+    bottom: 9px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.9);
+    overflow: hidden;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: filter .15s, transform .12s;
+    /* start collapsed for animation */
+    transform-origin: left center;
+}
+.bar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,.18) 0%, transparent 55%);
+    border-radius: inherit;
+    pointer-events: none;
+}
+.bar:hover { filter: brightness(1.2); transform: scaleY(1.1); z-index: 10; }
+
+.bar.working   { background: linear-gradient(90deg, var(--working), var(--working2));    box-shadow: 0 2px 10px rgba(34,197,94,.3); }
+.bar.breakdown { background: linear-gradient(90deg, var(--breakdown), var(--breakdown2)); box-shadow: 0 2px 10px rgba(239,68,68,.4); }
+.bar.ideal,
+.bar.idle-bar  { background: linear-gradient(90deg, #d97706, var(--ideal2));             box-shadow: 0 2px 10px rgba(245,158,11,.3); color: rgba(0,0,0,.75); }
+.bar.unknown   { background: linear-gradient(90deg, var(--idle), #94a3b8); }
+
+/* hide label when bar is tiny */
+.bar.tiny .bar-lbl { display: none; }
+
+/* ── Now line ── */
+.now-line {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: var(--accent);
+    z-index: 8;
+    pointer-events: none;
+}
+.now-line::before {
+    content: 'NOW';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    left: 50%;
+    font-size: 8px;
+    font-weight: 700;
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--accent);
+    letter-spacing: 1px;
+    white-space: nowrap;
+    background: var(--panel);
+    padding: 2px 4px;
+    border-radius: 2px;
+}
+
+/* ── Tooltip ── */
+#ms-tooltip {
+    position: fixed;
+    display: none;
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    z-index: 9999;
+    pointer-events: none;
+    min-width: 170px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.6);
+}
+#ms-tooltip.show { display: block; }
+.tt-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+.tt-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    font-size: 12px;
+    color: #7a8299;
+    margin-top: 4px;
+}
+.tt-row span:last-child { color: var(--text); font-weight: 600; }
+.tt-badge {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+}
+.tt-badge.working   { background: rgba(34,197,94,.2);  color: var(--working2); }
+.tt-badge.breakdown { background: rgba(239,68,68,.2);  color: var(--breakdown2); }
+.tt-badge.ideal,
+.tt-badge.idle      { background: rgba(245,158,11,.2); color: var(--ideal2); }
+
+.empty-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 80px;
+    color: #7a8299;
+    font-size: 14px;
+    letter-spacing: .5px;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { height: 5px; width: 5px; }
+::-webkit-scrollbar-track { background: var(--panel2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+
+<!-- ══ Header ══ -->
+<div class="ms-header">
+    <div class="ms-title">Machine <em>Schedule</em></div>
+    <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--working)"></div>Working</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--breakdown)"></div>Breakdown</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--ideal)"></div>Ideal / Idle</div>
+        <div class="legend-item">
+            <div class="legend-dot" style="background:var(--accent); border-radius:50%;"></div>Now
+        </div>
+    </div>
+</div>
+
+<!-- ══ Chart Card ══ -->
+<div class="chart-card">
+    <div class="chart-wrapper" id="machineChart">
+
+        <!-- Time axis -->
+        <div class="time-axis" id="timeAxis"></div>
+
+        @if (!machines.Any())
+        {
+            <div class="empty-row">No schedule data found. Insert records into MachineSchedule.</div>
+        }
+
+        @foreach (var machine in machines)
+        {
+            <div class="chart-row" data-machine="@machine.Key">
+                <div class="row-label">@machine.Key</div>
+                <div class="bar-area" id="area-@machine.Key.Replace(" ", "-")">
+                    @foreach (var entry in machine.OrderBy(x => x.StartTime))
+                    {
+                        double sMin = entry.StartTime.TotalMinutes - dayStartMinutes;
+                        double eMin = entry.EndTime.TotalMinutes - dayStartMinutes;
+                        sMin = Math.Max(0, Math.Min(sMin, totalMinutes));
+                        eMin = Math.Max(0, Math.Min(eMin, totalMinutes));
+                        double w = ((eMin - sMin) / totalMinutes) * 100;
+                        double l = (sMin / totalMinutes) * 100;
+                        if (w <= 0) { continue; }
+
+                        string cls = entry.Status.ToLower() switch {
+                            "working"   => "working",
+                            "breakdown" => "breakdown",
+                            "ideal"     => "ideal",
+                            "idle"      => "idle-bar",
+                            _           => "unknown"
+                        };
+
+                        string lbl = entry.Status.ToUpper() switch {
+                            "WORKING"   => "W",
+                            "BREAKDOWN" => "BD",
+                            "IDEAL"     => "ID",
+                            "IDLE"      => "IU",
+                            _           => entry.Status.Length >= 2 ? entry.Status[..2].ToUpper() : entry.Status.ToUpper()
+                        };
+
+                        string tiny = w < 5 ? " tiny" : "";
+                        string startFmt = DateTime.Today.Add(entry.StartTime).ToString("hh:mm tt");
+                        string endFmt   = DateTime.Today.Add(entry.EndTime).ToString("hh:mm tt");
+                        double durMin   = (entry.EndTime - entry.StartTime).TotalMinutes;
+                        string badgeCls = cls == "idle-bar" ? "idle" : cls;
+
+                        <div class="bar @cls@tiny"
+                             style="left:@(l.ToString("F2"))%;width:0%;"
+                             data-final-width="@(w.ToString("F2"))"
+                             data-machine="@entry.MachineName"
+                             data-status="@entry.Status"
+                             data-badge="@badgeCls"
+                             data-start="@startFmt"
+                             data-end="@endFmt"
+                             data-dur="@((int)durMin) min">
+                            <span class="bar-lbl">@lbl</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Tooltip -->
+<div id="ms-tooltip">
+    <div class="tt-title" id="tt-machine"></div>
+    <div class="tt-row"><span>Status</span><span><span class="tt-badge" id="tt-badge"></span></span></div>
+    <div class="tt-row"><span>Start</span><span id="tt-start"></span></div>
+    <div class="tt-row"><span>End</span><span id="tt-end"></span></div>
+    <div class="tt-row"><span>Duration</span><span id="tt-dur"></span></div>
+</div>
+
+<script>
+$(function () {
+
+    /* ── 1. Build time-axis ticks ── */
+    var ticks = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(timeSlots));
+    var $axis = $('#timeAxis');
+    $.each(ticks, function (_, t) {
+        $axis.append($('<div class="time-tick">').text(t));
+    });
+
+    /* ── 2. Animate bars in with jQuery ── */
+    $('.bar').each(function (i) {
+        var $b = $(this);
+        var fw = parseFloat($b.data('final-width'));
+        setTimeout(function () {
+            $b.animate({ width: fw + '%' }, { duration: 600, easing: 'swing' });
+        }, i * 18);
+    });
+
+    /* ── 3. Now-line ── */
+    (function () {
+        var now      = new Date();
+        var dayStart = 7 * 60;
+        var total    = 12 * 60;
+        var cur      = now.getHours() * 60 + now.getMinutes();
+        var offset   = cur - dayStart;
+        if (offset < 0 || offset > total) return;
+        var pct = (offset / total * 100).toFixed(2) + '%';
+        $('.bar-area').each(function () {
+            $(this).append($('<div class="now-line">').css('left', pct));
+        });
+    })();
+
+    /* ── 4. Tooltip ── */
+    var $tip = $('#ms-tooltip');
+
+    $(document).on('mouseenter', '.bar', function (e) {
+        var $b = $(this);
+        $('#tt-machine').text($b.data('machine'));
+        $('#tt-badge').text($b.data('status')).attr('class', 'tt-badge ' + $b.data('badge'));
+        $('#tt-start').text($b.data('start'));
+        $('#tt-end').text($b.data('end'));
+        $('#tt-dur').text($b.data('dur'));
+        $tip.addClass('show');
+        moveTip(e);
+    }).on('mouseleave', '.bar', function () {
+        $tip.removeClass('show');
+    }).on('mousemove', function (e) {
+        if ($tip.hasClass('show')) moveTip(e);
+    });
+
+    function moveTip(e) {
+        var x = e.clientX + 14, y = e.clientY - 12;
+        var tw = $tip.outerWidth(), th = $tip.outerHeight();
+        if (x + tw > window.innerWidth)  x = e.clientX - tw - 14;
+        if (y + th > window.innerHeight) y = e.clientY - th - 4;
+        $tip.css({ left: x, top: y });
+    }
+
+});
+</script>

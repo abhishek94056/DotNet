@@ -1,0 +1,1027 @@
+﻿@using InvoiceGenerator.Helper
+@{
+    ViewData["Title"] = "Raw Material Master";
+}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<style>
+    /* ════════════════════════════════════════
+       CSS VARIABLES
+    ════════════════════════════════════════ */
+    :root {
+        --header-bg:   #1a1a2e;
+        --row-odd:     #f8f9fa;
+        --row-even:    #eef2ff;
+        --row-hover:   #cfe2ff;
+        --accent:      #0d6efd;
+        --sec-hdr-bg:  #0d6efd;
+        --font-xs:      0.72rem;
+        --font-xxs:     0.69rem;
+        --font-xxxs:    0.62rem;
+        --font-tiny:    0.67rem;
+    }
+
+    /* ════════════════════════════════════════
+       PAGE HEADER
+    ════════════════════════════════════════ */
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .page-header h6 {
+        margin: 0;
+        font-weight: 700;
+        white-space: nowrap;
+         word-break:break-word;
+    }
+
+    .header-controls {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .header-controls select,
+    .header-controls input[type="text"] {
+        font-size: 0.78rem;
+    }
+
+    /* ════════════════════════════════════════
+       TABLE
+    ════════════════════════════════════════ */
+    #rmTable {
+        font-size: var(--font-xs);
+        width: 100%;
+        min-width: 700px; /* prevent collapse on desktop */
+    }
+
+    #rmTable thead th {
+        font-size:      var(--font-xxs);
+        padding:        4px 6px;
+        white-space:    nowrap;
+        text-align:     center;
+        background:     var(--header-bg);
+        color:          #fff;
+        position:       sticky;
+        top:            0;
+        z-index:        2;
+    }
+
+    #rmTable tbody td {
+        padding:          3px 6px;
+        vertical-align:   middle;
+        white-space:      nowrap;
+    }
+
+    #rmTable tbody tr:nth-child(odd)  td { background-color: var(--row-odd); }
+    #rmTable tbody tr:nth-child(even) td { background-color: var(--row-even); }
+    #rmTable tbody tr:hover td {
+        background-color: var(--row-hover) !important;
+        cursor:           pointer;
+        transition:       background-color 0.15s;
+    }
+
+    #rmTable .btn-sm { padding: 1px 5px; font-size: var(--font-tiny); }
+
+    /* ════════════════════════════════════════
+       VIEW-ONLY BADGES
+    ════════════════════════════════════════ */
+    .view-badge {
+        font-size:    var(--font-xxxs);
+        background:   #6c757d;
+        color:        #fff;
+        border-radius: 3px;
+        padding:      1px 5px;
+    }
+    .view-badge.filled { background: #198754; }
+
+    /* ════════════════════════════════════════
+       TABLE WRAPPER
+    ════════════════════════════════════════ */
+    .table-wrap {
+        max-height:   460px;
+        overflow-y:   auto;
+        overflow-x:   auto;          /* horizontal scroll on small screens */
+        border:       1px solid #dee2e6;
+        border-radius: 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ════════════════════════════════════════
+       PAGINATION
+    ════════════════════════════════════════ */
+    .pagination-bar {
+        display:        flex;
+        justify-content: flex-end;
+        align-items:    center;
+        flex-wrap:      wrap;
+        gap:            5px;
+        margin-top:     8px;
+        font-size:      0.73rem;
+    }
+
+    .pagination-bar button {
+        min-width:    28px;
+        height:       26px;
+        font-size:    0.68rem;
+        padding:      0 5px;
+        border-radius: 4px;
+    }
+
+    .pagination-bar button.active-page {
+        background:   #0d6efd;
+        color:        #fff;
+        border-color: #0d6efd;
+    }
+
+    #loadingRow td { text-align: center; padding: 20px; color: #888; }
+
+    /* ════════════════════════════════════════
+       SELECT2 OVERRIDES
+    ════════════════════════════════════════ */
+    .select2-container { width: 100% !important; }
+
+    .select2-container--default .select2-selection--single {
+        height:           31px !important;
+        border:           1px solid #ced4da !important;
+        border-radius:    0 0.25rem 0.25rem 0 !important;
+        background-color: #fff !important;
+    }
+
+    .select2-selection__rendered {
+        line-height:   31px !important;
+        padding-left:  8px !important;
+        padding-right: 25px !important;
+        color:         #495057 !important;
+    }
+
+    .select2-container--default .select2-selection--single
+    .select2-selection__placeholder { color: #6c757d !important; }
+
+    .select2-selection__arrow { height: 31px !important; top: 0 !important; }
+
+    .select2-search__field {
+        width:   100% !important;
+        padding: 4px 6px !important;
+        border:  1px solid #ced4da !important;
+        outline: none !important;
+    }
+
+    .input-group-sm .input-group-text {
+        height:          31px;
+        display:         flex;
+        align-items:     center;
+        justify-content: center;
+    }
+
+    .select2-wrapper { flex: 1 1 auto; }
+
+   
+
+
+    @@media (max-width: 575px) {
+        .page-header h6{
+    font-size:0.9rem;
+}
+
+.page-header{
+    overflow:hidden;
+}
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-controls select,
+    .header-controls input,
+    .header-controls button {
+        width: 100% !important;
+    }
+
+    /* Keep table visible */
+    .table-wrap {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Hide cards */
+    .rm-card-list {
+        display: none !important;
+    }
+
+    /* Keep desktop-like width */
+    #rmTable {
+        min-width: 1000px;
+    }
+
+    .pagination-bar {
+        justify-content: center;
+    }
+
+    .pagination-bar #pageNumbers {
+        flex-wrap: wrap;
+    }
+}
+</style>
+
+<!-- ── PAGE HEADER ── -->
+<div class="page-header">
+    <h6>
+        <i class="bi bi-stack me-2 text-primary"></i>
+        Raw Material Master
+    </h6>
+
+    <div class="header-controls">
+
+        <!-- Department -->
+        <select id="deptFilter" class="form-select form-select-sm"
+                style="width:155px" onchange="onFilterChange()">
+            <option value="">-- Department --</option>
+        </select>
+
+        <!-- Month -->
+        <select id="monthFilter" class="form-select form-select-sm"
+                style="width:115px" onchange="onFilterChange()">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+        </select>
+
+        <!-- Search -->
+        <input type="text" id="searchInput"
+               class="form-control form-control-sm"
+               placeholder="🔍 Search..."
+               style="width:155px" oninput="applyFilter()" />
+
+        <button class="btn btn-primary btn-sm" id="btnAdd">
+            <i class="bi bi-plus-lg me-1"></i>Add RM
+        </button>
+    </div>
+</div>
+
+<!-- ── DESKTOP / TABLET TABLE ── -->
+<div class="table-wrap">
+    <table class="table table-bordered mb-0" id="rmTable">
+        <thead>
+            <tr class="text-center">
+                <th rowspan="2" class="align-middle">#</th>
+                <th rowspan="2" class="align-middle">Department</th>
+                <th rowspan="2" class="align-middle">Date</th>
+                <th rowspan="2" class="align-middle">RM Code</th>
+                <th rowspan="2" class="align-middle col-hide-tablet">RM Size</th>
+                <th rowspan="2" class="align-middle">RM Rate (₹)</th>
+                <th rowspan="2" class="align-middle">Qty</th>
+                <th colspan="4" class="col-hide-tablet">Tally GRN Data List</th>
+                <th rowspan="2" class="align-middle">Actions</th>
+            </tr>
+            <tr class="text-center">
+                <th class="col-hide-tablet">Supplier</th>
+                <th class="col-hide-tablet">PO No</th>
+                <th class="col-hide-tablet">Invoice No</th>
+                <th class="col-hide-tablet">Batch No</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <tr id="loadingRow">
+                <td colspan="12">
+                    <i class="bi bi-info-circle text-primary me-2"></i>
+                    Select Department and Month to load Raw Material records.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ── MOBILE CARD LIST ── -->
+@* <div class="rm-card-list" id="cardList">
+    <!-- Cards injected by JS -->
+</div> *@
+
+<!-- ── PAGINATION ── -->
+<div class="pagination-bar">
+    <span id="pageInfo" class="text-muted"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnFirst" onclick="goToPage(1)">«</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnPrev"  onclick="goToPage(currentPage-1)">‹</button>
+    <span id="pageNumbers" class="d-flex gap-1 flex-wrap"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnNext"  onclick="goToPage(currentPage+1)">›</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnLast"  onclick="goToPage(totalPages)">»</button>
+    <select id="rppSelect" class="form-select form-select-sm"
+            style="width:75px" onchange="changeRPP()">
+        <option value="10" selected>10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+    </select>
+    <span class="text-muted">/ page</span>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ADD / EDIT MODAL
+══════════════════════════════════════════════ -->
+<div class="modal fade" id="rmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header bg-dark text-white py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-stack me-2"></i>
+                    <span id="modalTitleText">Add Raw Material</span>
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="rmForm" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="fSrNo" value="0" />
+                    <div class="row g-2">
+
+                        <!-- Department -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">
+                                Department <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-diagram-3"></i>
+                                </span>
+                                <select id="fDepartmentId"
+                                        class="form-select form-select-sm">
+                                    <option value="0">-- Select Department --</option>
+                                </select>
+                            </div>
+                            <div class="invalid-feedback d-block" id="err-dept"></div>
+                        </div>
+
+                        <!-- Size Code -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">
+                                Size Code <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-rulers"></i>
+                                </span>
+                                <div class="select2-wrapper flex-grow-1">
+                                    <select id="fSizeId"
+                                            class="form-select"
+                                            onchange="onSizeChange()">
+                                        <option value="0">-- Select Size Code --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="invalid-feedback d-block" id="err-size"></div>
+                        </div>
+
+                        <!-- Size Description -->
+                        @* <div class="col-md-6">
+                            <label class="form-label fw-semibold small">
+                                Size Description
+                            </label>
+                            <input type="text" id="fItemSize"
+                                   class="form-control form-control-sm bg-light"
+                                   readonly />
+                        </div> *@
+                        <div class="col-md-6">
+    <label class="form-label fw-semibold small">
+        Size Description
+    </label>
+
+    <div class="input-group input-group-sm">
+        <span class="input-group-text">
+            <i class="bi bi-rulers"></i>
+        </span>
+
+        <input type="text"
+               id="fItemSize"
+               class="form-control form-control-sm bg-light"
+               readonly />
+    </div>
+</div>
+                        <!-- RM Rate -->
+                        <div class="col-md-3 col-6">
+                            <label class="form-label fw-semibold small">
+                                RM Rate (₹) <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">₹</span>
+                                <input type="number" id="fRMRate"
+                                       class="form-control form-control-sm"
+                                       min="0" step="0.01" placeholder="0.00"
+                                       oninput="calcTotal()" />
+                            </div>
+                            <div class="invalid-feedback d-block" id="err-rate"></div>
+                        </div>
+
+                        <!-- Quantity -->
+                        @* <div class="col-md-3 col-6">
+                            <label class="form-label fw-semibold small">
+                                Quantity (KG) <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" id="fQuantity"
+                                   class="form-control form-control-sm"
+                                   min="0.01" step="0.01" placeholder="0.00"
+                                   oninput="calcTotal()" />
+                            <div class="invalid-feedback d-block" id="err-qty"></div>
+                        </div> *@
+
+
+                        <div class="col-md-3 col-6">
+    <label class="form-label fw-semibold small">
+        Quantity (KG) <span class="text-danger">*</span>
+    </label>
+
+    <div class="input-group input-group-sm">
+        <span class="input-group-text">
+            <i class="bi bi-box-seam"></i>
+        </span>
+
+        <input type="number"
+               id="fQuantity"
+               class="form-control form-control-sm"
+               min="0.01"
+               step="0.01"
+               placeholder="0.00"
+               oninput="calcTotal()" />
+    </div>
+
+    <div class="invalid-feedback d-block" id="err-qty"></div>
+</div>
+
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" id="btnSave">
+                    <i class="bi bi-check-lg me-1"></i>Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ── DELETE CONFIRM MODAL ── -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Confirm Delete
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center small">
+                <p class="mb-1">Delete Raw Material record</p>
+                <strong id="deleteLabel"></strong>?
+            </div>
+            <div class="modal-footer justify-content-center py-2">
+                <button class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger btn-sm"
+                        id="btnConfirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index:9999">
+    <div id="toast" class="toast align-items-center text-white border-0"
+         role="alert" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body small" id="toastMsg"></div>
+            <button type="button"
+                    class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(function () {
+
+    // ════════════════════════════════════════════
+    // STATE
+    // ════════════════════════════════════════════
+    let allData         = [];
+    let filteredData    = [];
+    let currentPage     = 1;
+    let rowsPerPage     = 10;
+    let totalPages      = 1;
+    let pendingDeleteId = null;
+    let currentDeptId   = 0;
+    let sizeRateMap     = {};
+
+    const rmModal     = new bootstrap.Modal($('#rmModal')[0]);
+    const deleteModal = new bootstrap.Modal($('#deleteModal')[0]);
+    const toastEl     = $('#toast')[0];
+    const bsToast     = new bootstrap.Toast(toastEl, { delay: 3000 });
+
+    /* expose for inline onclick handlers */
+    window.currentPage  = currentPage;
+    window.totalPages   = totalPages;
+
+    // ── Set current month as default ──
+    const now = new Date();
+    $('#monthFilter').val(now.getMonth() + 1);
+
+    // ── Detect mobile breakpoint ──
+    function isMobile() { return window.innerWidth < 576; }
+
+    // ════════════════════════════════════════════
+    // LOAD DEPARTMENTS
+    // ════════════════════════════════════════════
+    $.ajax({
+        url:      '/RawMaterial/GetDepartments',
+        method:   'GET',
+        dataType: 'json',
+        success: function (depts) {
+            let filterOpts = '<option value="">-- Department --</option>';
+            let formOpts   = '<option value="0">-- Select Department --</option>';
+
+            depts.forEach(d => {
+                filterOpts += `<option value="${d.DepartmentId}">${d.Department}</option>`;
+                formOpts   += `<option value="${d.DepartmentId}">${d.Department}</option>`;
+            });
+
+            $('#deptFilter').html(filterOpts);
+            $('#fDepartmentId').html(formOpts);
+        }
+    });
+
+    // ════════════════════════════════════════════
+    // FILTER CHANGE
+    // ════════════════════════════════════════════
+    window.onFilterChange = function () {
+        currentDeptId = parseInt($('#deptFilter').val()) || 0;
+
+        if (!currentDeptId) {
+            allData = filteredData = [];
+            renderTable();
+            return;
+        }
+        loadSizes(currentDeptId);
+        loadData();
+    };
+
+    // ════════════════════════════════════════════
+    // LOAD SIZES
+    // ════════════════════════════════════════════
+    function loadSizes(deptId) {
+        sizeRateMap = {};
+        $.ajax({
+            url:      '/RawMaterial/GetSizesByDept?deptId=' + deptId,
+            method:   'GET',
+            dataType: 'json',
+            success: function (sizes) {
+                let opts = '<option value="0">-- Select Size --</option>';
+                sizes.forEach(s => {
+                    sizeRateMap[s.sizeId] = s.rate;
+                    opts += `<option value="${s.sizeId}"
+                             data-rate="${s.rate}"
+                             data-size="${s.item_Size}">
+                             ${s.itemSize_Code}</option>`;
+                });
+                $('#fSizeId').html(opts);
+
+                if ($('#fSizeId').hasClass('select2-hidden-accessible')) {
+                    $('#fSizeId').select2('destroy');
+                }
+                $('#fSizeId').select2({
+                    placeholder:    'Search Size Code',
+                    allowClear:     true,
+                    width:          '100%',
+                    dropdownParent: $('#rmModal')
+                });
+            }
+        });
+    }
+
+    window.onSizeChange = function () {
+        const selected = $('#fSizeId option:selected');
+        const rate     = selected.data('rate') || 0;
+        const itemSize = selected.data('size') || '';
+        $('#fRMRate').val(rate > 0 ? parseFloat(rate).toFixed(2) : '');
+        $('#fItemSize').val(itemSize);
+    };
+
+    // ════════════════════════════════════════════
+    // LOAD DATA
+    // ════════════════════════════════════════════
+    function loadData() {
+        const monthId = $('#monthFilter').val() || now.getMonth() + 1;
+
+        $('#loadingRow').show()
+            .find('td')
+            .html('<div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading...');
+        $('#tableBody tr:not(#loadingRow)').remove();
+        $('#cardList').html(
+            '<div class="text-center text-muted py-3">' +
+            '<div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading...</div>');
+
+        $.ajax({
+            url:      '/RawMaterial/GetAll?deptId=' + currentDeptId + '&monthId=' + monthId,
+            method:   'GET',
+            dataType: 'json',
+            success: function (data) {
+                allData = data;
+                applyFilter();
+                $('#loadingRow').hide();
+            },
+            error: function () {
+                $('#loadingRow td').html(
+                    '<i class="bi bi-exclamation-triangle text-danger me-1"></i>Failed to load data.');
+                $('#cardList').html(
+                    '<div class="text-center text-danger py-3">Failed to load data.</div>');
+            }
+        });
+    }
+
+    // ════════════════════════════════════════════
+    // RENDER TABLE  (desktop/tablet)
+    // ════════════════════════════════════════════
+    function renderTable() {
+        totalPages = Math.max(1, Math.ceil(filteredData.length / rowsPerPage));
+        window.totalPages = totalPages;
+        if (currentPage > totalPages) currentPage = 1;
+        window.currentPage = currentPage;
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end   = Math.min(start + rowsPerPage, filteredData.length);
+        const slice = filteredData.slice(start, end);
+
+        // ── Desktop table rows ──
+        $('#tableBody tr:not(#loadingRow)').remove();
+
+        if (slice.length === 0) {
+            $('#tableBody').append(
+                `<tr><td colspan="12" class="text-center text-muted py-3">No records found.</td></tr>`);
+        } else {
+            slice.forEach((r, idx) =>
+                $('#tableBody').append(buildRow(r, start + idx + 1)));
+        }
+
+        // ── Mobile cards ──
+        if (slice.length === 0) {
+            $('#cardList').html(
+                '<div class="text-center text-muted py-3">No records found.</div>');
+        } else {
+            $('#cardList').html(slice.map((r, idx) =>
+                buildCard(r, start + idx + 1)).join(''));
+        }
+
+        updatePaginationUI(start, end);
+    }
+
+    // ── Desktop row ──
+    function buildRow(r, sr) {
+        const fmt  = v => v || '';
+        const voBadge = (v, label) =>
+            v && v.trim()
+                ? `<span class="view-badge filled" title="${label}: ${v}">${v}</span>`
+                : '';
+
+        return `
+        <tr id="row-${r.SrNo}">
+            <td class="text-center">${sr}</td>
+            <td>
+                <span class="badge bg-dark" style="font-size:0.60rem">
+                    ${fmt(r.DepartmentName)}
+                </span>
+            </td>
+            <td class="text-center">${fmt(r.Add_Date)}</td>
+            <td class="fw-bold text-primary">${fmt(r.ItemSize_Code)}</td>
+            <td class="col-hide-tablet">${fmt(r.Item_Size)}</td>
+            <td class="text-end pe-2">₹${r.RM_Rate?.toFixed(2) ?? ''}</td>
+            <td class="text-end pe-2 fw-bold">${r.Quantity?.toFixed(2) ?? ''}</td>
+            <td class="text-center col-hide-tablet">${voBadge(r.Supplier,    'Supplier')}</td>
+            <td class="text-center col-hide-tablet">${voBadge(r.PO_Number,   'PO No')}</td>
+            <td class="text-center col-hide-tablet">${voBadge(r.Invoice_No,  'Invoice')}</td>
+            <td class="text-center col-hide-tablet">${voBadge(r.Batch_Number,'Batch')}</td>
+            <td class="text-center">
+                <button class="btn btn-outline-primary btn-sm btn-edit"
+                        data-id="${r.SrNo}" title="Edit">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm btn-del"
+                        data-id="${r.SrNo}"
+                        data-label="${fmt(r.ItemSize_Code)}"
+                        title="Delete">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </td>
+        </tr>`;
+    }
+
+    // ── Mobile card ──
+    function buildCard(r, sr) {
+        const fmt = v => v || '—';
+        const badge = (v, label) =>
+            v && v.trim()
+                ? `<span class="view-badge filled" title="${label}: ${v}">${v}</span>`
+                : '';
+
+        return `
+        <div class="rm-card" id="card-${r.SrNo}">
+            <div class="rm-card-header">
+                <span class="rm-card-code">${fmt(r.ItemSize_Code)}</span>
+                <span class="badge bg-dark" style="font-size:0.60rem">${fmt(r.DepartmentName)}</span>
+            </div>
+            <div class="rm-card-row">
+                <div>
+                    <div class="rm-card-label">Date</div>
+                    <div class="rm-card-value">${fmt(r.Add_Date)}</div>
+                </div>
+                <div>
+                    <div class="rm-card-label">Size</div>
+                    <div class="rm-card-value">${fmt(r.Item_Size)}</div>
+                </div>
+                <div>
+                    <div class="rm-card-label">Rate</div>
+                    <div class="rm-card-value">₹${r.RM_Rate?.toFixed(2) ?? '—'}</div>
+                </div>
+                <div>
+                    <div class="rm-card-label">Quantity (KG)</div>
+                    <div class="rm-card-value fw-bold">${r.Quantity?.toFixed(2) ?? '—'}</div>
+                </div>
+            </div>
+            <div class="rm-card-badges">
+                ${badge(r.Supplier,    'Supplier')}
+                ${badge(r.PO_Number,   'PO No')}
+                ${badge(r.Invoice_No,  'Invoice')}
+                ${badge(r.Batch_Number,'Batch')}
+            </div>
+            <div class="rm-card-actions">
+                <button class="btn btn-outline-primary btn-sm btn-edit"
+                        data-id="${r.SrNo}" title="Edit">
+                    <i class="bi bi-pencil-square me-1"></i>Edit
+                </button>
+                <button class="btn btn-outline-danger btn-sm btn-del"
+                        data-id="${r.SrNo}"
+                        data-label="${fmt(r.ItemSize_Code)}"
+                        title="Delete">
+                    <i class="bi bi-trash3 me-1"></i>Delete
+                </button>
+            </div>
+        </div>`;
+    }
+
+    // ════════════════════════════════════════════
+    // FILTER (search box)
+    // ════════════════════════════════════════════
+    window.applyFilter = function () {
+        const q = $('#searchInput').val().toLowerCase().trim();
+
+        filteredData = allData.filter(r =>
+            !q ||
+            (r.ItemSize_Code  || '').toLowerCase().includes(q) ||
+            (r.Item_Size      || '').toLowerCase().includes(q) ||
+            (r.Supplier       || '').toLowerCase().includes(q) ||
+            (r.PO_Number      || '').toLowerCase().includes(q) ||
+            (r.Invoice_No     || '').toLowerCase().includes(q) ||
+            (r.Batch_Number   || '').toLowerCase().includes(q)
+        );
+
+        currentPage = 1;
+        window.currentPage = currentPage;
+        renderTable();
+    };
+
+    // ════════════════════════════════════════════
+    // FORM DEPARTMENT CHANGE
+    // ════════════════════════════════════════════
+    $(document).on('change', '#fDepartmentId', function () {
+        const deptId = parseInt($(this).val()) || 0;
+        loadSizes(deptId);
+    });
+
+    // ════════════════════════════════════════════
+    // PAGINATION
+    // ════════════════════════════════════════════
+    function updatePaginationUI(start, end) {
+        $('#pageInfo').text(
+            filteredData.length === 0
+                ? 'No records'
+                : `${start + 1}–${end} of ${filteredData.length}`);
+
+        $('#btnFirst,#btnPrev').prop('disabled', currentPage === 1);
+        $('#btnNext,#btnLast').prop('disabled',  currentPage === totalPages);
+
+        const container = $('#pageNumbers').empty();
+        const maxV = 5;
+        let sp = Math.max(1, currentPage - Math.floor(maxV / 2));
+        let ep = Math.min(totalPages, sp + maxV - 1);
+        if (ep - sp < maxV - 1) sp = Math.max(1, ep - maxV + 1);
+
+        for (let p = sp; p <= ep; p++) {
+            $('<button>').text(p)
+                .addClass('btn btn-outline-secondary btn-sm' +
+                    (p === currentPage ? ' active-page' : ''))
+                .on('click', () => goToPage(p))
+                .appendTo(container);
+        }
+    }
+
+    window.goToPage = function (p) {
+        if (p < 1 || p > totalPages) return;
+        currentPage = p;
+        window.currentPage = p;
+        renderTable();
+    };
+
+    window.changeRPP = function () {
+        rowsPerPage = parseInt($('#rppSelect').val());
+        currentPage = 1;
+        window.currentPage = 1;
+        renderTable();
+    };
+
+    // ════════════════════════════════════════════
+    // ADD BUTTON
+    // ════════════════════════════════════════════
+    $('#btnAdd').on('click', function () {
+        clearForm();
+        $('#modalTitleText').text('Add Raw Material');
+        $('#fDepartmentId').val('0');
+        $('#fSizeId').html('<option value="0">-- Select Size --</option>');
+        rmModal.show();
+    });
+
+    // ════════════════════════════════════════════
+    // EDIT BUTTON (table row + card)
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-edit', function () {
+        const id = parseInt($(this).data('id'));
+        const r  = allData.find(x => x.SrNo === id);
+        if (!r) return;
+
+        clearForm();
+        $('#modalTitleText').text('Edit Raw Material');
+        $('#fSrNo').val(r.SrNo);
+        $('#fDepartmentId').val(r.DepartmentId);
+        loadSizes(r.DepartmentId);
+
+        setTimeout(function () {
+            $('#fSizeId').val(r.SizeId);
+            onSizeChange();
+            $('#fQuantity').val(r.Quantity);
+            $('#fRMRate').val(r.RM_Rate?.toFixed(2));
+        }, 300);
+
+        rmModal.show();
+    });
+
+    // ════════════════════════════════════════════
+    // SAVE
+    // ════════════════════════════════════════════
+    $('#btnSave').on('click', function () {
+        clearErrors();
+
+        const DepartmentId = parseInt($('#fDepartmentId').val()) || 0;
+        const SizeId       = parseInt($('#fSizeId').val()) || 0;
+        const Quantity     = parseFloat($('#fQuantity').val()) || 0;
+        const RM_Rate      = parseFloat($('#fRMRate').val()) || 0;
+
+        let valid = true;
+        if (DepartmentId === 0) { showError('fDepartmentId','err-dept','Please select Department.'); valid = false; }
+        if (SizeId === 0)       { showError('fSizeId','err-size','Please select an Item Size.');    valid = false; }
+        if (Quantity <= 0)      { showError('fQuantity','err-qty','Quantity must be greater than 0.'); valid = false; }
+        if (RM_Rate < 0)        { showError('fRMRate','err-rate','RM Rate cannot be negative.');    valid = false; }
+        if (!valid) return;
+
+        const token = $('input[name="__RequestVerificationToken"]').val();
+
+        $.ajax({
+            url:      '/RawMaterial/Save',
+            method:   'POST',
+            dataType: 'json',
+            data: {
+                SrNo:         $('#fSrNo').val(),
+                SizeId,
+                Quantity,
+                RM_Rate,
+                DepartmentId,
+                __RequestVerificationToken: token
+            },
+            success: function (d) {
+                if (!d.success) { showToast(d.message || 'Save failed.', 'danger'); return; }
+                rmModal.hide();
+                showToast(d.message, 'success');
+                loadData();
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
+                showToast('Network error.', 'danger');
+            }
+        });
+    });
+
+    // ════════════════════════════════════════════
+    // DELETE
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-del', function () {
+        pendingDeleteId = $(this).data('id');
+        $('#deleteLabel').text($(this).data('label'));
+        deleteModal.show();
+    });
+
+    $('#btnConfirmDelete').on('click', function () {
+        const token = $('input[name="__RequestVerificationToken"]').val();
+
+        $.ajax({
+            url:      '/RawMaterial/Delete',
+            method:   'POST',
+            dataType: 'json',
+            data: { srNo: pendingDeleteId, __RequestVerificationToken: token },
+            success: function (d) {
+                deleteModal.hide();
+                if (d.success) {
+                    allData      = allData.filter(r => r.SrNo !== pendingDeleteId);
+                    filteredData = filteredData.filter(r => r.SrNo !== pendingDeleteId);
+                    renderTable();
+                    showToast('Raw Material deleted.', 'success');
+                } else {
+                    showToast('Delete failed.', 'danger');
+                }
+            },
+            error: function () { showToast('Network error.', 'danger'); }
+        });
+    });
+
+    // ════════════════════════════════════════════
+    // HELPERS
+    // ════════════════════════════════════════════
+    function clearForm() {
+        $('#fSrNo').val('0');
+        $('#fSizeId').val('0');
+        $('#fQuantity').val('');
+        $('#fRMRate').val('');
+        $('#fItemSize').val('');
+        clearErrors();
+    }
+
+    function clearErrors() {
+        $('.invalid-feedback.d-block').text('');
+        $('#rmForm .form-control, #rmForm .form-select').removeClass('is-invalid');
+    }
+
+    function showError(fieldId, errId, msg) {
+        $('#' + fieldId).addClass('is-invalid');
+        $('#' + errId).text(msg);
+    }
+
+    function showToast(msg, type) {
+        toastEl.className = `toast align-items-center text-white border-0 bg-${type}`;
+        $('#toastMsg').text(msg);
+        bsToast.show();
+    }
+
+    // Re-render on window resize (switch between table and card layout)
+    let resizeTimer;
+    $(window).on('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function () {
+            if (filteredData.length) renderTable();
+        }, 200);
+    });
+
+});
+</script>
+}

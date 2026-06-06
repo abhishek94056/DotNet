@@ -47,7 +47,7 @@ namespace InvoiceGenerator
 
 
                 // --- LOGO CELL ---
-                string logoPath = @"D:\Dot Net\WinForms\InvoiceGenerator\Logo.png";
+                string logoPath = @"D:\Dot Net\WinForms\InvoiceGenerator\images\Logo.png";
 
                 iTextSharp.text.Image logo = iTextSharp.text.Image.GetInstance(logoPath);
                 logo.ScaleToFit(70f, 80f);
@@ -62,7 +62,7 @@ namespace InvoiceGenerator
                 headerTable.AddCell(logoCell);
 
                 // --- COMPANY NAME IMAGE CELL ---
-                string companyNamePath = @"D:\Dot Net\WinForms\InvoiceGenerator\Company Name.png"; // ← your PNG path
+                string companyNamePath = @"D:\Dot Net\WinForms\InvoiceGenerator\images\Company Name.png"; // ← your PNG path
                 iTextSharp.text.Image companyNameImg = iTextSharp.text.Image.GetInstance(companyNamePath);
                 companyNameImg.ScaleToFit(1000f, 55f);  // ← adjust width/height to fit nicely
 
@@ -621,7 +621,7 @@ namespace InvoiceGenerator
                 authCell.AddElement(new Paragraph(" "));
 
                 // static signature image
-                string signPath = @"D:\Dot Net\WinForms\InvoiceGenerator\Signature.png";
+                string signPath = @"D:\Dot Net\WinForms\InvoiceGenerator\images\Signature.png";
 
                 iTextSharp.text.Image signImg = iTextSharp.text.Image.GetInstance(signPath);
                 signImg.ScaleToFit(120f, 40f);
@@ -987,11 +987,6 @@ namespace InvoiceGenerator
                 cbTransportMode.DisplayMember = "ModeName";
                 cbTransportMode.ValueMember = "ModeName";
             }
-        }
-
-        private void dgvItems_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
         }
     }
 }

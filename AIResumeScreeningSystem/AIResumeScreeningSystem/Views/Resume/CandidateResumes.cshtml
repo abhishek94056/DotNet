@@ -1,0 +1,103 @@
+﻿@model AIResumeScreeningSystem.ViewModels.Resume.ResumeListViewModel
+@{
+    ViewData["Title"] = $"{Model.CandidateName} — Resumes";
+}
+
+<div class="d-flex align-items-center gap-2 mb-4">
+    <a asp-controller="Candidate" asp-action="Index" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+        <h4 class="fw-bold mb-0">Resumes — @Model.CandidateName</h4>
+        <small class="text-muted">
+            @Model.TotalCount total · @Model.ParsedCount parsed · @Model.PendingCount pending
+        </small>
+    </div>
+</div>
+
+@if (!Model.Resumes.Any())
+{
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-file-earmark text-muted" style="font-size:3rem;"></i>
+            <h5 class="text-muted mt-3">No resumes uploaded</h5>
+            <p class="text-muted small">This candidate hasn't uploaded any resumes yet.</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var resume in Model.Resumes)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100 @(resume.IsActive ? "border-success border-2" : "")">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start gap-3 mb-3">
+                            <i class="bi @resume.FileIconClass fs-2 flex-shrink-0"></i>
+                            <div class="overflow-hidden">
+                                <div class="fw-600 small text-truncate" title="@resume.FileName">
+                                    @resume.FileName
+                                </div>
+                                <div class="d-flex gap-1 mt-1 flex-wrap">
+                                    <span class="badge @resume.StatusBadgeClass"
+                                          style="font-size:10px;">@resume.StatusDisplay</span>
+                                    @if (resume.IsActive)
+                                    {
+                                        <span class="badge bg-success bg-opacity-15 text-success"
+                                              style="font-size:10px;">Active</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (resume.Status == ResumeStatus.Parsed)
+                        {
+                            <div class="mb-3">
+                                @if (!string.IsNullOrEmpty(resume.ParsedName))
+                                {
+                                    <small class="text-muted d-block">
+                                        <i class="bi bi-person me-1"></i>@resume.ParsedName
+                                    </small>
+                                }
+                                @if (resume.ParsedSkillsList.Any())
+                                {
+                                    <div class="mt-2 d-flex flex-wrap gap-1">
+                                        @foreach (var skill in resume.ParsedSkillsList.Take(4))
+                                        {
+                                            <span class="badge bg-primary bg-opacity-10 text-primary"
+                                                  style="font-size:10px;">@skill</span>
+                                        }
+                                        @if (resume.ParsedSkillsList.Count > 4)
+                                        {
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary"
+                                                  style="font-size:10px;">
+                                                +@(resume.ParsedSkillsList.Count - 4)
+                                            </span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        <div class="text-muted small mb-3">
+                            <i class="bi bi-clock me-1"></i>@resume.UploadedAt.ToString("MMM dd, yyyy")
+                            <span class="ms-2">@resume.FileSizeDisplay</span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <a asp-action="Details" asp-route-id="@resume.Id"
+                                   class="btn btn-sm btn-outline-primary flex-grow-1">
+                                <i class="bi bi-eye me-1"></i>View
+                            </a>
+                            <a asp-action="Download" asp-route-id="@resume.Id"
+                                   class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-download"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,226 @@
+﻿@model AIResumeScreeningSystem.ViewModels.AI.AIEvaluationViewModel
+@{
+    ViewData["Title"] = "AI Candidate Evaluation";
+}
+
+<div class="d-flex align-items-center gap-2 mb-4">
+    <a asp-controller="Application" asp-action="Details"
+           asp-route-id="@Model.ApplicationId"
+           class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+        <h4 class="fw-bold mb-0">
+            <i class="bi bi-stars me-2 text-warning"></i>AI Candidate Evaluation
+        </h4>
+        <small class="text-muted">@Model.CandidateName — @Model.JobTitle</small>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-circle me-2"></i>@Model.Error
+    </div>
+}
+else if (Model.IsLoaded)
+{
+    <!-- Header Card: Recommendation -->
+    <div class="card shadow-sm mb-4"
+         style="background:linear-gradient(135deg,#1e3a5f,#1a56db);color:white;border:none;">
+        <div class="card-body py-4">
+            <div class="row align-items-center g-3">
+                <div class="col">
+                    <h5 class="fw-bold mb-1">@Model.CandidateName</h5>
+                    <p class="mb-2 opacity-75">@Model.JobTitle at @Model.Company</p>
+                    <span class="badge @Model.RecommendationBadgeClass px-4 py-2 fs-6">
+                        @Model.RecommendationLevel
+                    </span>
+                </div>
+                <div class="col-auto text-center">
+                    <div class="fw-bold" style="font-size:3rem;line-height:1;">
+                        @Model.OverallMatchScore.ToString("F0")%
+                    </div>
+                    <small class="opacity-75">AI Match Score</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- LEFT -->
+        <div class="col-lg-8">
+
+            <!-- Evaluation Summary -->
+            @if (!string.IsNullOrEmpty(Model.EvaluationSummary))
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-cpu me-2 text-primary"></i>AI Evaluation Summary
+                        </h6>
+                    </div>
+                    <div class="card-body text-muted" style="line-height:1.8;">
+                        @Model.EvaluationSummary
+                    </div>
+                </div>
+            }
+
+            <!-- Strengths & Weaknesses -->
+            <div class="row g-4 mb-4">
+                @if (!string.IsNullOrEmpty(Model.StrengthsAnalysis))
+                {
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100 border-success border-opacity-50">
+                            <div class="card-header py-3 bg-success bg-opacity-5">
+                                <h6 class="mb-0 fw-600 text-success">
+                                    <i class="bi bi-arrow-up-circle me-2"></i>Strengths
+                                </h6>
+                            </div>
+                            <div class="card-body text-muted small" style="line-height:1.7;">
+                                @Model.StrengthsAnalysis
+                                @if (Model.KeyStrengths.Any())
+                                {
+                                    <ul class="mt-2 mb-0 ps-3">
+                                        @foreach (var s in Model.KeyStrengths)
+                                        {
+                                            <li>@s</li>
+                                        }
+                                    </ul>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(Model.WeaknessesAnalysis))
+                {
+                    <div class="col-md-6">
+                        <div class="card shadow-sm h-100 border-warning border-opacity-50">
+                            <div class="card-header py-3 bg-warning bg-opacity-5">
+                                <h6 class="mb-0 fw-600 text-warning">
+                                    <i class="bi bi-arrow-down-circle me-2"></i>Areas to Improve
+                                </h6>
+                            </div>
+                            <div class="card-body text-muted small" style="line-height:1.7;">
+                                @Model.WeaknessesAnalysis
+                                @if (Model.KeyWeaknesses.Any())
+                                {
+                                    <ul class="mt-2 mb-0 ps-3">
+                                        @foreach (var w in Model.KeyWeaknesses)
+                                        {
+                                            <li>@w</li>
+                                        }
+                                    </ul>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Hiring Recommendation -->
+            @if (!string.IsNullOrEmpty(Model.HiringRecommendation))
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-person-check me-2 text-primary"></i>
+                            Hiring Recommendation
+                        </h6>
+                    </div>
+                    <div class="card-body text-muted" style="line-height:1.7;">
+                        @Model.HiringRecommendation
+                    </div>
+                </div>
+            }
+
+            <!-- Red Flags -->
+            @if (Model.RedFlags.Any())
+            {
+                <div class="card shadow-sm mb-4 border-danger border-opacity-25">
+                    <div class="card-header py-3 bg-danger bg-opacity-5">
+                        <h6 class="mb-0 fw-600 text-danger">
+                            <i class="bi bi-flag me-2"></i>Red Flags
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            @foreach (var flag in Model.RedFlags)
+                            {
+                                <li class="text-danger small mb-1">@flag</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col-lg-4">
+
+            <!-- Career Progression -->
+            @if (!string.IsNullOrEmpty(Model.CareerProgressionNote))
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-graph-up me-2 text-primary"></i>Career Trajectory
+                        </h6>
+                    </div>
+                    <div class="card-body text-muted small" style="line-height:1.7;">
+                        @Model.CareerProgressionNote
+                    </div>
+                </div>
+            }
+
+            <!-- Cultural Fit -->
+            @if (!string.IsNullOrEmpty(Model.CulturalFitAssessment))
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-people me-2 text-primary"></i>Cultural Fit
+                        </h6>
+                    </div>
+                    <div class="card-body text-muted small" style="line-height:1.7;">
+                        @Model.CulturalFitAssessment
+                    </div>
+                </div>
+            }
+
+            <!-- Quick Actions -->
+            <div class="card shadow-sm">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-600">
+                        <i class="bi bi-lightning me-2 text-warning"></i>Quick Actions
+                    </h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a asp-controller="Application" asp-action="Details"
+                           asp-route-id="@Model.ApplicationId"
+                           class="list-group-item list-group-item-action py-3">
+                        <i class="bi bi-bar-chart me-2 text-primary"></i>View Match Scores
+                    </a>
+                    <a asp-controller="AI" asp-action="SkillGap"
+                           asp-route-applicationId="@Model.ApplicationId"
+                           class="list-group-item list-group-item-action py-3">
+                        <i class="bi bi-bullseye me-2 text-warning"></i>Skill Gap Analysis
+                    </a>
+                    <a asp-controller="AI" asp-action="InterviewQuestions"
+                           asp-route-jobId="@Model.JobId"
+                           asp-route-applicationId="@Model.ApplicationId"
+                           class="list-group-item list-group-item-action py-3">
+                        <i class="bi bi-chat-left-quote me-2 text-success"></i>
+                        Generate Interview Questions
+                    </a>
+                    <a asp-controller="Application" asp-action="UpdateStatus"
+                           class="list-group-item list-group-item-action py-3 text-success">
+                        <i class="bi bi-star me-2"></i>Shortlist Candidate
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}

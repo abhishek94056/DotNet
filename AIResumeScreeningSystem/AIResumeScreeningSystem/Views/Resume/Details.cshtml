@@ -1,0 +1,230 @@
+﻿@model AIResumeScreeningSystem.ViewModels.Resume.ResumeViewModel
+@{
+    ViewData["Title"] = "Resume Details";
+}
+
+<div class="d-flex align-items-center gap-2 mb-4">
+    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+        <h4 class="fw-bold mb-0">Resume Details</h4>
+        <small class="text-muted">@Model.FileName</small>
+    </div>
+</div>
+
+<div class="row g-4">
+
+    <!-- Left: Meta Info -->
+    <div class="col-lg-4">
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body text-center py-4">
+                <i class="bi @Model.FileIconClass" style="font-size:4rem;"></i>
+                <h6 class="fw-600 mt-3 mb-1">@Model.FileName</h6>
+                <span class="badge @Model.StatusBadgeClass mb-3">@Model.StatusDisplay</span>
+                @if (Model.IsActive)
+                {
+                    <div>
+                        <span class="badge bg-success bg-opacity-15 text-success px-3 py-2">
+                            <i class="bi bi-check-circle me-1"></i>Active Resume
+                        </span>
+                    </div>
+                }
+                <div class="d-flex gap-2 justify-content-center mt-3">
+                    <a asp-action="Download" asp-route-id="@Model.Id"
+                           class="btn btn-primary btn-sm px-3">
+                        <i class="bi bi-download me-1"></i>Download
+                    </a>
+                    <form asp-action="Reparse" asp-route-resumeId="@Model.Id" method="post">
+                        <button type="submit" class="btn btn-outline-warning btn-sm px-3">
+                            <i class="bi bi-arrow-repeat me-1"></i>Re-parse
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header py-3">
+                <h6 class="mb-0 fw-600"><i class="bi bi-info-circle me-2 text-primary"></i>File Info</h6>
+            </div>
+            <div class="list-group list-group-flush">
+                @foreach (var (label, value) in new[] {
+                    ("File Size", Model.FileSizeDisplay),
+                    ("Extension", Model.FileExtension.ToUpper()),
+                    ("Uploaded", Model.UploadedAt.ToString("MMM dd, yyyy HH:mm")),
+                    ("Parsed", Model.ParsedAt?.ToString("MMM dd, yyyy HH:mm") ?? "Not yet")
+                })
+                {
+                    <div class="list-group-item border-0 d-flex justify-content-between py-2">
+                        <span class="text-muted small">@label</span>
+                        <span class="small fw-500">@value</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Right: Parsed Data -->
+    <div class="col-lg-8">
+
+        @if (Model.Status == ResumeStatus.Parsing)
+        {
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center py-5">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <h5 class="fw-600">AI is parsing your resume...</h5>
+                    <p class="text-muted small">This usually takes a few seconds. Refresh to see results.</p>
+                    <button onclick="location.reload()" class="btn btn-outline-primary btn-sm mt-2">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        }
+        else if (Model.Status == ResumeStatus.Failed)
+        {
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                <strong>Parsing failed.</strong> Please try re-parsing or upload a different file.
+                <form asp-action="Reparse" asp-route-resumeId="@Model.Id" method="post" class="d-inline ms-3">
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="bi bi-arrow-repeat me-1"></i>Try Again
+                    </button>
+                </form>
+            </div>
+        }
+        else if (Model.Status == ResumeStatus.Parsed)
+        {
+            <!-- Extracted Contact -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-600">
+                        <i class="bi bi-person-check me-2 text-success"></i>Extracted Contact Info
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        @foreach (var (label, value, icon) in new[] {
+                            ("Name", Model.ParsedName ?? "Not found", "bi-person"),
+                            ("Email", Model.ParsedEmail ?? "Not found", "bi-envelope"),
+                            ("Phone", Model.ParsedPhone ?? "Not found", "bi-phone")
+                        })
+                        {
+                            <div class="col-md-4">
+                                <div class="p-3 rounded-3 @(value == "Not found" ? "bg-light" : "bg-success bg-opacity-5 border border-success border-opacity-25")">
+                                    <small class="text-muted d-block mb-1">
+                                        <i class="bi @icon me-1"></i>@label
+                                    </small>
+                                    <span class="fw-500 @(value == "Not found" ? "text-muted" : "text-dark")">
+                                        @value
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extracted Skills -->
+            @if (!string.IsNullOrEmpty(Model.ParsedSkills))
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3 d-flex justify-content-between">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-tags me-2 text-primary"></i>Extracted Skills
+                        </h6>
+                        <span class="badge bg-primary bg-opacity-10 text-primary">
+                            @Model.ParsedSkillsList.Count found
+                        </span>
+                    </div>
+                    <div class="card-body d-flex flex-wrap gap-2">
+                        @foreach (var skill in Model.ParsedSkillsList)
+                        {
+                            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                                @skill
+                            </span>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Summary -->
+            @if (!string.IsNullOrEmpty(Model.ParsedSummary))
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-file-text me-2 text-primary"></i>Extracted Summary
+                        </h6>
+                    </div>
+                    <div class="card-body text-muted" style="line-height:1.7;">
+                        @Model.ParsedSummary
+                    </div>
+                </div>
+            }
+
+            <!-- Education -->
+            @if (!string.IsNullOrEmpty(Model.ParsedEducation))
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-mortarboard me-2 text-primary"></i>Education (Extracted)
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <pre class="text-muted mb-0"
+                             style="white-space:pre-wrap;font-family:inherit;font-size:.875rem;">@Model.ParsedEducation</pre>
+                    </div>
+                </div>
+            }
+
+            <!-- Experience -->
+            @if (!string.IsNullOrEmpty(Model.ParsedExperience))
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-briefcase me-2 text-primary"></i>Experience (Extracted)
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <pre class="text-muted mb-0"
+                             style="white-space:pre-wrap;font-family:inherit;font-size:.875rem;">@Model.ParsedExperience</pre>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <!-- Uploaded but not yet parsed -->
+            <div class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-hourglass-split text-warning" style="font-size:3rem;"></i>
+                    <h5 class="mt-3 fw-600">Waiting to be parsed</h5>
+                    <p class="text-muted small mb-3">
+                        AI parsing will run automatically or you can trigger it manually.
+                    </p>
+                    <form asp-action="Reparse" asp-route-resumeId="@Model.Id" method="post">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-cpu me-2"></i>Parse Now
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
+@if (Model.Status == ResumeStatus.Parsing)
+{
+    @section Scripts {
+        <script>
+            // Auto-refresh every 3 seconds while parsing
+            setTimeout(() => location.reload(), 3000);
+        </script>
+    }
+}

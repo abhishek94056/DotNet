@@ -1,0 +1,452 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — AI Resume Screening</title>
+
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+          rel="stylesheet" />
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+          rel="stylesheet" />
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet" />
+
+    <style>
+        /* ── Design Tokens ──────────────────────────────────────── */
+        :root {
+            --primary:       #1a56db;
+            --primary-dark:  #1240a8;
+            --primary-light: #dbeafe;
+            --success:       #059669;
+            --danger:        #dc2626;
+            --warning:       #d97706;
+            --sidebar-w:     260px;
+            --navbar-h:      56px;
+            --radius:        12px;
+            --shadow:        0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+            --shadow-md:     0 4px 15px rgba(0,0,0,.10);
+        }
+
+        /* ── Base ───────────────────────────────────────────────── */
+        * { font-family: 'Inter', sans-serif; }
+        body { background: #f3f4f6; }
+
+        /* ── Navbar ─────────────────────────────────────────────── */
+        .app-navbar {
+            height: var(--navbar-h);
+            background: linear-gradient(90deg, #1e3a5f, var(--primary)) !important;
+        }
+
+        .navbar-brand-logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -.5px;
+        }
+        .navbar-brand-logo span { color: #93c5fd; }
+
+        /* ── Sidebar ────────────────────────────────────────────── */
+        .sidebar {
+            width: var(--sidebar-w);
+            min-height: calc(100vh - var(--navbar-h));
+            background: linear-gradient(180deg, #1e3a5f 0%, #1a56db 100%);
+            position: fixed;
+            top: var(--navbar-h);
+            left: 0;
+            z-index: 100;
+            padding: .75rem 0 4rem;
+            overflow-y: auto;
+            transition: transform .3s;
+        }
+
+        .sidebar-section-title {
+            color: rgba(255,255,255,.4);
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: .7rem 1.5rem .2rem;
+        }
+
+        .sidebar .nav-link {
+            color: rgba(255,255,255,.75);
+            padding: .55rem 1.25rem;
+            border-radius: 8px;
+            margin: 2px 8px;
+            font-size: .875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all .2s;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: #fff;
+            background: rgba(255,255,255,.15);
+        }
+        .sidebar .nav-link i { font-size: 1.05rem; width: 20px; text-align: center; }
+
+        /* ── Main Content ───────────────────────────────────────── */
+        .main-content {
+            margin-left: var(--sidebar-w);
+            margin-top: var(--navbar-h);
+            padding: 1.5rem;
+            min-height: calc(100vh - var(--navbar-h));
+        }
+
+        .main-content-full {
+            margin-top: var(--navbar-h);
+            padding: 0;
+            min-height: calc(100vh - var(--navbar-h));
+        }
+
+        /* ── Cards ──────────────────────────────────────────────── */
+        .card {
+            border: none;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        .card-header {
+            background: transparent;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 600;
+        }
+
+        /* ── Buttons ────────────────────────────────────────────── */
+        .btn-primary { background: var(--primary); border-color: var(--primary); }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        /* ── Forms ──────────────────────────────────────────────── */
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26,86,219,.1);
+        }
+
+        /* ── Tables ─────────────────────────────────────────────── */
+        .table { border-radius: var(--radius); overflow: hidden; }
+        .table thead th {
+            background: #f9fafb;
+            font-size: .72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: #6b7280;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .table tbody tr:hover { background: #f9fafb; }
+
+        /* ── Alerts ─────────────────────────────────────────────── */
+        .alert { border-radius: 10px; border: none; }
+
+        /* ── Utilities ──────────────────────────────────────────── */
+        .fw-500 { font-weight: 500 !important; }
+        .fw-600 { font-weight: 600 !important; }
+        .cursor-pointer { cursor: pointer; }
+        .hover-lift { transition: transform .15s; }
+        .hover-lift:hover { transform: translateY(-2px); }
+
+        /* ── Responsive ─────────────────────────────────────────── */
+        @@media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1050;
+            }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,.4);
+                z-index: 1040;
+            }
+            .sidebar.open ~ .sidebar-overlay { display: block; }
+        }
+
+        /* ── Page transition ────────────────────────────────────── */
+        .main-content, .main-content-full {
+            animation: fadeIn .25s ease;
+        }
+        @@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } }
+    </style>
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+
+<body>
+
+<!-- ═══ TOP NAVBAR ════════════════════════════════════════════════════════ -->
+<nav class="navbar app-navbar navbar-dark fixed-top px-3">
+
+    <!-- Brand + hamburger -->
+    <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-link text-white p-0 me-1 d-lg-none"
+                id="sidebarToggle" aria-label="Toggle menu">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        <a class="navbar-brand navbar-brand-logo mb-0"
+           asp-controller="Home" asp-action="Index">
+            <i class="bi bi-cpu me-2"></i>AI<span>Resume</span>
+        </a>
+    </div>
+
+    <!-- Right side -->
+    <div class="d-flex align-items-center gap-3 ms-auto">
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <!-- Notification Bell -->
+            <a asp-controller="Notification" asp-action="Index"
+               class="text-white text-decoration-none position-relative"
+               id="notifBell" title="Notifications">
+                <i class="bi bi-bell fs-5"></i>
+                <span id="notifBadge"
+                      class="position-absolute top-0 start-100 translate-middle
+                             badge rounded-pill bg-danger"
+                      style="font-size:9px;display:none;">0</span>
+            </a>
+
+            <!-- AI Chatbot shortcut -->
+            <a asp-controller="AI" asp-action="Chatbot"
+               class="text-white text-decoration-none d-none d-md-block"
+               title="AI Assistant">
+                <i class="bi bi-robot fs-5"></i>
+            </a>
+        }
+
+        <partial name="_LoginPartial" />
+    </div>
+</nav>
+
+<!-- Mobile Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ═══ SIDEBAR ══════════════════════════════════════════════════════════ -->
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <nav class="sidebar" id="sidebar">
+
+        @if (User.IsInRole("Admin"))
+        {
+            <!-- ADMIN SIDEBAR -->
+            <p class="sidebar-section-title">Admin Panel</p>
+            <ul class="nav flex-column">
+                <li><a class="nav-link @(ViewData["ActivePage"]?.ToString() == "AdminDashboard" ? "active" : "")"
+                       asp-controller="Admin" asp-action="Dashboard">
+                    <i class="bi bi-speedometer2"></i>Dashboard</a></li>
+                <li><a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Users" ? "active" : "")"
+                       asp-controller="Admin" asp-action="Users">
+                    <i class="bi bi-people"></i>Manage Users</a></li>
+                <li><a class="nav-link @(ViewData["ActivePage"]?.ToString() == "Roles" ? "active" : "")"
+                       asp-controller="Admin" asp-action="Roles">
+                    <i class="bi bi-shield-check"></i>Roles</a></li>
+            </ul>
+            <p class="sidebar-section-title mt-2">Content</p>
+            <ul class="nav flex-column">
+                <li><a class="nav-link" asp-controller="Job" asp-action="Index">
+                    <i class="bi bi-briefcase"></i>All Jobs</a></li>
+                <li><a class="nav-link" asp-controller="Candidate" asp-action="Index">
+                    <i class="bi bi-person-badge"></i>Candidates</a></li>
+                <li><a class="nav-link" asp-controller="Report" asp-action="Index">
+                    <i class="bi bi-bar-chart"></i>Reports</a></li>
+            </ul>
+            <p class="sidebar-section-title mt-2">AI Tools</p>
+            <ul class="nav flex-column">
+                <li><a class="nav-link" asp-controller="AI" asp-action="Chatbot">
+                    <i class="bi bi-robot"></i>AI Assistant</a></li>
+            </ul>
+        }
+        else if (User.IsInRole("Recruiter"))
+        {
+            <!-- RECRUITER SIDEBAR -->
+            <p class="sidebar-section-title">Recruiter Panel</p>
+            <ul class="nav flex-column">
+                <li><a class="nav-link @(ViewData["ActivePage"]?.ToString() == "RecruiterDashboard" ? "active" : "")"
+                       asp-controller="Recruiter" asp-action="Dashboard">
+                    <i class="bi bi-speedometer2"></i>Dashboard</a></li>
+                <li><a class="nav-link @(ViewData["ActivePage"]?.ToString() == "MyJobs" ? "active" : "")"
+                       asp-controller="Job" asp-action="Index">
+                    <i class="bi bi-briefcase"></i>My Jobs</a></li>
+                <li><a class="nav-link" asp-controller="Job" asp-action="Create">
+                    <i class="bi bi-plus-circle"></i>Post a Job</a></li>
+            </ul>
+            <p class="sidebar-section-title mt-2">Applications</p>
+            <ul class="nav flex-column">
+                <li><a class="nav-link" asp-controller="Candidate" asp-action="Index">
+                    <i class="bi bi-people"></i>Candidate Pool</a></li>
+                <li><a class="nav-link" asp-controller="Application" asp-action="Shortlisted">
+                    <i class="bi bi-star"></i>Shortlisted</a></li>
+            </ul>
+            <p class="sidebar-section-title mt-2">AI Tools</p>
+            <ul class="nav flex-column">
+                <li><a class="nav-link" asp-controller="AI" asp-action="Chatbot">
+                    <i class="bi bi-robot"></i>AI Assistant</a></li>
+            </ul>
+            <p class="sidebar-section-title mt-2">Reports & Account</p>
+            <ul class="nav flex-column">
+                <li><a class="nav-link" asp-controller="Report" asp-action="Index">
+                    <i class="bi bi-bar-chart"></i>Reports</a></li>
+                <li><a class="nav-link" asp-controller="Notification" asp-action="Index">
+                    <i class="bi bi-bell"></i>Notifications
+                    <span id="sidebarBadge" class="badge bg-danger ms-auto"
+                          style="display:none;"></span></a></li>
+            </ul>
+        }
+        else if (User.IsInRole("Candidate"))
+        {
+            <!-- CANDIDATE SIDEBAR -->
+            <p class="sidebar-section-title">Candidate Panel</p>
+            <ul class="nav flex-column">
+                <li><a class="nav-link @(ViewData["ActivePage"]?.ToString() == "CandidateDashboard" ? "active" : "")"
+                       asp-controller="Candidate" asp-action="Dashboard">
+                    <i class="bi bi-speedometer2"></i>Dashboard</a></li>
+                <li><a class="nav-link" asp-controller="Candidate" asp-action="Profile">
+                    <i class="bi bi-person-circle"></i>My Profile</a></li>
+                <li><a class="nav-link" asp-controller="Resume" asp-action="Upload">
+                    <i class="bi bi-cloud-upload"></i>Upload Resume</a></li>
+                <li><a class="nav-link" asp-controller="Resume" asp-action="Index">
+                    <i class="bi bi-files"></i>My Resumes</a></li>
+                <li><a class="nav-link" asp-controller="Candidate" asp-action="Skills">
+                    <i class="bi bi-tags"></i>My Skills</a></li>
+            </ul>
+            <p class="sidebar-section-title mt-2">Jobs</p>
+            <ul class="nav flex-column">
+                <li><a class="nav-link" asp-controller="Job" asp-action="Browse">
+                    <i class="bi bi-search"></i>Browse Jobs</a></li>
+                <li><a class="nav-link" asp-controller="Application" asp-action="MyApplications">
+                    <i class="bi bi-collection"></i>My Applications</a></li>
+            </ul>
+            <p class="sidebar-section-title mt-2">AI Tools</p>
+            <ul class="nav flex-column">
+                <li><a class="nav-link" asp-controller="AI" asp-action="Recommendations">
+                    <i class="bi bi-stars"></i>AI Recommendations</a></li>
+                <li><a class="nav-link" asp-controller="AI" asp-action="Chatbot">
+                    <i class="bi bi-robot"></i>AI Assistant</a></li>
+            </ul>
+            <p class="sidebar-section-title mt-2">Account</p>
+            <ul class="nav flex-column">
+                <li><a class="nav-link" asp-controller="Notification" asp-action="Index">
+                    <i class="bi bi-bell"></i>Notifications
+                    <span id="sidebarBadge" class="badge bg-danger ms-auto"
+                          style="display:none;"></span></a></li>
+            </ul>
+        }
+
+        <!-- Logout (bottom) -->
+        <hr style="border-color:rgba(255,255,255,.15);margin:1rem .75rem .5rem;" />
+        <ul class="nav flex-column pb-3">
+            <li>
+                <form asp-controller="Account" asp-action="Logout" method="post">
+                    <button class="nav-link btn btn-link text-start w-100" type="submit">
+                        <i class="bi bi-box-arrow-left"></i>Logout
+                    </button>
+                </form>
+            </li>
+        </ul>
+
+    </nav>
+}
+
+<!-- ═══ MAIN CONTENT ══════════════════════════════════════════════════════ -->
+<main class="@(User.Identity?.IsAuthenticated == true
+    ? "main-content" : "main-content-full")">
+
+    <!-- Global alerts -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show
+                    d-flex align-items-center gap-2 mb-3" role="alert">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>@TempData["SuccessMessage"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show
+                    d-flex align-items-center gap-2 mb-3" role="alert">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <span>@TempData["ErrorMessage"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @RenderBody()
+</main>
+
+<!-- ═══ SCRIPTS ═══════════════════════════════════════════════════════════ -->
+<!-- Bootstrap 5 -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+    // ── Auto-dismiss alerts ──────────────────────────────────────────────
+    setTimeout(() => {
+        document.querySelectorAll('.alert').forEach(el => {
+            try { bootstrap.Alert.getOrCreateInstance(el).close(); } catch {}
+        });
+    }, 5000);
+
+    // ── Sidebar toggle (mobile) ──────────────────────────────────────────
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+        sidebar?.classList.toggle('open');
+    });
+    overlay?.addEventListener('click', () => {
+        sidebar?.classList.remove('open');
+    });
+
+    // ── Active nav link highlight ────────────────────────────────────────
+    const currentPath = window.location.pathname.toLowerCase();
+    document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+        const href = link.getAttribute('href')?.toLowerCase();
+        if (href && href !== '/' && currentPath.startsWith(href))
+            link.classList.add('active');
+    });
+
+    // ── Live notification badge ──────────────────────────────────────────
+    async function refreshNotifCount() {
+        try {
+            const res = await fetch('/Notification/UnreadCount');
+            if (!res.ok) return;
+            const { count } = await res.json();
+            const badge  = document.getElementById('notifBadge');
+            const sBadge = document.getElementById('sidebarBadge');
+            const show   = count > 0;
+            const text   = count > 99 ? '99+' : String(count);
+
+            if (badge) {
+                badge.textContent = text;
+                badge.style.display = show ? 'inline' : 'none';
+            }
+            if (sBadge) {
+                sBadge.textContent = text;
+                sBadge.style.display = show ? 'inline' : 'none';
+            }
+        } catch { /* silent fail */ }
+    }
+
+    if (document.getElementById('notifBell')) {
+        refreshNotifCount();
+        setInterval(refreshNotifCount, 30000);
+    }
+</script>
+
+@await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

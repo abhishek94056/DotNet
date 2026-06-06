@@ -1,0 +1,334 @@
+﻿@model AIResumeScreeningSystem.ViewModels.SkillMatching.SkillMatchResultViewModel
+@{
+    ViewData["Title"] = "Application Details";
+    bool isRecruiter = User.IsInRole("Recruiter") || User.IsInRole("Admin");
+}
+
+<div class="d-flex align-items-center gap-2 mb-4">
+    @if (isRecruiter)
+    {
+        <a asp-action="Index" asp-route-jobId="@Model.JobId"
+               class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+    }
+    else
+    {
+        <a asp-action="MyApplications" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+    }
+    <div>
+        <h4 class="fw-bold mb-0">Application Details</h4>
+        <small class="text-muted">@Model.JobTitle — @Model.Company</small>
+    </div>
+</div>
+
+<div class="row g-4">
+
+    <!-- LEFT: Score Card -->
+    <div class="col-lg-4">
+
+        <!-- AI Score Ring -->
+        <div class="card shadow-sm mb-4 text-center">
+            <div class="card-body py-4">
+                <h6 class="fw-600 text-muted mb-3">AI Match Score</h6>
+
+                <!-- SVG Score Ring -->
+                <svg width="140" height="140" viewBox="0 0 140 140" class="mb-3">
+                    <circle cx="70" cy="70" r="58"
+                            fill="none" stroke="#e5e7eb" stroke-width="12" />
+                    <circle cx="70" cy="70" r="58"
+                            fill="none"
+                            stroke="@Model.ScoreRingColor"
+                            stroke-width="12"
+                            stroke-dasharray="@(2 * Math.PI * 58 * (double)Model.OverallMatchScore / 100) @(2 * Math.PI * 58)"
+                            stroke-dashoffset="@(2 * Math.PI * 58 * 0.25)"
+                            stroke-linecap="round"
+                            transform="rotate(-90 70 70)" />
+                    <text x="70" y="65" text-anchor="middle"
+                          font-size="28" font-weight="bold" fill="#111827">
+                        @Model.OverallMatchScore.ToString("F0")%
+                    </text>
+                    <text x="70" y="85" text-anchor="middle"
+                          font-size="13" fill="#6b7280">@Model.MatchGrade</text>
+                </svg>
+
+                <span class="badge @Model.GradeBadgeClass px-4 py-2 mb-3">
+                    @Model.MatchGrade Match
+                </span>
+
+                <div class="text-start mt-3">
+                    @foreach (var (label, score, color) in new[] {
+                        ("Required Skills", Model.RequiredSkillScore, "success"),
+                        ("Optional Skills", Model.OptionalSkillScore, "primary"),
+                        ("Experience", Model.ExperienceScore, "info"),
+                        ("Education", Model.EducationScore, "warning")
+                    })
+                    {
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <span class="text-muted">@label</span>
+                                <span class="fw-600">@score.ToString("F0")%</span>
+                            </div>
+                            <div class="progress" style="height:6px;border-radius:3px;">
+                                <div class="progress-bar bg-@color"
+                                     style="width:@score%;transition:width 1s;"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Info -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header py-3">
+                <h6 class="mb-0 fw-600">
+                    <i class="bi bi-info-circle me-2 text-primary"></i>Application Info
+                </h6>
+            </div>
+            <div class="list-group list-group-flush">
+                <div class="list-group-item border-0 d-flex justify-content-between py-2">
+                    <span class="text-muted small">Status</span>
+                    <span class="badge @Model.StatusBadgeClass">@Model.Status</span>
+                </div>
+                <div class="list-group-item border-0 d-flex justify-content-between py-2">
+                    <span class="text-muted small">Applied</span>
+                    <span class="small fw-500">@Model.AppliedAt.ToString("MMM dd, yyyy")</span>
+                </div>
+                @if (Model.RankPosition.HasValue)
+                {
+                    <div class="list-group-item border-0 d-flex justify-content-between py-2">
+                        <span class="text-muted small">Rank</span>
+                        <span class="small fw-600 text-primary">#@Model.RankPosition</span>
+                    </div>
+                }
+                <div class="list-group-item border-0 d-flex justify-content-between py-2">
+                    <span class="text-muted small">Candidate</span>
+                    <span class="small fw-500">@Model.CandidateName</span>
+                </div>
+                <div class="list-group-item border-0 d-flex justify-content-between py-2">
+                    <span class="text-muted small">Experience</span>
+                    <span class="small fw-500">@Model.CandidateExperienceYears yr(s)</span>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.CandidateEducation))
+                {
+                    <div class="list-group-item border-0 d-flex justify-content-between py-2">
+                        <span class="text-muted small">Education</span>
+                        <span class="small fw-500">@Model.CandidateEducation</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Recruiter Actions -->
+        @if (isRecruiter)
+        {
+            <div class="card shadow-sm">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-600">
+                        <i class="bi bi-sliders me-2 text-primary"></i>Update Status
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="UpdateStatus" method="post">
+                        <input type="hidden" name="applicationId"
+                               value="@Model.ApplicationId" />
+                        <div class="mb-3">
+                            <select name="status" class="form-select form-select-sm">
+                                @foreach (var s in Enum.GetValues<ApplicationStatus>())
+                                {
+                                    <option value="@s"
+                                            selected="@(s == Model.Status)">
+                                        @s
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <textarea name="notes" class="form-control form-control-sm"
+                                      rows="3" placeholder="Add notes (optional)...">@Model.RecruiterNotes</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                            <i class="bi bi-save me-1"></i>Update Status
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+
+    </div>
+
+    <!-- RIGHT: Skill Analysis -->
+    <div class="col-lg-8">
+
+        <!-- Skill Match Summary -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-600">
+                    <i class="bi bi-tags me-2 text-primary"></i>Skill Analysis
+                </h6>
+                <div class="d-flex gap-3 small text-muted">
+                    <span>
+                        <i class="bi bi-check-circle text-success me-1"></i>
+                        @Model.MatchedRequiredSkills.Count / @Model.TotalRequiredSkills required
+                    </span>
+                    <span>
+                        <i class="bi bi-plus-circle text-primary me-1"></i>
+                        @Model.MatchedOptionalSkills.Count / @Model.TotalOptionalSkills optional
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+
+                    <!-- Matched Required -->
+                    @if (Model.MatchedRequiredSkills.Any())
+                    {
+                        <div class="col-md-6">
+                            <h6 class="small fw-600 text-success mb-2">
+                                <i class="bi bi-check-circle-fill me-1"></i>
+                                Matched Required (@Model.MatchedRequiredSkills.Count)
+                            </h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var skill in Model.MatchedRequiredSkills)
+                                {
+                                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">
+                                        ✓ @skill
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Missing Required -->
+                    @if (Model.MissingRequiredSkills.Any())
+                    {
+                        <div class="col-md-6">
+                            <h6 class="small fw-600 text-danger mb-2">
+                                <i class="bi bi-x-circle-fill me-1"></i>
+                                Missing Required (@Model.MissingRequiredSkills.Count)
+                            </h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var skill in Model.MissingRequiredSkills)
+                                {
+                                    <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2">
+                                        ✗ @skill
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Matched Optional -->
+                    @if (Model.MatchedOptionalSkills.Any())
+                    {
+                        <div class="col-md-6">
+                            <h6 class="small fw-600 text-primary mb-2">
+                                <i class="bi bi-plus-circle-fill me-1"></i>
+                                Matched Optional (@Model.MatchedOptionalSkills.Count)
+                            </h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var skill in Model.MatchedOptionalSkills)
+                                {
+                                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                                        ✓ @skill
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Extra Skills -->
+                    @if (Model.CandidateExtraSkills.Any())
+                    {
+                        <div class="col-md-6">
+                            <h6 class="small fw-600 text-info mb-2">
+                                <i class="bi bi-lightbulb-fill me-1"></i>
+                                Bonus Skills (@Model.CandidateExtraSkills.Count)
+                            </h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var skill in Model.CandidateExtraSkills)
+                                {
+                                    <span class="badge bg-info bg-opacity-10 text-info px-3 py-2">
+                                        + @skill
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                </div>
+
+                <!-- Skill Match Progress Bars -->
+                <div class="mt-4 pt-3 border-top">
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span>Required Skills Match</span>
+                            <span class="fw-600">@Model.RequiredMatchPercent%</span>
+                        </div>
+                        <div class="progress" style="height:10px;border-radius:5px;">
+                            <div class="progress-bar bg-success"
+                                 style="width:@Model.RequiredMatchPercent%;transition:width 1s;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-0">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span>Optional Skills Match</span>
+                            <span class="fw-600">@Model.OptionalMatchPercent%</span>
+                        </div>
+                        <div class="progress" style="height:10px;border-radius:5px;">
+                            <div class="progress-bar bg-primary"
+                                 style="width:@Model.OptionalMatchPercent%;transition:width 1s;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skill Gap CTA -->
+            @if (Model.MissingRequiredSkills.Any())
+            {
+                <div class="card-footer bg-transparent">
+                    <a asp-action="SkillGap" asp-route-id="@Model.ApplicationId"
+                           class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-bullseye me-1"></i>View Full Skill Gap Analysis
+                    </a>
+                </div>
+            }
+        </div>
+
+        <!-- AI Evaluation -->
+        @if (!string.IsNullOrEmpty(Model.AIEvaluation))
+        {
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-600">
+                        <i class="bi bi-stars me-2 text-warning"></i>AI Evaluation
+                    </h6>
+                </div>
+                <div class="card-body text-muted" style="line-height:1.7;">
+                    @Model.AIEvaluation
+                </div>
+            </div>
+        }
+
+        <!-- Recruiter Notes -->
+        @if (!string.IsNullOrEmpty(Model.RecruiterNotes))
+        {
+            <div class="card shadow-sm">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-600">
+                        <i class="bi bi-sticky me-2 text-primary"></i>Recruiter Notes
+                    </h6>
+                </div>
+                <div class="card-body text-muted" style="white-space:pre-line;">
+                    @Model.RecruiterNotes
+                </div>
+            </div>
+        }
+
+    </div>
+</div>

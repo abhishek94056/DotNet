@@ -1,0 +1,1603 @@
+﻿@{
+    ViewData["Title"] = "PPBox Master";
+}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    :root {
+        --header-bg: #1a1a2e;
+        --row-odd: #f8f9fa;
+        --row-even: #eef2ff;
+        --row-hover: #cfe2ff;
+        --accent: #0d6efd;
+        --sec-bg: #343a40;
+    }
+
+    /* =========================================
+       PAGE HEADER
+    ========================================= */
+
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+
+        .page-header h6 {
+            margin: 0;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+    .header-controls {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+        flex-wrap: wrap;
+        flex: 1;
+    }
+
+        .header-controls .form-select,
+        .header-controls .form-control,
+        .header-controls .btn {
+            width: auto;
+        }
+
+
+    /* =========================================
+       TABLE
+    ========================================= */
+
+    #itemTable {
+        font-size: .70rem;
+        min-width: 1700px;
+        width: max-content;
+    }
+
+        #itemTable thead th {
+            font-size: .67rem;
+            padding: 4px 5px;
+            white-space: nowrap;
+            text-align: center;
+            background: var(--header-bg);
+            color: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        #itemTable tbody td {
+            padding: 3px 5px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        #itemTable tbody tr:nth-child(odd) td {
+            background-color: var(--row-odd);
+        }
+
+        #itemTable tbody tr:nth-child(even) td {
+            background-color: var(--row-even);
+        }
+
+        #itemTable tbody tr:hover td {
+            background-color: var(--row-hover) !important;
+            cursor: pointer;
+            transition: background-color .15s;
+        }
+
+        #itemTable .btn-sm {
+            padding: 1px 4px;
+            font-size: .65rem;
+        }
+
+    /* =========================================
+       TABLE WRAP
+    ========================================= */
+
+    .table-wrap {
+        max-height: 480px;
+        overflow: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* =========================================
+       PAGINATION
+    ========================================= */
+
+    .pagination-bar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 8px;
+        font-size: .73rem;
+    }
+
+        .pagination-bar button {
+            min-width: 28px;
+            height: 26px;
+            font-size: .68rem;
+            padding: 0 5px;
+            border-radius: 4px;
+        }
+
+            .pagination-bar button.active-page {
+                background: var(--accent);
+                color: #fff;
+                border-color: var(--accent);
+            }
+
+    /* =========================================
+       FORM SECTION
+    ========================================= */
+
+    .form-section-title {
+        font-size: .72rem;
+        font-weight: 700;
+        color: #fff;
+        background: var(--sec-bg);
+        padding: 4px 10px;
+        border-radius: 4px;
+        margin-bottom: 8px;
+    }
+
+    /* =========================================
+       SELECT2
+    ========================================= */
+
+    .select2-wrapper {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        height: 31px !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 0 .25rem .25rem 0 !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .select2-selection__rendered {
+        line-height: normal !important;
+        display: flex !important;
+        align-items: center !important;
+        height: 100%;
+        padding-left: 6px !important;
+    }
+
+    .select2-selection__arrow {
+        height: 100% !important;
+        top: 0 !important;
+    }
+
+    .input-group-sm .input-group-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 31px;
+    }
+
+    /* =========================================
+       MODAL
+    ========================================= */
+
+    .modal-xl {
+        max-width: 95%;
+    }
+
+    .modal-body {
+        overflow-x: hidden;
+    }
+
+    #itemForm .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    /* =========================================
+       MOBILE
+    ========================================= */
+
+    @@media (max-width:575px) {
+
+        .page-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .header-controls {
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+        }
+
+            .header-controls .form-select,
+            .header-controls .form-control,
+            .header-controls .btn {
+                width: 100% !important;
+            }
+
+        .pagination-bar {
+            justify-content: center;
+        }
+
+        #pageNumbers {
+            flex-wrap: wrap;
+        }
+
+        .modal-dialog {
+            margin: .5rem;
+        }
+
+        .modal-xl {
+            max-width: 100%;
+        }
+
+        #itemForm .col-md-2,
+        #itemForm .col-md-3 {
+            width: 100%;
+        }
+
+        #itemTable {
+            min-width: 1500px;
+        }
+
+        .select2-container {
+            width: 100% !important;
+        }
+    }
+
+    /* =========================================
+       TABLET
+    ========================================= */
+
+    @@media (min-width:576px) and (max-width:991px) {
+
+        #itemForm .col-md-2,
+        #itemForm .col-md-3 {
+            width: 50%;
+        }
+    }
+</style>
+
+<!-- ── PAGE HEADER ── -->
+<div class="page-header">
+    <h6 class="mb-0 fw-bold">
+        <i class="bi bi-box me-2 text-primary"></i>
+        PP Box Master
+    </h6>
+<div class="header-controls">
+
+        <select id="deptFilter" class="form-select form-select-sm"
+                style="width:150px" onchange="applyFilter()">
+            <option value="">All Departments</option>
+        </select>
+
+        <input type="text" id="searchInput"
+               class="form-control form-control-sm"
+               placeholder="🔍 Search code / desc..."
+               style="width:180px"
+               oninput="applyFilter()" />
+
+        <button class="btn btn-primary btn-sm" id="btnAddItem">
+            <i class="bi bi-plus-lg me-1"></i>Add Item
+        </button>
+    </div>
+</div>
+
+<!-- ── TABLE ── -->
+<div class="table-wrap">
+    <table class="table table-bordered mb-0" id="itemTable">
+    <thead>
+<tr>
+    <th>#</th>
+    <th>Department</th>
+    <th>Item Code</th>
+    <th>Description</th>
+    <th>MRP Rate RM</th>
+    <th>MRP Rate Sale</th>
+    <th>RM Size 1</th>
+    <th>Sheet Qty. 1</th>
+    <th>RM Size 2</th>
+    <th>Sheet Qty. 2</th>
+    <th>RM Size 3</th>
+    <th>Sheet Qty. 3</th>
+    <th>RM Size 4</th>
+    <th>Sheet Qty. 4</th>
+    <th>Opening Stock</th>
+    <th>MIN Qty.</th>
+    <th>MAX Qty.</th>
+    <th>Packing Type</th>
+    <th>Packing Qty.</th>
+    <th>Sale Transport</th>
+    <th>Action</th>
+</tr>
+</thead>
+<tbody id="tableBody">
+            <tr id="loadingRow">
+                <td colspan="21">
+                    <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                    Loading data...
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- ── PAGINATION ── -->
+<div class="pagination-bar">
+    <span id="pageInfo" class="text-muted"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnFirst" onclick="goToPage(1)">«</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnPrev"  onclick="goToPage(currentPage-1)">‹</button>
+    <span id="pageNumbers" class="d-flex gap-1 flex-wrap"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnNext"  onclick="goToPage(currentPage+1)">›</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnLast"  onclick="goToPage(totalPages)">»</button>
+    <select id="rppSelect" class="form-select form-select-sm"
+            style="width:75px" onchange="changeRPP()">
+        <option value="10" selected>10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+    </select>
+    <span class="text-muted">/ page</span>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ADD / EDIT MODAL  (tabbed sections)
+══════════════════════════════════════════════ -->
+<div class="modal fade" id="itemModal" tabindex="-1">
+<div class="modal-dialog modal-xl modal-fullscreen-sm-down modal-dialog-centered modal-dialog-scrollable">
+<div class="modal-content">
+
+<!-- HEADER -->
+<div class="modal-header bg-dark text-white py-2">
+    <h6 class="modal-title mb-0">
+        <i class="bi bi-box-seam me-2"></i>
+        <span id="modalTitleText">Add Item</span>
+    </h6>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+</div>
+
+<!-- BODY -->
+<div class="modal-body">
+<form id="itemForm">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="fItemId"/>
+
+<div class="row g-2">
+
+    <!-- Department -->
+<div class="col-md-2">
+    <label class="form-label fw-semibold small">Department <span class="text-danger">*</span></label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-building"></i></span>
+        <select id="fDeptId" class="form-select"></select>
+        <div class="invalid-feedback d-block" id="err-dept"></div>
+    </div>
+</div>
+
+<!-- Item Code -->
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Item Code <span class="text-danger">*</span></label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
+        <input type="text" id="fItemCode" class="form-control" placeholder="Enter item code"/>
+        <div class="invalid-feedback d-block" id="err-itemCode"></div>
+    </div>
+</div>
+
+<!-- Description -->
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Description <span class="text-danger">*</span></label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-card-text"></i></span>
+        <input type="text" id="fItemDesc" class="form-control" placeholder="Enter item description"/>
+    </div>
+    <div class="invalid-feedback d-block" id="err-itemDesc"></div>
+</div>
+
+
+
+<!-- PRICING -->
+
+<div class="col-md-2">
+    <label class="form-label fw-semibold small">MRP Rate RM<span class="text-danger">*</span></label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-currency-rupee"></i></span>
+        <input type="number" id="fMrpRM" class="form-control" placeholder="₹"/>
+        <div class="invalid-feedback d-block" id="err-mrpRM"></div>
+    </div>
+</div>
+
+<div class="col-md-2">
+    <label class="form-label fw-semibold small">MRP Rate Sale<span class="text-danger">*</span></label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-cash"></i></span>
+        <input type="number" id="fMrpSale" class="form-control" placeholder="₹"/>
+        <div class="invalid-feedback d-block" id="err-mrpSale"></div>
+    </div>
+</div>
+
+<!-- RM SIZES -->
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">RM Size 1<span class="text-danger">*</span></label>
+     
+    <div class="input-group input-group-sm mb-1">
+    @* <span class="input-group-text">
+        <i class="bi bi-layers"></i>
+    </span> *@
+
+    <div class="select2-wrapper">
+        <select id="fRMSize1" class="form-select rm-size"></select>
+         <div class="invalid-feedback d-block" id="err-rm1"></div>
+    </div>
+     </div>
+
+
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-123"></i></span>
+        <input type="number" id="fSheetQty1" class="form-control" placeholder="Sheet Qty"/>
+        <div class="invalid-feedback d-block" id="err-qty1"></div>
+    </div>
+</div>
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">RM Size 2</label>
+    <div class="input-group input-group-sm mb-1">
+    @* <span class="input-group-text">
+        <i class="bi bi-layers"></i>
+    </span> *@
+
+    <div class="select2-wrapper">
+        <select id="fRMSize2" class="form-select rm-size"></select>
+         <div class="invalid-feedback d-block" id="err-rm2"></div>
+    </div>
+     </div>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-123"></i></span>
+        <input type="number" id="fSheetQty2" class="form-control" placeholder="Sheet Qty"/>
+       <div class="invalid-feedback d-block" id="err-qty2"></div>
+    </div>
+</div>
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">RM Size 3</label>
+    <div class="input-group input-group-sm mb-1">
+    @* <span class="input-group-text">
+        <i class="bi bi-layers"></i>
+    </span> *@
+
+    <div class="select2-wrapper">
+        <select id="fRMSize3" class="form-select rm-size"></select>
+         <div class="invalid-feedback d-block" id="err-rm3"></div>
+    </div>
+     </div>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-123"></i></span>
+        <input type="number" id="fSheetQty3" class="form-control" placeholder="Sheet Qty"/>
+        <div class="invalid-feedback d-block" id="err-qty3"></div>
+    </div>
+</div>
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">RM Size 4</label>
+     <div class="input-group input-group-sm mb-1">
+    @* <span class="input-group-text">
+        <i class="bi bi-layers"></i>
+    </span> *@
+
+    <div class="select2-wrapper">
+        <select id="fRMSize4" class="form-select rm-size"></select>
+         <div class="invalid-feedback d-block" id="err-rm4"></div>
+    </div>
+     </div>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-123"></i></span>
+        <input type="number" id="fSheetQty4" class="form-control" placeholder="Sheet Qty"/>
+        <div class="invalid-feedback d-block" id="err-qty4"></div>
+    </div>
+</div>
+
+<!-- STOCK -->
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Packing Type</label>
+    <div class="input-group input-group-sm mb-1">
+    <span class="input-group-text"><i class="bi bi-box"></i></span>
+    <select id="fPackingId" class="form-select"></select>
+</div>
+    <label class="form-label fw-semibold small">Packing Qty</label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-123"></i></span>
+        <input type="number" id="fPackQty" class="form-control" placeholder="Packing Qty"/>
+    </div>
+</div>
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">MIN Qty <span class="text-danger">*</span></label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-arrow-down"></i></span>
+        <input type="number" id="fMinStock" class="form-control" placeholder="Minimum"/>
+        <div class="invalid-feedback d-block" id="err-min"></div>
+    </div>
+    <label class="form-label fw-semibold small">MAX Qty <span class="text-danger">*</span></label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-arrow-up"></i></span>
+        <input type="number" id="fMaxStock" class="form-control" placeholder="Maximum"/>
+        <div class="invalid-feedback d-block" id="err-max"></div>
+    </div>
+</div>
+
+<div class="col-md-3">
+    <label class="form-label fw-semibold small">Opening Stock</label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-box-seam"></i></span>
+        <input type="number" id="fOpenStock" class="form-control" placeholder="0"/>
+    </div>
+      <label class="form-label fw-semibold small">Sale Transport</label>
+    <div class="input-group input-group-sm">
+        <span class="input-group-text"><i class="bi bi-truck"></i></span>
+        <input type="number" id="fTransCost" class="form-control" placeholder="₹"/>
+    </div>
+</div>
+
+</div>
+</form>
+</div>
+
+<!-- FOOTER -->
+<div class="modal-footer py-2">
+    <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+        <i class="bi bi-x-lg me-1"></i>Cancel
+    </button>
+    <button class="btn btn-primary btn-sm" id="btnSaveItem">
+        <i class="bi bi-check-lg me-1"></i>Save
+    </button>
+</div>
+
+</div>
+</div>
+</div>
+<!-- ── DELETE CONFIRM MODAL ── -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Confirm Delete
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center small">
+                <p class="mb-1">Delete item</p>
+                <strong id="deleteItemCode"></strong>?
+            </div>
+            <div class="modal-footer justify-content-center py-2">
+                <button class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger btn-sm"
+                        id="btnConfirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index:9999">
+    <div id="toast" class="toast align-items-center text-white border-0"
+         role="alert" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body small" id="toastMsg"></div>
+            <button type="button"
+                    class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<!-- jQuery (required) -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(function () {
+
+    // ════════════════════════════════════════════
+    // STATE
+    // ════════════════════════════════════════════
+    let allData      = [];   // full dataset from server
+    let filteredData = [];   // after search/dept filter
+    let currentPage  = 1;
+    let rowsPerPage  = 10;
+    let totalPages   = 1;
+    let pendingDeleteId = null;
+
+    // Bootstrap modals
+    const itemModal   = new bootstrap.Modal($('#itemModal')[0]);
+    const deleteModal = new bootstrap.Modal($('#deleteModal')[0]);
+    const toastEl     = $('#toast')[0];
+    const bsToast     = new bootstrap.Toast(toastEl, { delay: 3000 });
+
+    // ════════════════════════════════════════════
+    // LOAD ALL DATA — jQuery AJAX
+    // ════════════════════════════════════════════
+    function loadData() {
+
+    const deptId = $('#deptFilter').val();   // 👈 get selected department
+
+    if (!deptId) return; // optional safety
+
+    $('#loadingRow').show();
+    $('#tableBody tr:not(#loadingRow)').remove();
+
+    $.ajax({
+        url: '/ItemDescriptionPPBox/GetAll',
+        method: 'GET',
+        data: { departmentId: deptId },   // 👈 IMPORTANT
+        dataType: 'json',
+
+        success: function (data) {
+            allData = data;
+            applyFilter();
+            $('#loadingRow').hide();
+        },
+
+        error: function () {
+            $('#loadingRow td').html(
+                '<i class="bi bi-exclamation-triangle text-danger me-1"></i>' +
+                'Failed to load data.');
+        }
+    });
+
+}
+    
+    // ════════════════════════════════════════════
+    // LOAD DROPDOWNS
+    // ════════════════════════════════════════════
+
+// function loadDropdowns() {
+
+//     let allPacking = [];
+
+//     $.ajax({
+//         url: '/ItemDescription/GetDropdowns',
+//         method: 'GET',
+//         dataType: 'json',
+
+//         success: function (d) {
+
+//             ==============================
+//             STORE PACKING
+//             ==============================
+//             allPacking = d.packing;
+
+//             ==============================
+//             FILTER PP BOX DEPARTMENT
+//             ==============================
+//             const ppboxDept = d.departments.filter(dep =>
+//                 (dep.DepartmentName || dep.departmentName || '')
+//                     .toLowerCase()
+//                     .trim()
+//                     .includes('pp box')
+//             );
+
+//             ==============================
+//             DEPARTMENT DROPDOWN
+//             ==============================
+//             let deptOpts = '';
+//             ppboxDept.forEach(dep => {
+//                 deptOpts += `<option value="${dep.DepartmentId}">
+//                                 ${dep.DepartmentName}
+//                              </option>`;
+//             });
+
+//             $('#deptFilter').html(deptOpts);
+//             $('#fDeptId').html(deptOpts);
+
+//             ==============================
+//             RM SIZE DROPDOWNS (same)
+//             ==============================
+//             let sizeOpts = '<option value="">-- Select Size --</option>';
+
+//             d.sizes.forEach(s => {
+//                 sizeOpts += `<option value="${s.SizeId}">
+//                                 ${s.ItemSize_Code}
+//                              </option>`;
+//             });
+
+//             $('#fRMSize1').html(sizeOpts);
+//             $('#fRMSize2').html(sizeOpts);
+//             $('#fRMSize3').html(sizeOpts);
+//             $('#fRMSize4').html(sizeOpts);
+
+//             ==============================
+//             🔥 FUNCTION: PACKING FILTER
+//             ==============================
+//             function bindPacking(deptId) {
+
+//                 const filteredPacking = allPacking.filter(p =>
+//                     String(p.DepartmentId) === String(deptId)
+//                 );
+
+//                 let packOpts = '<option value="">-- Select Packing --</option>';
+
+//                 filteredPacking.forEach(p => {
+//                     packOpts += `<option value="${p.PackingId}">
+//                                     ${p.Packing_Type}
+//                                  </option>`;
+//                 });
+
+//                 $('#fPackingId').html(packOpts);
+//             }
+
+//             ==============================
+//             DEFAULT SELECT
+//             ==============================
+//             if (ppboxDept.length > 0) {
+
+//                 const deptId = ppboxDept[0].DepartmentId;
+
+//                 $('#deptFilter').val(deptId);
+//                 $('#fDeptId').val(deptId);
+
+//                 bindPacking(deptId);   ✅ FIX
+//             }
+
+//             ==============================
+//             DEPARTMENT CHANGE
+//             ==============================
+//             $('#fDeptId').on('change', function () {
+
+//                 const deptId = $(this).val();
+
+//                 bindPacking(deptId);   ✅ FIX
+//             });
+//         },
+
+//         error: function () {
+//             console.error("Dropdown load failed");
+//         }
+//     });
+// }
+
+function loadSizes(deptId) {
+
+    $.ajax({
+        url: '/ItemDescriptionPPBox/GetItemSizes',
+        method: 'GET',
+        data: { departmentId: deptId },
+
+        success: function (data) {
+
+            let sizeOpts = '<option value="">-- Select Size --</option>';
+
+            data.forEach(s => {
+                sizeOpts += `<option value="${s.SizeId}">
+                                ${s.ItemSize_Code}
+                             </option>`;
+            });
+
+            $('#fRMSize1').html(sizeOpts).trigger('change');
+$('#fRMSize2').html(sizeOpts).trigger('change');
+$('#fRMSize3').html(sizeOpts).trigger('change');
+$('#fRMSize4').html(sizeOpts).trigger('change');
+        }
+    });
+}
+
+
+function loadDropdowns() {
+
+    let allPacking = [];
+
+    $.ajax({
+        url: '/ItemDescriptionPPBox/GetDropdowns',
+        method: 'GET',
+        dataType: 'json',
+
+        success: function (d) {
+
+            // ==============================
+            // STORE PACKING
+            // ==============================
+            allPacking = d.packing;
+
+            // ==============================
+            // FILTER PP BOX DEPARTMENT
+            // ==============================
+            const ppboxDept = d.departments.filter(dep =>
+                (dep.Department || dep.department || '')
+                    .toLowerCase()
+                    .trim()
+                    .includes('pp box')
+            );
+
+            // ==============================
+            // DEPARTMENT DROPDOWN
+            // ==============================
+            let deptOpts = '';
+            ppboxDept.forEach(dep => {
+                deptOpts += `<option value="${dep.DepartmentId}">
+                                ${dep.Department}
+                             </option>`;
+            });
+
+            $('#deptFilter').html(deptOpts);
+            $('#fDeptId').html(deptOpts);
+
+            // ==============================
+            // RM SIZE DROPDOWNS
+            // ==============================
+            // let sizeOpts = '<option value="">-- Select Size --</option>';
+
+            // d.sizes.forEach(s => {
+            //     sizeOpts += `<option value="${s.SizeId}">
+            //                     ${s.ItemSize_Code}
+            //                  </option>`;
+            // });
+
+            // ✅ SAFE DESTROY
+            if ($.fn.select2) {
+                $('#fRMSize1, #fRMSize2, #fRMSize3, #fRMSize4').each(function () {
+                    if ($(this).hasClass("select2-hidden-accessible")) {
+                        $(this).select2('destroy');
+                    }
+                });
+            }
+
+            // $('#fRMSize1').html(sizeOpts);
+            // $('#fRMSize2').html(sizeOpts);
+            // $('#fRMSize3').html(sizeOpts);
+            // $('#fRMSize4').html(sizeOpts);
+
+            // ==============================
+            // APPLY SELECT2 (SEARCH)
+            // ==============================
+            // APPLY SELECT2
+function applySelect2() {
+    $('#fRMSize1').select2({
+        placeholder: "Search RM Size 1",
+        allowClear: true,
+        // width: '100%',
+        width: 'resolve',
+        dropdownParent: $('#itemModal')
+    });
+
+    $('#fRMSize2').select2({
+        placeholder: "Search RM Size 2",
+        allowClear: true,
+        // width: '100%',
+        width: 'resolve',
+        dropdownParent: $('#itemModal')
+    });
+
+    $('#fRMSize3').select2({
+        placeholder: "Search RM Size 3",
+        allowClear: true,
+        // width: '100%',
+        width: 'resolve',
+        dropdownParent: $('#itemModal')
+    });
+
+    $('#fRMSize4').select2({
+        placeholder: "Search RM Size 4",
+        allowClear: true,
+        // width: '100%',
+        width: 'resolve',
+        dropdownParent: $('#itemModal')
+    });
+}
+
+// ✅ CALL THIS ONLY
+applySelect2();
+            // ==============================
+            // PACKING FILTER
+            // ==============================
+            function bindPacking(deptId) {
+
+                const filteredPacking = allPacking.filter(p =>
+                    String(p.DepartmentId) === String(deptId)
+                );
+
+                let packOpts = '<option value="">-- Select Packing --</option>';
+
+                filteredPacking.forEach(p => {
+                    packOpts += `<option value="${p.PackingId}">
+                                    ${p.Packing_Type}
+                                 </option>`;
+                });
+
+                // SAFE DESTROY
+                // if ($('#fPackingId').hasClass("select2-hidden-accessible")) {
+                //     $('#fPackingId').select2('destroy');
+                // }
+
+                $('#fPackingId').html(packOpts);
+
+                // APPLY SELECT2
+                // $('#fPackingId').select2({
+                //     placeholder: "Search Packing",
+                //     allowClear: true,
+                //     width: '100%',
+                //     dropdownParent: $('#itemModal')
+                // });
+            }
+
+            // ==============================
+            // DEFAULT SELECT
+            // ==============================
+            if (ppboxDept.length > 0) {
+
+                const deptId = ppboxDept[0].DepartmentId;
+
+                $('#deptFilter').val(deptId);
+                $('#fDeptId').val(deptId);
+
+                bindPacking(deptId);
+                loadSizes(deptId); 
+                loadData();
+                setTimeout(() => {
+        applySelect2();   // 🔥 IMPORTANT
+    }, 200);
+            }
+
+            // ==============================
+            // DEPARTMENT CHANGE
+            // ==============================
+            $('#fDeptId').off('change').on('change', function () {
+
+    const deptId = $(this).val();   // ✅ correct
+
+    bindPacking(deptId);            // ✅ correct
+    loadSizes(deptId);              // ✅ correct
+
+     setTimeout(() => {
+        applySelect2();   // 🔥 ADD THIS
+    }, 200);
+});
+        },
+
+        error: function () {
+            console.error("Dropdown load failed");
+        }
+    });
+}
+
+    // ════════════════════════════════════════════
+    // RENDER TABLE
+    // ════════════════════════════════════════════
+    function renderTable() {
+        totalPages = Math.max(1,
+            Math.ceil(filteredData.length / rowsPerPage));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end   = Math.min(start + rowsPerPage, filteredData.length);
+        const slice = filteredData.slice(start, end);
+
+        const tbody = $('#tableBody');
+        tbody.find('tr:not(#loadingRow)').remove();
+
+        if (slice.length === 0) {
+            tbody.append(
+                `<tr><td colspan="21" class="text-center text-muted py-3">
+                    No records found.
+                 </td></tr>`);
+        } else {
+            slice.forEach((r, idx) => {
+                tbody.append(buildRow(r, start + idx + 1));
+            });
+        }
+
+        updatePaginationUI(start, end);
+    }
+
+   
+   function buildRow(r, sr) {
+
+    const fmt = v => v != null && v !== '' ? v : '—';
+
+    return `
+    <tr>
+        <td>${sr}</td>
+        <td>${fmt(r.Department)}</td>
+        <td>${fmt(r.Item_Code)}</td>
+        <td>${fmt(r.Item_Description)}</td>
+
+        <td>${fmt(r.MRP_Rate_RM)}</td>
+        <td>${fmt(r.MRP_Rate_Sale)}</td>
+
+        <td>${fmt(r.ItemSize_Code_1)}</td>
+        <td>${fmt(r.Sheet_Qty_1)}</td>
+
+        <td>${fmt(r.ItemSize_Code_2)}</td>
+        <td>${fmt(r.Sheet_Qty_2)}</td>
+
+        <td>${fmt(r.ItemSize_Code_3)}</td>
+        <td>${fmt(r.Sheet_Qty_3)}</td>
+
+        <td>${fmt(r.ItemSize_Code_4)}</td>
+        <td>${fmt(r.Sheet_Qty_4)}</td>
+
+        <td>${fmt(r.Opening_Stock)}</td>
+        <td>${fmt(r.MIN_Stock)}</td>
+        <td>${fmt(r.MAX_Stock)}</td>
+
+        <td>${fmt(r.Packing_Type)}</td>
+        <td>${fmt(r.Packing_Qty)}</td>
+
+        <td>${fmt(r.Sale_Trans_Cost)}</td>
+
+        <td>
+            <button class="btn btn-sm btn-primary btn-edit" data-id="${r.ItemId}">Edit</button>
+            <button class="btn btn-sm btn-danger btn-del" data-id="${r.ItemId}" data-code="${r.Item_Code}">Delete</button>
+        </td>
+    </tr>`;
+}
+    // ════════════════════════════════════════════
+    // FILTER
+    // ════════════════════════════════════════════
+    window.applyFilter = function() {
+        const q    = $('#searchInput').val().toLowerCase().trim();
+        const dept = $('#deptFilter').val();
+
+        filteredData = allData.filter(r => {
+    const matchDept = !dept ||
+        String(r.DepartmentId) === String(dept);
+
+    const matchQ = !q ||
+        (r.Item_Code || '').toLowerCase().includes(q) ||
+        (r.Item_Description || '').toLowerCase().includes(q);
+
+    return matchDept && matchQ;
+});
+
+        currentPage = 1;
+        renderTable();
+    };
+      $('#deptFilter').on('change', function () {
+        loadData();
+    });
+    // ════════════════════════════════════════════
+    // PAGINATION
+    // ════════════════════════════════════════════
+    function updatePaginationUI(start, end) {
+        $('#pageInfo').text(
+            filteredData.length === 0
+                ? 'No records'
+                : `${start+1}–${end} of ${filteredData.length}`);
+
+        $('#btnFirst,#btnPrev').prop('disabled', currentPage === 1);
+        $('#btnNext,#btnLast').prop('disabled',  currentPage === totalPages);
+
+        const container = $('#pageNumbers').empty();
+        const maxV = 5;
+        let sp = Math.max(1, currentPage - Math.floor(maxV/2));
+        let ep = Math.min(totalPages, sp + maxV - 1);
+        if (ep - sp < maxV - 1) sp = Math.max(1, ep - maxV + 1);
+
+        for (let p = sp; p <= ep; p++) {
+            $('<button>')
+                .text(p)
+                .addClass('btn btn-outline-secondary btn-sm'
+                    + (p === currentPage ? ' active-page' : ''))
+                .on('click', () => goToPage(p))
+                .appendTo(container);
+        }
+    }
+
+    window.goToPage = function(p) {
+        if (p < 1 || p > totalPages) return;
+        currentPage = p;
+        renderTable();
+    };
+
+    window.changeRPP = function() {
+        rowsPerPage = parseInt($('#rppSelect').val());
+        currentPage = 1;
+        renderTable();
+    };
+
+    // ════════════════════════════════════════════
+    // ADD MODAL
+    // ════════════════════════════════════════════
+    $('#btnAddItem').on('click', function () {
+        clearForm();
+        $('#modalTitleText').text('Add Item');
+        // $('#fDate').val(new Date().toISOString().split('T')[0]);
+        $('#fItemCode').prop('disabled', false);
+        itemModal.show();
+    });
+
+    // ════════════════════════════════════════════
+    // EDIT — load record via AJAX
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-edit', function () {
+
+    const id = $(this).data('id');
+
+    $.ajax({
+        url: '/ItemDescriptionPPBox/GetById?id=' + id,
+        method: 'GET',
+        dataType: 'json',
+
+        success: function (r) {
+
+            $('#modalTitleText').text('Edit Item');
+            clearForm();
+
+            // BASIC
+            $('#fItemId').val(r.ItemId);
+            $('#fItemCode').val(r.Item_Code);
+            $('#fItemDesc').val(r.Item_Description);
+            $('#fItemCode').prop('disabled', true);
+            $('#fDeptId').val(r.DepartmentId);
+
+            // PRICING
+            $('#fMrpRM').val(r.MRP_Rate_RM);
+            $('#fMrpSale').val(r.MRP_Rate_Sale);
+
+            // RM SIZE
+            // $('#fRMSize1').val(r.RM_SizeId_1 ?? '');
+            $('#fSheetQty1').val(r.Sheet_Qty_1);
+
+            // $('#fRMSize2').val(r.RM_SizeId_2 ?? '');
+            $('#fSheetQty2').val(r.Sheet_Qty_2);
+
+            // $('#fRMSize3').val(r.RM_SizeId_3 ?? '');
+            $('#fSheetQty3').val(r.Sheet_Qty_3);
+
+            // $('#fRMSize4').val(r.RM_SizeId_4 ?? '');
+            $('#fSheetQty4').val(r.Sheet_Qty_4);
+            $('#fRMSize1').val(r.RM_SizeId_1).trigger('change');
+            $('#fRMSize2').val(r.RM_SizeId_2).trigger('change');
+            $('#fRMSize3').val(r.RM_SizeId_3).trigger('change');
+            $('#fRMSize4').val(r.RM_SizeId_4).trigger('change');
+            // STOCK
+            $('#fOpenStock').val(r.Opening_Stock);
+            $('#fMinStock').val(r.MIN_Stock);
+            $('#fMaxStock').val(r.MAX_Stock);
+
+            // PACKING
+            // $('#fPackType').val(r.Packing_Type);
+            // $('#fPackingId').val(r.PackingId);
+//              $('#fPackingId option').each(function () {
+//     if ($(this).text().trim() === (r.Packing_Type || '').trim()) {
+//         $('#fPackingId').val($(this).val());
+//     }
+// });
+$('#fPackingId option').each(function () {
+    if ($(this).text().trim() === (r.Packing_Type || '').trim()) {
+        $('#fPackingId').val($(this).val()).trigger('change'); // 🔥 important
+    }
+});
+            $('#fPackQty').val(r.Packing_Qty);
+
+            // TRANSPORT
+            $('#fTransCost').val(r.Sale_Trans_Cost);
+
+            // SHOW MODAL
+            itemModal.show();
+        },
+
+        error: function () {
+            showToast('Failed to load item.', 'danger');
+        }
+    });
+
+});
+
+    // ════════════════════════════════════════════
+    // SAVE — jQuery AJAX POST
+    // ════════════════════════════════════════════
+   
+
+//    $('#btnSaveItem').on('click', function () {
+
+//     clearErrors();
+//     let isValid = true;
+
+//     REQUIRED VALIDATIONS
+//     if (!$('#fItemCode').val().trim()) {
+//         showError('fItemCode', 'err-itemCode', 'Item Code is required');
+//         isValid = false;
+//     }
+
+//     if (!$('#fItemDesc').val().trim()) {
+//         showError('fItemDesc', 'err-itemDesc', 'Description is required');
+//         isValid = false;
+//     }
+
+//     if (!$('#fDeptId').val()) {
+//         showError('fDeptId', 'err-dept', 'Department is required');
+//         isValid = false;
+//     }
+
+//     if (!$('#fMinStock').val()) {
+//         showError('fMinStock', 'err-min', 'Min Qty is required');
+//         isValid = false;
+//     }
+
+//     if (!$('#fMaxStock').val()) {
+//         showError('fMaxStock', 'err-max', 'Max Qty is required');
+//         isValid = false;
+//     }
+//     ✅ NEW VALIDATION
+
+// if (!$('#fMrpRM').val()) {
+//     showError('fMrpRM', 'err-mrpRM', 'MRP RM is required');
+//     isValid = false;
+// }
+
+// if (!$('#fMrpSale').val()) {
+//     showError('fMrpSale', 'err-mrpSale', 'MRP Sale is required');
+//     isValid = false;
+// }
+//     ❌ STOP API CALL
+//     if (!isValid) return;
+
+//     ✅ Continue your existing AJAX payload code
+//     const token = $('input[name="__RequestVerificationToken"]').val();
+
+   
+//     const payload = {
+//     ItemId: $('#fItemId').val(),
+
+//     Item_Code: $('#fItemCode').val().trim(),
+//     Item_Description: $('#fItemDesc').val().trim(),
+
+//     DepartmentId: parseInt($('#fDeptId').val()) || 0,
+
+//     MRP_Rate_RM: parseFloat($('#fMrpRM').val()) || 0,
+//     MRP_Rate_Sale: parseFloat($('#fMrpSale').val()) || 0,
+
+//     RM_SizeId_1: $('#fRMSize1').val() ? parseInt($('#fRMSize1').val()) : null,
+//     Sheet_Qty_1: parseInt($('#fSheetQty1').val()) || 0,
+
+//     RM_SizeId_2: $('#fRMSize2').val() ? parseInt($('#fRMSize2').val()) : null,
+//     Sheet_Qty_2: parseInt($('#fSheetQty2').val()) || 0,
+
+//     RM_SizeId_3: $('#fRMSize3').val() ? parseInt($('#fRMSize3').val()) : null,
+//     Sheet_Qty_3: parseInt($('#fSheetQty3').val()) || 0,
+
+//     RM_SizeId_4: $('#fRMSize4').val() ? parseInt($('#fRMSize4').val()) : null,
+//     Sheet_Qty_4: parseInt($('#fSheetQty4').val()) || 0,
+
+//     Opening_Stock: parseInt($('#fOpenStock').val()) || 0,
+//     MIN_Stock: parseInt($('#fMinStock').val()) || 0,
+//     MAX_Stock: parseInt($('#fMaxStock').val()) || 0,
+
+//     PackingId: $('#fPackingId').val() ? parseInt($('#fPackingId').val()) : null,
+//     Packing_Qty: parseInt($('#fPackQty').val()) || 1,
+
+//     Sale_Trans_Cost: parseFloat($('#fTransCost').val()) || 0,
+
+//     Cycle_Time: 0,
+//     No_of_Cavity: 0,
+//     Std_Shot_Weight: 0,
+//     Finish_Weight: 0,
+//     Ext_Mould_PVC_RMType: "",
+//     Lab: 0,
+
+//     CreatedBy: "Admin",
+//     Date: new Date().toISOString(),
+
+//     Inner_Packing_Type: "",
+//     Inner_Packing_Qty: 0,
+
+//     __RequestVerificationToken: token
+// };
+//     $.ajax({
+//         url: '/ItemDescription/Save',
+//         method: 'POST',
+//         data: payload,
+//         dataType: 'json',
+
+//         success: function (d) {
+
+//             if (!d.success) {
+//                 showToast(d.message || 'Save failed.', 'danger');
+//                 return;
+//             }
+
+//             itemModal.hide();
+//             showToast(d.message, 'success');
+//             loadData(); reload table
+//         },
+
+//         error: function (xhr) {
+//     console.log(xhr.responseText);   🔥 important
+//     showToast('Error: ' + xhr.status, 'danger');
+// }
+//     });
+
+// });
+
+
+
+
+
+
+
+$('#btnSaveItem').on('click', function () {
+
+    clearErrors();
+    let isValid = true;
+
+    // ============================
+    // REQUIRED VALIDATIONS
+    // ============================
+
+    if (!$('#fItemCode').val().trim()) {
+        showError('fItemCode', 'err-itemCode', 'Item Code is required');
+        isValid = false;
+    }
+
+    if (!$('#fItemDesc').val().trim()) {
+        showError('fItemDesc', 'err-itemDesc', 'Description is required');
+        isValid = false;
+    }
+
+    if (!$('#fDeptId').val()) {
+        showError('fDeptId', 'err-dept', 'Department is required');
+        isValid = false;
+    }
+
+    if (!$('#fMinStock').val()) {
+        showError('fMinStock', 'err-min', 'Min Qty is required');
+        isValid = false;
+    }
+
+    if (!$('#fMaxStock').val()) {
+        showError('fMaxStock', 'err-max', 'Max Qty is required');
+        isValid = false;
+    }
+
+    if (!$('#fMrpRM').val()) {
+        showError('fMrpRM', 'err-mrpRM', 'MRP RM is required');
+        isValid = false;
+    }
+
+    if (!$('#fMrpSale').val()) {
+        showError('fMrpSale', 'err-mrpSale', 'MRP Sale is required');
+        isValid = false;
+    }
+
+    // ============================
+    // RM SIZE VALIDATION
+    // ============================
+
+    const size1 = $('#fRMSize1').val();
+    const size2 = $('#fRMSize2').val();
+    const size3 = $('#fRMSize3').val();
+    const size4 = $('#fRMSize4').val();
+
+    if (!size1) {
+        showError('fRMSize1', 'err-rm1', 'RM Size 1 is required');
+        isValid = false;
+    }
+
+    if (size2 && !size1) {
+        showError('fRMSize2', 'err-rm2', 'Fill RM Size 1 first');
+        isValid = false;
+    }
+
+    if (size3 && !size2) {
+        showError('fRMSize3', 'err-rm3', 'Fill RM Size 2 first');
+        isValid = false;
+    }
+
+    if (size4 && !size3) {
+        showError('fRMSize4', 'err-rm4', 'Fill RM Size 3 first');
+        isValid = false;
+    }
+
+    // ============================
+    // SHEET QTY VALIDATION
+    // ============================
+
+    function validateQty(size, qtyId, errId, msg) {
+        const qty = $(qtyId).val();
+
+        if (size && (!qty || qty <= 0)) {
+            showError(qtyId.replace('#',''), errId, msg);
+            return false;
+        }
+        return true;
+    }
+
+    if (!validateQty(size1, '#fSheetQty1', 'err-qty1', 'Qty required for RM Size 1'))
+        isValid = false;
+
+    if (!validateQty(size2, '#fSheetQty2', 'err-qty2', 'Qty required for RM Size 2'))
+        isValid = false;
+
+    if (!validateQty(size3, '#fSheetQty3', 'err-qty3', 'Qty required for RM Size 3'))
+        isValid = false;
+
+    if (!validateQty(size4, '#fSheetQty4', 'err-qty4', 'Qty required for RM Size 4'))
+        isValid = false;
+
+    // ============================
+    // STOP IF INVALID
+    // ============================
+
+    if (!isValid) return;
+
+    // ============================
+    // PAYLOAD
+    // ============================
+
+    const token = $('input[name="__RequestVerificationToken"]').val();
+
+    const payload = {
+        ItemId: $('#fItemId').val(),
+
+        Item_Code: $('#fItemCode').val().trim(),
+        Item_Description: $('#fItemDesc').val().trim(),
+
+        DepartmentId: parseInt($('#fDeptId').val()) || 0,
+
+        MRP_Rate_RM: parseFloat($('#fMrpRM').val()) || 0,
+        MRP_Rate_Sale: parseFloat($('#fMrpSale').val()) || 0,
+
+        RM_SizeId_1: size1 ? parseInt(size1) : null,
+        Sheet_Qty_1: parseInt($('#fSheetQty1').val()) || 0,
+
+        RM_SizeId_2: size2 ? parseInt(size2) : null,
+        Sheet_Qty_2: parseInt($('#fSheetQty2').val()) || 0,
+
+        RM_SizeId_3: size3 ? parseInt(size3) : null,
+        Sheet_Qty_3: parseInt($('#fSheetQty3').val()) || 0,
+
+        RM_SizeId_4: size4 ? parseInt(size4) : null,
+        Sheet_Qty_4: parseInt($('#fSheetQty4').val()) || 0,
+
+        Opening_Stock: parseInt($('#fOpenStock').val()) || 0,
+        MIN_Stock: parseInt($('#fMinStock').val()) || 0,
+        MAX_Stock: parseInt($('#fMaxStock').val()) || 0,
+
+        // PackingId: $('#fPackingId').val() ? parseInt($('#fPackingId').val()) : null,
+        Packing_Type: $('#fPackingId').val() ? $('#fPackingId option:selected').text() : '',
+        Packing_Qty: parseInt($('#fPackQty').val()) || 1,
+
+        Sale_Trans_Cost: parseFloat($('#fTransCost').val()) || 0,
+
+        // DEFAULT VALUES
+        Cycle_Time: 20,
+        No_of_Cavity: 1,
+        Std_Shot_Weight: 0,
+        Finish_Weight: 0,
+        Ext_Mould_PVC_RMType: "",
+        Lab: 0,
+
+        CreatedBy: "Admin",
+        Date: new Date().toISOString(),
+
+        Inner_Packing_Type: "",
+        Inner_Packing_Qty: 0,
+
+        __RequestVerificationToken: token
+    };
+
+    // ============================
+    // AJAX CALL
+    // ============================
+
+    $.ajax({
+        url: '/ItemDescriptionPPBox/Save',
+        method: 'POST',
+        data: payload,
+        dataType: 'json',
+
+        success: function (d) {
+
+            if (!d.success) {
+                showToast(d.message || 'Save failed.', 'danger');
+                return;
+            }
+
+            itemModal.hide();
+            showToast(d.message || 'Saved successfully!', 'success');
+
+            loadData(); // reload table
+        },
+
+        error: function (xhr) {
+            console.log(xhr.responseText);
+            showToast('Error: ' + xhr.status, 'danger');
+        }
+    });
+
+});
+    // ════════════════════════════════════════════
+    // DELETE
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-del', function () {
+        pendingDeleteId = $(this).data('id');
+        $('#deleteItemCode').text($(this).data('code'));
+        deleteModal.show();
+    });
+
+    $('#btnConfirmDelete').on('click', function () {
+        const token = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url:      '/ItemDescriptionPPBox/Delete',
+            method:   'POST',
+            data:     { id: pendingDeleteId,
+                        __RequestVerificationToken: token },
+            dataType: 'json',
+            success: function (d) {
+                deleteModal.hide();
+                if (d.success) {
+                    // Remove from local arrays — no full reload needed
+                    allData      = allData.filter(
+                        r => r.ItemId !== pendingDeleteId);
+                    filteredData = filteredData.filter(
+                        r => r.ItemId !== pendingDeleteId);
+                    renderTable();
+                    showToast('Item deleted.', 'success');
+                    loadData();
+                } else {
+                    showToast('Delete failed.', 'danger');
+                }
+            },
+            error: function () {
+                showToast('Network error.', 'danger');
+            }
+        });
+    });
+
+    // ════════════════════════════════════════════
+    // HELPERS
+    // ════════════════════════════════════════════
+    function clearForm() {
+        $('#itemForm')[0].reset();
+        $('#fItemId').val('0');
+        $('#fItemCode').prop('disabled', false);
+        clearErrors();
+    }
+
+    function clearErrors() {
+        $('.invalid-feedback.d-block').text('');
+        $('#itemForm .form-control, #itemForm .form-select')
+            .removeClass('is-invalid');
+    }
+
+    function showError(fieldId, errId, msg) {
+        $('#' + fieldId).addClass('is-invalid');
+        $('#' + errId).text(msg);
+    }
+
+    function showToast(msg, type) {
+        toastEl.className =
+            `toast align-items-center text-white border-0 bg-${type}`;
+        $('#toastMsg').text(msg);
+        bsToast.show();
+    }
+
+    // ── INIT ──
+    loadDropdowns();
+
+});
+</script>
+}

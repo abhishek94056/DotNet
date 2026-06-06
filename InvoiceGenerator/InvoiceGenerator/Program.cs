@@ -33,6 +33,13 @@ namespace InvoiceGenerator
                 // Uses HTTPS if request is HTTPS
             });
 
+            //"This code tells ASP.NET: Don’t change my property names when sending JSON —
+            //keep them exactly as written in my model."
+            builder.Services.AddControllersWithViews()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNamingPolicy = null;
+            });
             // ── Custom Services (Dependency Injection) ──
             builder.Services.AddScoped<IInvoiceService, InvoiceService>();
             builder.Services.AddScoped<PdfService>();
@@ -40,6 +47,27 @@ namespace InvoiceGenerator
             builder.Services.AddScoped<IItemService, ItemService>();
             builder.Services.AddScoped<ITransportService, TransportService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<CustomerService>();
+            builder.Services.AddScoped<SupplierService>();  
+            builder.Services.AddScoped<ItemSizeService>();
+            builder.Services.AddScoped<ItemDescriptionService>();
+            builder.Services.AddScoped<ItemDescriptionPPBoxService>();
+            builder.Services.AddScoped<MatrixItemSizeService>();
+            builder.Services.AddScoped<MatrixItemCustomerService>();
+            builder.Services.AddScoped<NPDItemService>();
+            builder.Services.AddScoped<NPDPPBoxItemService>();
+            builder.Services.AddScoped<RawMaterialService>();
+            builder.Services.AddScoped<CustomerPOScheduleService>();
+            builder.Services.AddScoped<ProductionPlanService>();
+            builder.Services.AddScoped<MachineProductionService>();
+            builder.Services.AddScoped<MachineRejectionService>();
+            builder.Services.AddScoped<CustomerDispatchService>();
+            builder.Services.AddScoped<MachineDowntimeService>();
+            builder.Services.AddScoped<RawMaterialIssueReceivedService>();
+            builder.Services.AddScoped<ProductionFGIssueService>();
+            builder.Services.AddScoped<ManualScheduleDispatchService>();
+            builder.Services.AddScoped<ControlPlanService>();
+            builder.Services.AddScoped<SupplierPOStatusService>();
             // AddScoped -> One instance per HTTP request
 
             var app = builder.Build();

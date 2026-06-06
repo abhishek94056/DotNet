@@ -1,0 +1,23 @@
+﻿body {
+    background: #f0f2f5;
+}
+
+.login-card {
+    max-width: 420px;
+    margin: 40px auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.10);
+}
+
+.login-header {
+    background: #212529;
+    color: #fff;
+    border-radius: 12px 12px 0 0;
+    padding: 24px;
+    text-align: center;
+}
+
+    .login-header img {
+        height: 48px;
+        margin-bottom: 8px;
+    }

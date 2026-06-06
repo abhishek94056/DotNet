@@ -1,0 +1,1132 @@
+﻿@{
+    ViewData["Title"] = "Machine Downtime";
+}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    :root {
+        --header-bg: #1a2e4e;
+        --row-odd: #f8f9fa;
+        --row-even: #e8f0ff;
+        --row-hover: #c8d8ff;
+    }
+
+    /* HEADER */
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+        .page-header h6 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+    .header-controls {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    /* TABLE */
+    #dtTable {
+        width: 100%;
+        min-width: 1800px;
+        font-size: 0.69rem;
+    }
+
+        #dtTable thead th {
+            font-size: 0.66rem;
+            padding: 4px 4px;
+            white-space: nowrap;
+            text-align: center;
+            background: var(--header-bg);
+            color: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        #dtTable tbody td {
+            padding: 3px 4px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        #dtTable tbody tr:nth-child(odd) td {
+            background: var(--row-odd);
+        }
+
+        #dtTable tbody tr:nth-child(even) td {
+            background: var(--row-even);
+        }
+
+        #dtTable tbody tr:hover td {
+            background: var(--row-hover) !important;
+        }
+
+        #dtTable .btn-sm {
+            padding: 1px 4px;
+            font-size: 0.65rem;
+        }
+
+    /* HOURS */
+    .dt-hrs {
+        text-align: right;
+        padding-right: 6px;
+    }
+
+        .dt-hrs.has-val {
+            color: #dc3545;
+            font-weight: 700;
+        }
+
+        .dt-hrs.prod-val {
+            color: #198754;
+            font-weight: 700;
+        }
+
+    /* TABLE WRAP */
+    .table-wrap {
+        max-height: 440px;
+        overflow-y: auto;
+        overflow-x: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* PAGINATION */
+    .pagination-bar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 8px;
+        font-size: 0.72rem;
+    }
+
+        .pagination-bar button {
+            min-width: 28px;
+            height: 26px;
+            font-size: 0.68rem;
+        }
+
+            .pagination-bar button.active-pg {
+                background: #0d6efd;
+                color: #fff;
+                border-color: #0d6efd;
+            }
+
+    /* SUMMARY */
+    .dt-summary {
+        background: linear-gradient(135deg,#3a1a00,#bf5500);
+        color: #fff;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 0.72rem;
+    }
+
+        .dt-summary .val {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #ffd9a8;
+        }
+
+    /* BADGES */
+    .mc-on {
+        background: #198754;
+        color: #fff;
+        font-size: .60rem;
+    }
+
+    .mc-off {
+        background: #6c757d;
+        color: #fff;
+        font-size: .60rem;
+    }
+
+    /* SELECT2 */
+    .select2-wrapper {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .select2-container--default .select2-selection--single {
+        height: 31px !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 0 .25rem .25rem 0 !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    /* MODAL */
+    .modal .form-label {
+        margin-bottom: 3px;
+    }
+
+    .modal .input-group-text {
+        height: 31px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* MOBILE */
+    @@media (max-width:575px) {
+
+        .page-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .header-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+            .header-controls select,
+            .header-controls input,
+            .header-controls button {
+                width: 100% !important;
+            }
+
+        #dtTable {
+            min-width: 1800px;
+        }
+
+        .pagination-bar {
+            justify-content: center;
+        }
+
+            .pagination-bar #pageNumbers {
+                flex-wrap: wrap;
+            }
+
+        .modal-dialog {
+            margin: .5rem;
+        }
+
+        .modal .row > div {
+            margin-bottom: 2px;
+        }
+
+        .select2-container {
+            width: 100% !important;
+        }
+    }
+
+    /* TABLET */
+    @@media (min-width:576px) and (max-width:991px) {
+
+        #dtTable {
+            min-width: 1700px;
+        }
+
+        .pagination-bar {
+            justify-content: center;
+        }
+    }
+</style>
+
+<!-- ── PAGE HEADER ── -->
+<div class="page-header">
+    <h6 class="mb-0 fw-bold">
+        <i class="bi bi-hourglass-split me-2 text-primary"></i>
+        Machine Downtime Data Entry
+    </h6>
+    <div class="header-controls">
+
+        <select id="headerDeptFilter"
+                class="form-select form-select-sm"
+                style="width:155px">
+            <option value="0">-- Department --</option>
+        </select>
+
+        <select id="monthFilter"
+                class="form-select form-select-sm"
+                style="width:115px">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+        </select>
+
+        <input type="text" id="searchInput"
+               class="form-control form-control-sm"
+               placeholder="🔍 Search..."
+               style="width:145px" oninput="applyFilter()" />
+
+        <button class="btn btn-primary btn-sm" id="btnAdd"
+                style="color:#000">
+            <i class="bi bi-plus-lg me-1"></i>Add Downtime
+        </button>
+    </div>
+</div>
+
+
+<!-- ── TABLE ── -->
+<div class="table-wrap">
+    <table class="table table-bordered mb-0" id="dtTable">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Dept</th>
+                <th>Shift</th>
+                <th>Machine</th>
+                <th>Date</th>
+                <th>MC</th>
+                <th>Item Code</th>
+                <th>Description</th>
+                <th title="Actual Production Hrs">Prod Hrs</th>
+                <th title="No Operator">No Op.</th>
+                <th title="Tool Change">Tool Ch.</th>
+                <th title="No Power">No Pwr</th>
+                <th title="Machine Break Down">MC Brk</th>
+                <th title="No Material">No Mat.</th>
+                <th title="MC Setting">MC Set.</th>
+                <th title="No Load">No Load</th>
+                <th title="Training">Train.</th>
+                <th title="Quality Issue">Qual.</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <tr id="loadingRow">
+                <td colspan="19" style="text-align:center;">
+                    <i class="bi bi-info-circle text-primary me-2"></i>
+                    Select Department and Month then click Load.
+                </td>
+            </tr>
+        </tbody>
+      
+    </table>
+</div>
+
+<!-- ── PAGINATION ── -->
+<div class="pagination-bar">
+    <span id="pageInfo" class="text-muted"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnFirst" onclick="goToPage(1)">«</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnPrev"  onclick="goToPage(currentPage-1)">‹</button>
+    <span id="pageNumbers" class="d-flex gap-1"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnNext"  onclick="goToPage(currentPage+1)">›</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnLast"  onclick="goToPage(totalPages)">»</button>
+    <select id="rppSelect" class="form-select form-select-sm"
+            style="width:75px" onchange="changeRPP()">
+        <option value="10" selected>10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+    </select>
+    <span class="text-muted">/ page</span>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ADD / EDIT MODAL
+══════════════════════════════════════════════ -->
+<div class="modal fade" id="dtModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-dark text-white py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-hourglass-split me-2"></i>
+                    <span id="modalTitleText">Add Downtime Entry</span>
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="dtForm" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="fSrNo"         value="0" />
+
+                    <div class="row g-2">
+
+                        @* Add Department *@
+
+                      <!-- Department -->
+    <div class="col-md-4">
+        <label class="form-label fw-semibold small">
+            Department <span class="text-danger">*</span>
+        </label>
+
+        <div class="input-group input-group-sm">
+            <span class="input-group-text">
+                <i class="bi bi-diagram-3"></i>
+            </span>
+
+            <select id="fDepartmentId"
+                    class="form-select form-select-sm"
+                    onchange="onFormDepartmentChange()">
+                <option value="0">-- Select Department --</option>
+            </select>
+        </div>
+
+        <div class="invalid-feedback d-block"
+             id="err-dept"></div>
+    </div>
+
+   <!-- Machine — cascade from dept -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">
+                                Machine <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-cpu"></i>
+                                </span>
+                                <select id="fMachineId"
+                                        class="form-select form-select-sm">
+                                    <option value="0">
+                                        -- Select Machine --
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-machine"></div>
+                        </div>
+
+
+                            <!-- MC Status -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">
+                                Machine Status
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-toggle-on"></i>
+                                </span>
+                                <select id="fMCStatusId"
+                                        class="form-select form-select-sm">
+                                    <option value="0">-- Select --</option>
+                                    <option value="1">ON (Running)</option>
+                                    <option value="2">OFF (Stopped)</option>
+                                </select>
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-status"></div>
+                        </div>
+
+                        
+                        <!-- Item — cascade from dept, required when MC ON -->
+                        <div class="col-md-4" id="dvItemId">
+                            <label class="form-label fw-semibold small">
+                                Item Code
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                @* <span class="input-group-text">
+                                    <i class="bi bi-upc-scan"></i>
+                                </span> *@
+                               <div class="select2-wrapper">
+    <select id="fItemId"
+            class="form-select form-select-sm"
+            disabled
+            onchange="onItemChange()">
+       <option value="">-- Select Item --</option>
+    </select>
+</div>
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-item"></div>
+                        </div>
+
+                        <!-- Shift -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">
+                                Shift <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-clock"></i>
+                                </span>
+                                <select id="fShiftId"
+                                        class="form-select form-select-sm">
+                                    <option value="0">
+                                        -- Select Shift --
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-shift"></div>
+                        </div>
+
+                     
+                            <!-- Downtime Reason -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">
+                                Downtime Reason
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                </span>
+                                <select id="fDowntimeReasonId"
+                                        class="form-select form-select-sm">
+                                    <option value="0">
+                                        -- Select Reason --
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-reason"></div>
+                        </div>
+
+                        
+                        <!-- Downtime (hrs) -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">
+                                Time (hrs)
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-clock-history"></i>
+                                </span>
+                                <input type="number" id="fDowntime"
+                                       class="form-control form-control-sm"
+                                       min="0.01" step="0.01"
+                                       placeholder="0.00" />
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-dt"></div>
+                        </div>
+
+                        <!-- Date -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">
+                                Date <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-calendar3"></i>
+                                </span>
+                                <input type="date" id="fDate"
+                                       class="form-control form-control-sm" />
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-date"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary btn-sm"
+                        id="btnSave" style="color:#000">
+                    <i class="bi bi-floppy me-1"></i>Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ── DELETE CONFIRM MODAL ── -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Confirm Delete
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center small">
+                <p class="mb-1">Delete downtime record</p>
+                <strong id="deleteLabel"></strong>?
+            </div>
+            <div class="modal-footer justify-content-center py-2">
+                <button class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger btn-sm"
+                        id="btnConfirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index:9999">
+    <div id="toast" class="toast align-items-center text-white border-0"
+         role="alert" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body small" id="toastMsg"></div>
+            <button type="button"
+                    class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(function () {
+
+    // ════════════════════════════════════════════
+    // STATE
+    // ════════════════════════════════════════════
+    let allData         = [];
+    let filteredData    = [];
+    let currentPage     = 1;
+    let rowsPerPage     = 10;
+    let totalPages      = 1;
+    let pendingDeleteId = null;
+    let currentDeptId   = 0;
+
+    const dtModal     = new bootstrap.Modal($('#dtModal')[0]);
+    const deleteModal = new bootstrap.Modal($('#deleteModal')[0]);
+    const toastEl     = $('#toast')[0];
+    const bsToast     = new bootstrap.Toast(toastEl, { delay: 3500 });
+
+    // ── Set current month ──
+    $('#monthFilter').val(new Date().getMonth() + 1);
+
+    // ── Downtime reason labels (matching SP ReasonId 1-10) ──
+    const reasonLabels = {
+        1: 'No Operator', 2: 'Tool Change', 3: 'No Power',
+        4: 'Machine Break Down', 5: 'No Material',
+        6: 'MC Setting', 7: 'No Load', 8: 'Training',
+        9: 'Quality Issue', 10: 'Actual Production'
+    };
+
+    // ════════════════════════════════════════════
+    // INIT
+    // ════════════════════════════════════════════
+    $.ajax({
+    url: '/MachineDowntime/GetDepartments',
+    method: 'GET',
+    dataType: 'json',
+    success: function (depts) {
+
+        let headerOpts =
+            '<option value="0">-- Department --</option>';
+
+        let modalOpts =
+            '<option value="0">-- Select Department --</option>';
+
+        depts.forEach(d => {
+
+            headerOpts += `
+                <option value="${d.DepartmentId}">
+                    ${d.Department}
+                </option>`;
+
+            modalOpts += `
+                <option value="${d.DepartmentId}">
+                    ${d.Department}
+                </option>`;
+        });
+
+        $('#headerDeptFilter').html(headerOpts);
+        $('#fDepartmentId').html(modalOpts);
+    }
+});
+
+    $.ajax({
+        url: '/MachineDowntime/GetShifts',
+        method: 'GET', dataType: 'json',
+        success: function (shifts) {
+            let opts = '<option value="0">-- Select Shift --</option>';
+            shifts.forEach(s => {
+                opts += `<option value="${s.shiftId}">
+                            ${s.shiftName}</option>`;
+            });
+            $('#fShiftId').html(opts);
+        }
+    });
+
+    $.ajax({
+        url: '/MachineDowntime/GetDowntimeReasons',
+        method: 'GET', dataType: 'json',
+        success: function (reasons) {
+            let opts =
+                '<option value="0">-- Select Reason --</option>';
+            reasons.forEach(r => {
+                opts += `<option value="${r.downTime_ReasonId}">
+                            ${r.downTime_Reason}</option>`;
+            });
+            $('#fDowntimeReasonId').html(opts);
+        }
+    });
+    
+
+    // Load Machines/Items When Modal Department Changes
+
+
+    // ════════════════════════════════════════════
+    // Add auto-load on dropdown change
+    // ════════════════════════════════════════════
+    $('#headerDeptFilter, #monthFilter').on('change', function () {
+
+    currentDeptId = parseInt($('#headerDeptFilter').val()) || 0;
+    const monthId = parseInt($('#monthFilter').val()) || 0;
+
+    $('#btnAdd').prop('disabled', false);
+
+    loadModalDropdowns(currentDeptId);
+    loadData(currentDeptId, monthId);
+});
+
+    // ════════════════════════════════════════════
+    // LOAD MODAL DROPDOWNS
+    // ════════════════════════════════════════════
+    function loadModalDropdowns(deptId) {
+        $.ajax({
+            url: '/MachineDowntime/GetMachinesByDept?deptId=' + deptId,
+            method: 'GET', dataType: 'json',
+            success: function (machines) {
+                let opts =
+                    '<option value="0">-- Select Machine --</option>';
+                machines.forEach(m => {
+                    opts += `<option value="${m.machineId}">
+                                ${m.machineName}</option>`;
+                });
+                $('#fMachineId').html(opts);
+            }
+        });
+
+        $.ajax({
+            url: '/MachineDowntime/GetItemsByDept?deptId=' + deptId,
+            method: 'GET', dataType: 'json',
+            success: function (items) {
+                let opts =
+                    '<option value="0">-- Select Item --</option>';
+                items.forEach(i => {
+                    opts += `<option value="${i.itemId}">
+                                ${i.item_Code} — ${i.item_Description}
+                             </option>`;
+                });
+                $('#fItemId')
+    .html(opts)
+    .prop('disabled', false);
+
+setTimeout(() => {
+    applyItemSelect2();
+}, 100);
+            }
+        });
+    }
+    $('#fDepartmentId').on('change', function () {
+
+    const deptId = parseInt($(this).val()) || 0;
+
+    loadModalDropdowns(deptId);
+
+});
+   
+
+    // ════════════════════════════════════════════
+    // LOAD DATA
+    // ════════════════════════════════════════════
+    function loadData(deptId, monthId) {
+        $('#loadingRow').show()
+            .find('td').html(
+                '<div class="spinner-border spinner-border-sm ' +
+                'text-primary me-2"></div>Loading...');
+        $('#tableBody tr:not(#loadingRow)').remove();
+
+        $.ajax({
+            url: `/MachineDowntime/GetAll?deptId=${deptId}&monthId=${monthId}`,
+            method: 'GET', dataType: 'json',
+            success: function (data) {
+                allData = data;
+                applyFilter();
+                $('#loadingRow').hide();
+            },
+            error: function () {
+                $('#loadingRow td').html(
+                    '<i class="bi bi-exclamation-triangle ' +
+                    'text-danger me-1"></i>Failed to load data.');
+            }
+        });
+    }
+
+    // ════════════════════════════════════════════
+    // RENDER TABLE
+    // ════════════════════════════════════════════
+    function renderTable() {
+        totalPages = Math.max(1,
+            Math.ceil(filteredData.length / rowsPerPage));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end   = Math.min(start + rowsPerPage, filteredData.length);
+        const slice = filteredData.slice(start, end);
+
+        $('#tableBody tr:not(#loadingRow)').remove();
+
+        if (slice.length === 0) {
+
+            $('#tableBody').append(
+                `<tr><td colspan="19"
+                    class="text-center text-muted py-3">
+                    No records found.
+                 </td></tr>`);
+        } else {
+            slice.forEach((r, i) =>
+                $('#tableBody').append(buildRow(r, start+i+1)));
+        }
+
+        updatePagination(start, end);
+    }
+
+    function buildRow(r, sr) {
+        const fmt  = v => v || '—';
+        // Format hours: show only if > 0
+        const fmtH = (v, isProd = false) => {
+            const n = parseFloat(v) || 0;
+            if (n <= 0) return '<td class="dt-hrs">—</td>';
+            const cls = isProd ? 'prod-val' : 'has-val';
+            return `<td class="dt-hrs ${cls}">${n.toFixed(2)}</td>`;
+        };
+
+        const mcOn = r.itemId > 0;
+        const mcBadge = mcOn
+            ? `<span class="badge mc-on">ON</span>`
+            : `<span class="badge mc-off">OFF</span>`;
+
+        return `
+        <tr id="row-${r.SrNo}">
+            <td class="text-center">${sr}</td>
+            <td>
+                <span class="badge bg-dark" style="font-size:0.60rem">
+                    ${fmt(r.Department)}
+                </span>
+            </td>
+            <td>${fmt(r.ShiftName)}</td>
+            <td>${fmt(r.MachineName)}</td>
+            <td class="text-center">${fmt(r.Add_Date)}</td>
+            <td>${mcBadge}</td>
+            <td class="fw-bold text-primary">${fmt(r.Item_Code)}</td>
+            <td title="${fmt(r.Item_Description)}">
+                ${fmt(r.Item_Description)}
+            </td>
+            ${fmtH(r.Actual_Production_Hrs, true)}
+            ${fmtH(r.No_Operator_InHrs)}
+            ${fmtH(r.Tool_Change_InHrs)}
+            ${fmtH(r.No_Power_InHrs)}
+            ${fmtH(r.Machine_Break_Down_InHrs)}
+            ${fmtH(r.No_Material_InHrs)}
+            ${fmtH(r.MC_Setting_InHrs)}
+            ${fmtH(r.No_Load_InHrs)}
+            ${fmtH(r.Training_InHrs)}
+            ${fmtH(r.QualityIssue_InHrs)}
+            <td class="text-center">
+                <button class="btn btn-outline-primary btn-sm btn-edit"
+                        data-id="${r.SrNo}" title="Edit">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm btn-del"
+                        data-id="${r.SrNo}"
+                        data-label="${fmt(r.MachineName)} / ${fmt(r.Add_Date)}"
+                        title="Delete">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </td>
+        </tr>`;
+    }
+
+    function sumCol(field) {
+        return filteredData.reduce(
+            (a, r) => a + (parseFloat(r[field]) || 0), 0);
+    }
+
+    // ════════════════════════════════════════════
+    // FILTER
+    // ════════════════════════════════════════════
+    window.applyFilter = function () {
+        const q = $('#searchInput').val().toLowerCase().trim();
+        filteredData = allData.filter(r =>
+            !q ||
+            (r.machineName      || '').toLowerCase().includes(q) ||
+            (r.item_Code        || '').toLowerCase().includes(q) ||
+            (r.item_Description || '').toLowerCase().includes(q) ||
+            (r.shiftName        || '').toLowerCase().includes(q)
+        );
+        currentPage = 1;
+        renderTable();
+    };
+
+    // ════════════════════════════════════════════
+    // PAGINATION
+    // ════════════════════════════════════════════
+    function updatePagination(start, end) {
+        $('#pageInfo').text(
+            filteredData.length === 0
+                ? 'No records'
+                : `${start+1}–${end} of ${filteredData.length}`);
+
+        $('#btnFirst,#btnPrev').prop('disabled', currentPage === 1);
+        $('#btnNext,#btnLast').prop('disabled',  currentPage === totalPages);
+
+        const container = $('#pageNumbers').empty();
+        const maxV = 5;
+        let sp = Math.max(1, currentPage - Math.floor(maxV/2));
+        let ep = Math.min(totalPages, sp + maxV - 1);
+        if (ep - sp < maxV - 1) sp = Math.max(1, ep - maxV + 1);
+
+        for (let p = sp; p <= ep; p++) {
+            $('<button>').text(p)
+                .addClass('btn btn-outline-secondary btn-sm'
+                    + (p === currentPage ? ' active-pg' : ''))
+                .on('click', () => goToPage(p))
+                .appendTo(container);
+        }
+    }
+
+    window.goToPage = function (p) {
+        if (p < 1 || p > totalPages) return;
+        currentPage = p; renderTable();
+    };
+    window.changeRPP = function () {
+        rowsPerPage = parseInt($('#rppSelect').val());
+        currentPage = 1; renderTable();
+    };
+
+    // ════════════════════════════════════════════
+    // ADD MODAL
+    // ════════════════════════════════════════════
+    $('#btnAdd').on('click', function () {
+        clearForm();
+        $('#modalTitleText').text('Add Downtime Entry');
+        $('#fDate').val(new Date().toISOString().split('T')[0]);
+        dtModal.show();
+    });
+
+    // ════════════════════════════════════════════
+    // EDIT — from allData
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-edit', function () {
+        const id = parseInt($(this).data('id'));
+        const r  = allData.find(x => x.SrNo === id);
+        if (!r) return;
+
+        clearForm();
+        $('#modalTitleText').text('Edit Downtime Entry');
+        $('#fSrNo').val(r.SrNo);
+       
+        $('#fShiftId').val(r.ShiftId);
+       
+       $('#fDepartmentId').val(r.DepartmentId);
+loadModalDropdowns(r.DepartmentId);
+
+setTimeout(function () {
+    $('#fMachineId').val(r.MachineId);
+    $('#fItemId').val(r.ItemId);
+    setTimeout(() => {
+    applyItemSelect2();
+    $('#fItemId').val(r.ItemId).trigger('change');
+}, 300);
+}, 300);
+        $('#fMCStatusId').val(r.ItemId > 0 ? '1' : '2');
+        if (r.Add_Date) {
+        let dt = new Date(r.Add_Date);
+        $('#fDate').val(dt.toISOString().split('T')[0]);
+        }
+        // Determine which reason/value was set (find first non-zero column)
+        const reasonMap = [
+            [1,  r.No_Operator_InHrs],
+            [2,  r.Tool_Change_InHrs],
+            [3,  r.No_Power_InHrs],
+            [4,  r.Machine_Break_Down_InHrs],
+            [5,  r.No_Material_InHrs],
+            [6,  r.MC_Setting_InHrs],
+            [7,  r.No_Load_InHrs],
+            [8,  r.Training_InHrs],
+            [9,  r.QualityIssue_InHrs],
+            [10, r.Actual_Production_Hrs]
+        ];
+        const found = reasonMap.find(([, v]) => parseFloat(v) > 0);
+        if (found) {
+            $('#fDowntimeReasonId').val(found[0]);
+            $('#fDowntime').val(parseFloat(found[1]).toFixed(2));
+        }
+
+        dtModal.show();
+    });
+
+    // ════════════════════════════════════════════
+    // SAVE
+    // ════════════════════════════════════════════
+    $('#btnSave').on('click', function () {
+        clearErrors();
+
+        const shiftId   = parseInt($('#fShiftId').val())          || 0;
+        const machId    = parseInt($('#fMachineId').val())         || 0;
+        const statusId  = parseInt($('#fMCStatusId').val())        || 0;
+        const itemId    = parseInt($('#fItemId').val())            || 0;
+        const reasonId  = parseInt($('#fDowntimeReasonId').val())  || 0;
+        const downtime  = parseFloat($('#fDowntime').val())        || 0;
+        const date      = $('#fDate').val();
+
+        let valid = true;
+        if (!shiftId) {
+            showError('fShiftId','err-shift','Shift required.'); valid=false; }
+        if (!machId) {
+            showError('fMachineId','err-machine','Machine required.'); valid=false; }
+        if (!statusId) {
+            showError('fMCStatusId','err-status',
+                'Machine Status required.'); valid=false; }
+        if (!itemId) {
+            showError('fItemId','err-item','Item required.'); valid=false; }
+        if (!reasonId) {
+            showError('fDowntimeReasonId','err-reason',
+                'Reason required.'); valid=false; }
+        if (downtime <= 0) {
+            showError('fDowntime','err-dt','Time must be > 0.'); valid=false; }
+        if (!date) {
+            showError('fDate','err-date','Date required.'); valid=false; }
+        if (!valid) return;
+
+        const token =
+            $('input[name="__RequestVerificationToken"]').val();
+
+        $.ajax({
+            url:      '/MachineDowntime/Save',
+            method:   'POST',
+            dataType: 'json',
+            data: {
+                SrNo:              $('#fSrNo').val(),
+                DepartmentId:      $('#fDepartmentId').val(),
+                ShiftId:           shiftId,
+                MachineId:         machId,
+                MC_StatusId:       statusId,
+                ItemId:            itemId,
+                DownTime_ReasonId: reasonId,
+                DownTime:          downtime,
+                Date:              date,
+                __RequestVerificationToken: token
+            },
+            success: function (d) {
+                if (!d.success) {
+                    showToast(d.message || 'Save failed.', 'danger');
+                    return;
+                }
+                dtModal.hide();
+                showToast(d.message, 'success');
+                const deptId  = parseInt($('#headerDeptFilter').val()) || 0;
+                const monthId = parseInt($('#monthFilter').val())      || 0;
+                loadData(deptId, monthId);
+            },
+            error: function () {
+                showToast('Network error.', 'danger');
+            }
+        });
+    });
+
+    // ════════════════════════════════════════════
+    // DELETE
+    // ════════════════════════════════════════════
+    $(document).on('click', '.btn-del', function () {
+        pendingDeleteId = parseInt($(this).data('id'));
+        $('#deleteLabel').text($(this).data('label'));
+        deleteModal.show();
+    });
+
+    $('#btnConfirmDelete').on('click', function () {
+        const token =
+            $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url:      '/MachineDowntime/Delete',
+            method:   'POST',
+            dataType: 'json',
+            data: { srNo: pendingDeleteId,
+                    __RequestVerificationToken: token },
+        success: function (d) {
+        deleteModal.hide();
+
+        if (d.success) {
+
+        const deptId =
+        parseInt($('#headerDeptFilter').val()) || 0;
+
+        const monthId =
+        parseInt($('#monthFilter').val()) || 0;
+
+        loadData(deptId, monthId);
+
+        showToast('Downtime record deleted.', 'success');
+        }
+        }
+        });
+    });
+
+    // ════════════════════════════════════════════
+    // HELPERS
+    // ════════════════════════════════════════════
+    function clearForm() {
+        $('#fSrNo').val('0');
+      if ($('#fItemId').hasClass('select2-hidden-accessible')) {
+    $('#fItemId').select2('destroy');
+}
+        $('#fDowntime').val('');
+        $('#fDate').val('');
+        clearErrors();
+    }
+
+    function clearErrors() {
+        $('.invalid-feedback.d-block').text('');
+        $('#dtForm .form-control, #dtForm .form-select')
+            .removeClass('is-invalid');
+    }
+
+    function showError(fieldId, errId, msg) {
+        $('#' + fieldId).addClass('is-invalid');
+        $('#' + errId).text(msg);
+    }
+
+    function showToast(msg, type) {
+        toastEl.className =
+            `toast align-items-center text-white border-0 bg-${type}`;
+        $('#toastMsg').text(msg);
+        bsToast.show();
+    }
+    function applyItemSelect2() {
+
+    if ($('#fItemId').hasClass('select2-hidden-accessible')) {
+        $('#fItemId').select2('destroy');
+    }
+
+    $('#fItemId').select2({
+        dropdownParent: $('#dtModal'),
+        width: '100%',
+        placeholder: '-- Select Item --',
+        allowClear: true
+    });
+}
+});
+</script>
+}

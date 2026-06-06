@@ -1,87 +1,26 @@
 ﻿@model List<InvoiceGenerator.Models.UserModel>
 @{
-    ViewData["Title"] = "User Management";
+    ViewData["Title"] = "User Master";
 }
-
-<style>
-    /* ── Table font & density ── */
-    #userTable {
-        font-size: 0.75rem;
-    }
-    #userTable thead th {
-        font-size: 0.72rem;
-        padding: 5px 6px;
-        white-space: nowrap;
-    }
-    #userTable tbody td {
-        padding: 4px 6px;
-        vertical-align: middle;
-    }
-#userTable tbody tr:nth-child(odd) td {
-    background-color: #f8f9fa !important;
+@section Styles {
+    <link rel="stylesheet" href="~/css/Auth/User.css" />
 }
-
-#userTable tbody tr:nth-child(even) td {
-    background-color: #eef2ff !important;
-}
-
-#userTable tbody tr:hover td {
-    background-color: #cfe2ff !important;
-    cursor: pointer;
-}
-
-    /* ── Action buttons tiny ── */
-    #userTable .btn-sm {
-        padding: 1px 5px;
-        font-size: 0.7rem;
-    }
-
-    /* ── Badge size ── */
-    #userTable .badge {
-        font-size: 0.68rem;
-    }
-
-    /* ── Pagination ── */
-    .pagination-bar {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        gap: 6px;
-        margin-top: 8px;
-        font-size: 0.78rem;
-    }
-    .pagination-bar .page-info {
-        color: #555;
-    }
-    .pagination-bar button {
-        min-width: 30px;
-        height: 28px;
-        font-size: 0.72rem;
-        padding: 0.6px;
-        border-radius: 4px;
-    }
-    .pagination-bar button.active-page {
-        background-color: #dc3545;
-        color: #fff;
-        border-color: #dc3545;
-    }
-</style>
 
 <!-- ── PAGE HEADER ── -->
-<div class="d-flex align-items-center justify-content-between mb-2">
+<div class="page-header-bar">
     <h6 class="mb-0 fw-bold">
         <i class="bi bi-people me-2 text-danger"></i>User Master
     </h6>
-    <div class="d-flex align-items-center gap-2">
-        <!-- Search -->
+    <div class="page-header-actions">
         <input type="text" id="searchInput"
                class="form-control form-control-sm"
                placeholder="🔍 Search..."
                style="width:180px"
                oninput="filterTable()" />
-        <a asp-action="Register" class="btn btn-primary btn-sm">
+        <!-- ✅ Opens modal instead of navigating to Register page -->
+        <button class="btn btn-primary btn-sm" onclick="openModal()">
             <i class="bi bi-person-plus me-1"></i>Add User
-        </a>
+        </button>
     </div>
 </div>
 
@@ -91,14 +30,11 @@
            id="userTable">
         <thead class="table-dark text-center">
             <tr>
-                @* <th style="width:40px">#</th> *@
                 <th>#</th>
                 <th>Name</th>
+                <th>Department</th>
+                <th>Designation</th>
                 <th>Email</th>
-                @* <th style="width:70px">Role</th>
-                <th style="width:75px">Status</th>
-                <th style="width:90px">Created</th>
-                <th style="width:70px">Actions</th> *@
                 <th>Role</th>
                 <th>Status</th>
                 <th>Created</th>
@@ -106,12 +42,16 @@
             </tr>
         </thead>
         <tbody id="tableBody">
-            @{ int sr = 1; }
+            @{
+                int sr = 1;
+            }
             @foreach (var u in Model)
             {
                 <tr id="row-@u.UserId">
                     <td class="text-center">@sr</td>
                     <td>@u.Name</td>
+                    <td>@u.Department</td>
+                    <td>@u.Designation</td>
                     <td>@u.Email</td>
                     <td class="text-center">
                         <span class="badge bg-@(u.Role == "Admin" ? "danger" : "primary")">
@@ -155,19 +95,22 @@
 <div class="pagination-bar">
     <span class="page-info" id="pageInfo"></span>
     <button class="btn btn-outline-secondary btn-sm"
-            id="btnFirst" onclick="goToPage(1)"
-            title="First">«</button>
+            id="btnFirst" onclick="goToPage(1)" title="First">
+        «
+    </button>
     <button class="btn btn-outline-secondary btn-sm"
-            id="btnPrev" onclick="goToPage(currentPage - 1)"
-            title="Previous">‹</button>
+            id="btnPrev" onclick="goToPage(currentPage - 1)" title="Previous">
+        ‹
+    </button>
     <span id="pageNumbers" class="d-flex gap-1"></span>
     <button class="btn btn-outline-secondary btn-sm"
-            id="btnNext" onclick="goToPage(currentPage + 1)"
-            title="Next">›</button>
+            id="btnNext" onclick="goToPage(currentPage + 1)" title="Next">
+        ›
+    </button>
     <button class="btn btn-outline-secondary btn-sm"
-            id="btnLast" onclick="goToPage(totalPages)"
-            title="Last">»</button>
-
+            id="btnLast" onclick="goToPage(totalPages)" title="Last">
+        »
+    </button>
     <select id="rowsPerPageSelect"
             class="form-select form-select-sm"
             style="width:80px"
@@ -179,11 +122,202 @@
     <span class="page-info">/ page</span>
 </div>
 
+<!-- ══════════════════════════════════════════════
+     ADD USER MODAL
+══════════════════════════════════════════════ -->
+<div class="modal fade" id="userModal" tabindex="-1"
+     aria-labelledby="userModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-dark text-white py-2">
+                <h6 class="modal-title mb-0" id="userModalLabel">
+                    <i class="bi bi-person-plus me-2"></i>Add User
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="userForm" novalidate>
+                    @Html.AntiForgeryToken()
+
+                    <div class="row g-2">
+
+                        <!-- Full Name -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">
+                                Full Name <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                                <input type="text" id="regName"
+                                       class="form-control form-control-sm"
+                                       placeholder="e.g. Abhishek More"
+                                       maxlength="100" />
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-name"></div>
+                        </div>
+                        <!-- Department -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">
+                                Department <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-building"></i>
+                                </span>
+                                <input type="text" id="regDepartment"
+                                       class="form-control form-control-sm"
+                                       placeholder="e.g. IT / HR / Sales"
+                                       maxlength="100" />
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-department"></div>
+                        </div>
+                        <!-- Email -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">
+                                Email <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-envelope"></i>
+                                </span>
+                                <input type="email" id="regEmail"
+                                       class="form-control form-control-sm"
+                                       placeholder="you@example.com"
+                                       maxlength="150" />
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-email"></div>
+                        </div>
+
+                       
+
+                        <!-- Designation -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">
+                                Designation <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-person-workspace"></i>
+                                </span>
+                                <input type="text" id="regDesignation"
+                                       class="form-control form-control-sm"
+                                       placeholder="e.g. Manager / Developer"
+                                       maxlength="100" />
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-designation"></div>
+                        </div>
+
+                        <!-- Role -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">
+                                Role <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-person-badge"></i>
+                                </span>
+                               
+                                <!-- Role — value is what gets saved, text is display label -->
+                                <select id="regRole" class="form-select form-select-sm">
+                                    <option value="">-- Select Role --</option>
+                                    <!-- Full access group -->
+                                    <optgroup label="── Full Access ──">
+                                        <option value="Admin">Admin</option>
+                                        <option value="MD">MD (Managing Director)</option>
+                                        <option value="CEO">CEO (Chief Executive Officer)</option>
+                                        <option value="HOD">HOD (Head of Department)</option>
+                                    </optgroup>
+                                    <!-- Invoice only group -->
+                                    <optgroup label="── Invoice Access ──">
+                                        <option value="Supervisor">Supervisor</option>
+                                    </optgroup>
+                                    <!-- No access group -->
+                                    <optgroup label="── No System Access ──">
+                                        <option value="Operator">Operator</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-role"></div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">
+                                Password <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input type="password" id="regPassword"
+                                       class="form-control form-control-sm"
+                                       placeholder="Enter password"
+                                       id="pwd1" />
+                                <button type="button"
+                                        class="btn btn-outline-secondary btn-sm"
+                                        onclick="togglePwd('regPassword','eyePwd1')">
+                                    <i class="bi bi-eye" id="eyePwd1"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-password"></div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">
+                                Confirm Password <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-lock-fill"></i>
+                                </span>
+                                <input type="password" id="regConfirmPassword"
+                                       class="form-control form-control-sm"
+                                       placeholder="Re-enter password" />
+                                <button type="button"
+                                        class="btn btn-outline-secondary btn-sm"
+                                        onclick="togglePwd('regConfirmPassword','eyePwd2')">
+                                    <i class="bi bi-eye" id="eyePwd2"></i>
+                                </button>
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-confirmPassword"></div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary btn-sm"
+                        onclick="saveUser()">
+                    <i class="bi bi-person-plus me-1"></i>Register
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <!-- ── STATUS CONFIRM MODAL ── -->
 <div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
-
             <div class="modal-header bg-warning text-dark py-2">
                 <h6 class="modal-title mb-0">
                     <i class="bi bi-question-circle me-2"></i>Confirm Action
@@ -191,11 +325,9 @@
                 <button type="button" class="btn-close"
                         data-bs-dismiss="modal"></button>
             </div>
-
             <div class="modal-body text-center small">
                 <p id="statusMsg" class="mb-1"></p>
             </div>
-
             <div class="modal-footer justify-content-center py-2">
                 <button class="btn btn-secondary btn-sm"
                         data-bs-dismiss="modal">
@@ -205,7 +337,6 @@
                     <i class="bi bi-check-lg me-1"></i>Yes
                 </button>
             </div>
-
         </div>
     </div>
 </div>
@@ -223,154 +354,272 @@
 </div>
 
 @section Scripts {
-<script>
-    // ════════════════════════════════════════════
-    // PAGINATION STATE
-    // ════════════════════════════════════════════
-    let currentPage  = 1;
-    let rowsPerPage  = 15;
-    let totalPages   = 1;
-    let filteredRows = [];
+    <script>
+        // ════════════════════════════════════════════
+        // PAGINATION STATE
+        // ════════════════════════════════════════════
+        let currentPage  = 1;
+        let rowsPerPage  = 15;
+        let totalPages   = 1;
+        let filteredRows = [];
 
-    const statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
-    const toastEl     = document.getElementById('toast');
-    const bsToast     = new bootstrap.Toast(toastEl, { delay: 3000 });
+        const userModal   = new bootstrap.Modal(document.getElementById('userModal'));
+        const statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+        const toastEl     = document.getElementById('toast');
+        const bsToast     = new bootstrap.Toast(toastEl, { delay: 3000 });
 
-    let selectedUserId = 0;
-    let selectedStatus = false;
+        let selectedUserId = 0;
+        let selectedStatus = false;
 
-    // ════════════════════════════════════════════
-    // PAGINATION FUNCTIONS
-    // ════════════════════════════════════════════
-    function getAllRows() {
-        return Array.from(document.querySelectorAll('#tableBody tr'));
-    }
-
-    function filterTable() {
-        const q = document.getElementById('searchInput').value.toLowerCase().trim();
-        filteredRows = getAllRows().filter(row =>
-            !q || row.textContent.toLowerCase().includes(q)
-        );
-        currentPage = 1;
-        renderPage();
-    }
-
-    function renderPage() {
-        // Hide all
-        getAllRows().forEach(row => row.style.display = 'none');
-
-        totalPages  = Math.max(1, Math.ceil(filteredRows.length / rowsPerPage));
-        if (currentPage > totalPages) currentPage = totalPages;
-
-        const start = (currentPage - 1) * rowsPerPage;
-        const end   = Math.min(start + rowsPerPage, filteredRows.length);
-
-        // Show current page rows
-        for (let i = start; i < end; i++)
-            filteredRows[i].style.display = '';
-
-        updatePaginationUI(start, end);
-    }
-
-    function updatePaginationUI(start, end) {
-        document.getElementById('pageInfo').textContent =
-            filteredRows.length === 0
-                ? 'No records'
-                : `${start + 1}–${end} of ${filteredRows.length}`;
-
-        document.getElementById('btnFirst').disabled = currentPage === 1;
-        document.getElementById('btnPrev').disabled  = currentPage === 1;
-        document.getElementById('btnNext').disabled  = currentPage === totalPages;
-        document.getElementById('btnLast').disabled  = currentPage === totalPages;
-
-        // Page number buttons (sliding window of 5)
-        const container  = document.getElementById('pageNumbers');
-        container.innerHTML = '';
-
-        const maxVisible = 3;
-        let   startPage  = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-        let   endPage    = Math.min(totalPages, startPage + maxVisible - 1);
-        if (endPage - startPage < maxVisible - 1)
-            startPage = Math.max(1, endPage - maxVisible + 1);
-
-        for (let p = startPage; p <= endPage; p++) {
-            const btn       = document.createElement('button');
-            btn.textContent = p;
-            btn.className   = 'btn btn-outline-secondary btn-sm'
-                            + (p === currentPage ? ' active-page' : '');
-            btn.onclick     = () => goToPage(p);
-            container.appendChild(btn);
+        // ════════════════════════════════════════════
+        // PAGINATION
+        // ════════════════════════════════════════════
+        function getAllRows() {
+            return Array.from(document.querySelectorAll('#tableBody tr'));
         }
-    }
 
-    function goToPage(page) {
-        if (page < 1 || page > totalPages) return;
-        currentPage = page;
-        renderPage();
-    }
+        function filterTable() {
+            const q = document.getElementById('searchInput').value.toLowerCase().trim();
+            filteredRows = getAllRows().filter(row =>
+                !q || row.textContent.toLowerCase().includes(q));
+            currentPage = 1;
+            renderPage();
+        }
 
-    function changeRowsPerPage() {
-        rowsPerPage = parseInt(
-            document.getElementById('rowsPerPageSelect').value);
-        currentPage = 1;
-        renderPage();
-    }
+        function renderPage() {
+            getAllRows().forEach(row => row.style.display = 'none');
+            totalPages = Math.max(1, Math.ceil(filteredRows.length / rowsPerPage));
+            if (currentPage > totalPages) currentPage = totalPages;
 
-    // Init
-    document.addEventListener('DOMContentLoaded', () => {
-        filteredRows = getAllRows();
-        renderPage();
-    });
+            const start = (currentPage - 1) * rowsPerPage;
+            const end   = Math.min(start + rowsPerPage, filteredRows.length);
 
-    // ════════════════════════════════════════════
-    // STATUS TOGGLE
-    // ════════════════════════════════════════════
-    function openStatusModal(userId, activate) {
-        selectedUserId = userId;
-        selectedStatus = activate;
-        document.getElementById('statusMsg').textContent =
-            activate
-                ? 'Are you sure you want to activate this user?'
-                : 'Are you sure you want to deactivate this user?';
-        statusModal.show();
-    }
+            for (let i = start; i < end; i++)
+                filteredRows[i].style.display = '';
 
-    document.getElementById('btnConfirmStatus').addEventListener('click', async () => {
-        const token = document.querySelector(
-            'input[name="__RequestVerificationToken"]')?.value ?? '';
-        try {
-            const r = await fetch('/Auth/ToggleActive', {
-                method:  'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body:    new URLSearchParams({
-                    userId:   selectedUserId,
-                    isActive: selectedStatus,
-                    __RequestVerificationToken: token
-                })
-            });
-            const d = await r.json();
-            statusModal.hide();
-            if (d.success) {
-                showToast(
-                    selectedStatus ? 'User activated.' : 'User deactivated.',
-                    'success');
-                setTimeout(() => location.reload(), 1000);
-            } else {
-                showToast('Action failed.', 'danger');
+            updatePaginationUI(start, end);
+        }
+
+        function updatePaginationUI(start, end) {
+            document.getElementById('pageInfo').textContent =
+                filteredRows.length === 0
+                    ? 'No records'
+                    : `${start + 1}–${end} of ${filteredRows.length}`;
+
+            document.getElementById('btnFirst').disabled = currentPage === 1;
+            document.getElementById('btnPrev').disabled  = currentPage === 1;
+            document.getElementById('btnNext').disabled  = currentPage === totalPages;
+            document.getElementById('btnLast').disabled  = currentPage === totalPages;
+
+            const container  = document.getElementById('pageNumbers');
+            container.innerHTML = '';
+            const maxVisible = 3;
+            let sp = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+            let ep = Math.min(totalPages, sp + maxVisible - 1);
+            if (ep - sp < maxVisible - 1)
+                sp = Math.max(1, ep - maxVisible + 1);
+
+            for (let p = sp; p <= ep; p++) {
+                const btn       = document.createElement('button');
+                btn.textContent = p;
+                btn.className   = 'btn btn-outline-secondary btn-sm'
+                                + (p === currentPage ? ' active-page' : '');
+                btn.onclick     = () => goToPage(p);
+                container.appendChild(btn);
             }
-        } catch (err) {
-            showToast('Network error.', 'danger');
         }
-    });
 
-    // ════════════════════════════════════════════
-    // TOAST
-    // ════════════════════════════════════════════
-    function showToast(msg, type = 'success') {
-        toastEl.className =
-            `toast align-items-center text-white border-0 bg-${type}`;
-        document.getElementById('toastMsg').textContent = msg;
-        bsToast.show();
-    }
-</script>
+        function goToPage(page) {
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderPage();
+        }
+
+        function changeRowsPerPage() {
+            rowsPerPage = parseInt(
+                document.getElementById('rowsPerPageSelect').value);
+            currentPage = 1;
+            renderPage();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            filteredRows = getAllRows();
+            renderPage();
+        });
+
+        // ════════════════════════════════════════════
+        // ADD USER MODAL
+        // ════════════════════════════════════════════
+        function openModal() {
+            clearForm();
+            userModal.show();
+        }
+
+        async function saveUser() {
+            clearErrors();
+
+            // ── Client-side validation ──
+            const name            = document.getElementById('regName').value.trim();
+            const email           = document.getElementById('regEmail').value.trim();
+            const department      = document.getElementById('regDepartment').value.trim();
+            const designation     = document.getElementById('regDesignation').value.trim();
+            const role            = document.getElementById('regRole').value;
+            const password        = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+
+            let valid = true;
+
+            if (!name) {
+                showError('regName', 'err-name', 'Full Name is required.');
+                valid = false;
+            }
+            if (!email) {
+                showError('regEmail', 'err-email', 'Email is required.');
+                valid = false;
+            }
+        
+
+            if (!department) {
+                showError('regDepartment', 'err-department', 'Department is required.');
+                valid = false;
+            }
+            if (!designation) {
+                showError('regDesignation', 'err-designation', 'Designation is required.');
+                valid = false;
+            }
+            if (!role) {
+                showError('regRole', 'err-role', 'Please select a Role.');
+                valid = false;
+            }
+            if (!password) {
+                    showError('regPassword', 'err-password','Password is required.');
+                valid = false;
+            }
+            if (!confirmPassword) {
+                showError('regConfirmPassword', 'err-confirmPassword',
+                    'Please confirm your password.');
+                valid = false;
+            } else if (password !== confirmPassword) {
+                showError('regConfirmPassword', 'err-confirmPassword',
+                    'Passwords do not match.');
+                valid = false;
+            }
+
+            if (!valid) return;
+
+            // ── POST to existing Register action ──
+            const token = document.querySelector(
+                '#userForm input[name="__RequestVerificationToken"]').value;
+
+            const payload = new URLSearchParams({
+                Name:            name,
+                Email:           email,
+                Department:      department,
+                Designation:     designation,
+                Role:            role,
+                Password:        password,
+                ConfirmPassword: confirmPassword,
+                __RequestVerificationToken: token
+            });
+
+            try {
+                const r = await fetch('/Auth/RegisterAjax', {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body:    payload
+                });
+                const d = await r.json();
+
+                if (!d.success) {
+                    showToast(d.message || 'Registration failed.', 'danger');
+                    return;
+                }
+
+                userModal.hide();
+                showToast('User registered successfully!', 'success');
+                setTimeout(() => location.reload(), 1200);
+
+            } catch (err) {
+                showToast('Network error. Please try again.', 'danger');
+            }
+        }
+
+        // ════════════════════════════════════════════
+        // STATUS TOGGLE
+        // ════════════════════════════════════════════
+        function openStatusModal(userId, activate) {
+            selectedUserId = userId;
+            selectedStatus = activate;
+            document.getElementById('statusMsg').textContent =
+                activate
+                    ? 'Are you sure you want to activate this user?'
+                    : 'Are you sure you want to deactivate this user?';
+            statusModal.show();
+        }
+
+        document.getElementById('btnConfirmStatus').addEventListener('click', async () => {
+            const token = document.querySelector(
+                'input[name="__RequestVerificationToken"]')?.value ?? '';
+            try {
+                const r = await fetch('/Auth/ToggleActive', {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body:    new URLSearchParams({
+                        userId:   selectedUserId,
+                        isActive: selectedStatus,
+                        __RequestVerificationToken: token
+                    })
+                });
+                const d = await r.json();
+                statusModal.hide();
+                if (d.success) {
+                    showToast(
+                        selectedStatus ? 'User activated.' : 'User deactivated.',
+                        'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast('Action failed.', 'danger');
+                }
+            } catch (err) {
+                showToast('Network error.', 'danger');
+            }
+        });
+
+        // ════════════════════════════════════════════
+        // HELPERS
+        // ════════════════════════════════════════════
+        function clearForm() {
+            ['regName','regEmail','regDepartment',
+             'regDesignation','regPassword','regConfirmPassword']
+                .forEach(id => document.getElementById(id).value = '');
+            document.getElementById('regRole').value = '';
+            clearErrors();
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.invalid-feedback.d-block')
+                .forEach(el => { el.textContent = ''; });
+            document.querySelectorAll('#userForm .form-control, #userForm .form-select')
+                .forEach(el => el.classList.remove('is-invalid'));
+        }
+
+        function showError(fieldId, errId, msg) {
+            document.getElementById(fieldId)?.classList.add('is-invalid');
+            document.getElementById(errId).textContent = msg;
+        }
+
+        function showToast(msg, type = 'success') {
+            toastEl.className =
+                `toast align-items-center text-white border-0 bg-${type}`;
+            document.getElementById('toastMsg').textContent = msg;
+            bsToast.show();
+        }
+
+        function togglePwd(inputId, iconId) {
+            const inp  = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            inp.type   = inp.type === 'password' ? 'text' : 'password';
+            icon.className = inp.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+        }
+    </script>
 }

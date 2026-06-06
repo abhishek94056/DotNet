@@ -1,0 +1,865 @@
+﻿@using InvoiceGenerator.Helper
+@model List<InvoiceGenerator.Models.ItemSizeModel>
+@{
+    ViewData["Title"] = "Item Size Master";
+    var departments   = ViewBag.Departments as
+        List<InvoiceGenerator.Models.DepartmentModel>
+        ?? new();
+}
+
+<style>
+    #sizeTable { font-size: 0.73rem; }
+    #sizeTable thead th {
+        font-size: 0.70rem;
+        padding: 4px 5px;
+        white-space: nowrap;
+    }
+    #sizeTable tbody td {
+        padding: 3px 5px;
+        vertical-align: middle;
+    }
+    #sizeTable tbody tr:nth-child(odd)  td { background-color: #f8f9fa; }
+    #sizeTable tbody tr:nth-child(even) td { background-color: #eef2ff; }
+    #sizeTable tbody tr:hover td {
+        background-color: #cfe2ff !important;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+    #sizeTable .btn-sm { padding: 1px 5px; font-size: 0.68rem; }
+
+    .pagination-bar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        font-size: 0.75rem;
+    }
+    .pagination-bar button {
+        min-width: 28px; height: 26px;
+        font-size: 0.70rem; padding: 0 5px;
+        border-radius: 4px;
+    }
+    .pagination-bar button.active-page {
+        background-color: #0d6efd;
+        color: #fff; border-color: #0d6efd;
+    }
+
+    /* =========================================
+   PAGE HEADER
+========================================= */
+
+.page-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+    flex-wrap:wrap;
+}
+
+.page-header h6{
+    margin:0;
+    font-weight:700;
+    white-space:nowrap;
+    word-break:break-word;
+}
+
+.header-controls{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:6px;
+    flex-wrap:wrap;
+    flex:1;
+}
+
+/* =========================================
+   TABLE
+========================================= */
+
+.table-responsive{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+}
+
+#sizeTable{
+    min-width:850px;
+}
+
+/* =========================================
+   MODAL
+========================================= */
+
+.modal-lg{
+    max-width:850px;
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@@media (max-width:575px){
+    .page-header h6{
+    font-size:0.9rem;
+}
+
+.page-header{
+    overflow:hidden;
+}
+    .page-header{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .header-controls{
+        flex-direction:column;
+        align-items:stretch;
+        width:100%;
+    }
+
+    .header-controls .form-select,
+    .header-controls .form-control,
+    .header-controls .btn{
+        width:100%!important;
+    }
+
+    #deptFilter,
+    #searchInput{
+        width:100%!important;
+    }
+
+    .pagination-bar{
+        justify-content:center;
+        flex-wrap:wrap;
+    }
+
+    #pageNumbers{
+        flex-wrap:wrap;
+    }
+
+    .modal-dialog{
+        margin:.5rem;
+    }
+
+    .modal-lg{
+        max-width:100%;
+    }
+
+    #sizeTable{
+        min-width:800px;
+    }
+}
+
+/* =========================================
+   TABLET
+========================================= */
+
+@@media (min-width:576px) and (max-width:991px){
+
+    .header-controls{
+        width:100%;
+    }
+}
+</style>
+
+<!-- ── PAGE HEADER ── -->
+<div class="page-header">
+    <h6 class="mb-0 fw-bold">
+        <i class="bi bi-rulers me-2 text-primary"></i>Item Size Master
+    </h6>
+    @* <div class="d-flex align-items-center gap-2">
+
+        <!-- Department Filter -->
+        <select id="deptFilter" class="form-select form-select-sm"
+                style="width:160px" onchange="filterTable()"> *@
+               <div class="header-controls">
+
+    <!-- Department Filter -->
+    <select id="deptFilter" class="form-select form-select-sm"
+            style="width:140px" onchange="filterTable()">
+            <option value="">All Departments</option>
+            @foreach (var d in departments)
+            {
+                <option value="@d.Department">@d.Department</option>
+            }
+        </select>
+
+      @*   <input type="text" id="searchInput"
+               class="form-control form-control-sm"
+               placeholder="🔍 Search..."
+               style="width:160px"
+               oninput="filterTable()" /> *@
+
+
+               <input type="text" id="searchInput"
+       class="form-control form-control-sm"
+       placeholder="🔍 Search..."
+       style="width:140px"
+       oninput="filterTable()" />
+        <button class="btn btn-primary btn-sm" onclick="openModal()">
+            <i class="bi bi-plus-lg me-1"></i>Add Item Size
+        </button>
+    </div>
+</div>
+
+<!-- ── GRID ── -->
+<div class="table-responsive">
+    <table class="table table-bordered table-sm align-middle mb-0"
+           id="sizeTable">
+        <thead class="table-dark text-center">
+            <tr>
+                <th>#</th>
+                <th>Department</th>
+                <th>Size Code</th>
+                <th>Item Size</th>
+                <th>Rate (₹)</th>
+                <th>MIN Stock</th>
+                <th>MAX Stock</th>
+                @* <th>Date</th>
+                <th>Created By</th> *@
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            @{ int sr = 1; }
+            @foreach (var s in Model)
+            {
+                <tr id="row-@s.SizeId"
+                    data-dept="@s.Department.ToLower()">
+                    <td class="text-center">@sr</td>
+                    <td>
+                        <span class="badge bg-dark"
+                              style="font-size:0.65rem">
+                            @s.Department
+                        </span>
+                    </td>
+                    <td class="fw-bold text-primary">@s.ItemSize_Code</td>
+                    <td>@s.Item_Size</td>
+                    <td class="text-end pe-2">
+                        ₹@s.Rate.ToString("0.00")
+                    </td>
+                    <td class="text-end pe-2 text-danger fw-bold">
+                        @s.MIN_Stock.ToString("0.##")
+                    </td>
+                    <td class="text-end pe-2 text-primary fw-bold">
+                        @s.MAX_Stock.ToString("0.##")
+                    </td>
+                    @* <td class="text-center">
+                        @s.Date.ToString("dd-MM-yyyy")
+                    </td>
+                    <td class="text-center">@s.CreatedBy</td> *@
+                    <td class="text-center">
+                        <button class="btn btn-outline-primary btn-sm me-1"
+                                onclick="editSize(@s.SizeId)"
+                                title="Edit">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm"
+                                onclick="deleteSize(@s.SizeId,'@s.ItemSize_Code')"
+                                title="Delete">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </td>
+                </tr>
+                sr++;
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- ── PAGINATION ── -->
+<div class="pagination-bar">
+    <span id="pageInfo" class="text-muted"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnFirst" onclick="goToPage(1)">«</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnPrev"  onclick="goToPage(currentPage-1)">‹</button>
+    <span id="pageNumbers" class="d-flex gap-1"></span>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnNext"  onclick="goToPage(currentPage+1)">›</button>
+    <button class="btn btn-outline-secondary btn-sm"
+            id="btnLast"  onclick="goToPage(totalPages)">»</button>
+    <select id="rppSelect" class="form-select form-select-sm"
+            style="width:75px" onchange="changeRPP()">
+        <option value="10" selected>10</option>
+        <option value="20">20</option>
+        <option value="50">50</option>
+    </select>
+    <span class="text-muted">/ page</span>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ADD / EDIT MODAL
+══════════════════════════════════════════════ -->
+<div class="modal fade" id="sizeModal" tabindex="-1"
+     aria-labelledby="sizeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-fullscreen-sm-down modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-dark text-white py-2">
+                <h6 class="modal-title mb-0" id="sizeModalLabel">
+                    <i class="bi bi-rulers me-2"></i>
+                    <span id="modalTitleText">Add Item Size</span>
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="sizeForm" novalidate>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="sizeId" value="0" />
+
+                    <div class="row g-2">
+
+                        <!-- Department -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">
+                                Department
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-building"></i>
+                                </span>
+                                <select id="deptId"
+                                        class="form-select form-select-sm">
+                                    <option value="">-- Select --</option>
+                                    @foreach (var d in departments)
+                                    {
+                                        <option value="@d.DepartmentId">
+                                            @d.Department
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-dept"></div>
+                        </div>
+
+                        <!-- Item Size Code -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">
+                                Item Size Code
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-upc-scan"></i>
+                                </span>
+                                <input type="text" id="sizeCode"
+                                       class="form-control form-control-sm"
+                                       maxlength="50"
+                                       placeholder="e.g. SZ-001"
+                                       style="text-transform:uppercase" />
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-code"></div>
+                        </div>
+
+                        <!-- Item Size -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold small">
+                                Item Size
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-rulers"></i>
+                                </span>
+                                <input type="text" id="itemSize"
+                                       class="form-control form-control-sm"
+                                       maxlength="100"
+                                       placeholder="e.g. 10mm × 20mm" />
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-size"></div>
+                        </div>
+
+                        <!-- Rate -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">
+                                Rate (₹)
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">₹</span>
+                                <input type="number" id="rate"
+                                       class="form-control form-control-sm"
+                                       min="0" step="0.01"
+                                       placeholder="0.00" />
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-rate"></div>
+                        </div>
+
+                        <!-- MIN Stock -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">
+                                MIN Stock
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text
+                                             text-danger fw-bold">↓</span>
+                                <input type="number" id="minStock"
+                                       class="form-control form-control-sm"
+                                       min="0" step="0.01"
+                                       placeholder="0" />
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-min"></div>
+                        </div>
+
+                        <!-- MAX Stock -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">
+                                MAX Stock
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text
+                                             text-primary fw-bold">↑</span>
+                                <input type="number" id="maxStock"
+                                       class="form-control form-control-sm"
+                                       min="0" step="0.01"
+                                       placeholder="0" />
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-max"></div>
+                        </div>
+
+                        @* <!-- Date -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">
+                                Date <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-calendar3"></i>
+                                </span>
+                                <input type="date" id="sizeDate"
+                                       class="form-control form-control-sm" />
+                            </div>
+                            <div class="invalid-feedback d-block"
+                                 id="err-date"></div>
+                        </div>
+
+                        <!-- Created By -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">
+                                Created By
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">
+                                    <i class="bi bi-person-check"></i>
+                                </span>
+                                <input type="text" id="createdBy"
+                                       class="form-control form-control-sm bg-light"
+                                       readonly
+                                       value="@SessionHelper.GetUserName(Context.Session)" />
+                            </div>
+                        </div> *@
+
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-primary btn-sm"
+                        onclick="saveSize()">
+                    <i class="bi bi-check-lg me-1"></i>Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ── DELETE CONFIRM MODAL ── -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white py-2">
+                <h6 class="modal-title mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Confirm Delete
+                </h6>
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center small">
+                <p class="mb-1">Are you sure you want to delete</p>
+                <strong id="deleteSizeName"></strong>?
+            </div>
+            <div class="modal-footer justify-content-center py-2">
+                <button class="btn btn-secondary btn-sm"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-x-lg me-1"></i>Cancel
+                </button>
+                <button class="btn btn-danger btn-sm" id="btnConfirmDelete">
+                    <i class="bi bi-trash3 me-1"></i>Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index:9999">
+    <div id="toast" class="toast align-items-center text-white border-0"
+         role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body small" id="toastMsg"></div>
+            <button type="button"
+                    class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // ════════════════════════════════════════════
+    // PAGINATION STATE
+    // ════════════════════════════════════════════
+    let currentPage  = 1;
+    let rowsPerPage  = 10;
+    let totalPages   = 1;
+    let filteredRows = [];
+
+    const modal       = new bootstrap.Modal(
+        document.getElementById('sizeModal'));
+    const deleteModal = new bootstrap.Modal(
+        document.getElementById('deleteModal'));
+    const toastEl     = document.getElementById('toast');
+    const bsToast     = new bootstrap.Toast(toastEl, { delay: 3000 });
+    let   pendingDeleteId = null;
+
+    // ════════════════════════════════════════════
+    // PAGINATION
+    // ════════════════════════════════════════════
+    function getAllRows() {
+        return Array.from(document.querySelectorAll('#tableBody tr'));
+    }
+
+    function filterTable() {
+        const q    = document.getElementById('searchInput')
+                        .value.toLowerCase().trim();
+        const dept = document.getElementById('deptFilter')
+                        .value.toLowerCase();
+
+        filteredRows = getAllRows().filter(row => {
+            const matchDept = !dept ||
+                (row.dataset.dept || '').includes(dept);
+            const matchQ    = !q ||
+                row.textContent.toLowerCase().includes(q);
+            return matchDept && matchQ;
+        });
+        currentPage = 1;
+        renderPage();
+    }
+
+    function renderPage() {
+        getAllRows().forEach(r => r.style.display = 'none');
+        totalPages = Math.max(1,
+            Math.ceil(filteredRows.length / rowsPerPage));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end   = Math.min(start + rowsPerPage, filteredRows.length);
+        for (let i = start; i < end; i++)
+            filteredRows[i].style.display = '';
+
+        updatePaginationUI(start, end);
+    }
+
+    function updatePaginationUI(start, end) {
+        document.getElementById('pageInfo').textContent =
+            filteredRows.length === 0
+                ? 'No records'
+                : `${start + 1}–${end} of ${filteredRows.length}`;
+
+        document.getElementById('btnFirst').disabled = currentPage === 1;
+        document.getElementById('btnPrev').disabled  = currentPage === 1;
+        document.getElementById('btnNext').disabled  = currentPage === totalPages;
+        document.getElementById('btnLast').disabled  = currentPage === totalPages;
+
+        const container = document.getElementById('pageNumbers');
+        container.innerHTML = '';
+        const maxV = 5;
+        let sp = Math.max(1, currentPage - Math.floor(maxV / 2));
+        let ep = Math.min(totalPages, sp + maxV - 1);
+        if (ep - sp < maxV - 1) sp = Math.max(1, ep - maxV + 1);
+
+        for (let p = sp; p <= ep; p++) {
+            const btn       = document.createElement('button');
+            btn.textContent = p;
+            btn.className   = 'btn btn-outline-secondary btn-sm'
+                            + (p === currentPage ? ' active-page' : '');
+            btn.onclick     = () => goToPage(p);
+            container.appendChild(btn);
+        }
+    }
+
+    function goToPage(p) {
+        if (p < 1 || p > totalPages) return;
+        currentPage = p;
+        renderPage();
+    }
+
+    function changeRPP() {
+        rowsPerPage = parseInt(
+            document.getElementById('rppSelect').value);
+        currentPage = 1;
+        renderPage();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        filteredRows = getAllRows();
+        // document.getElementById('sizeDate').value =
+        //     new Date().toISOString().split('T')[0];
+        renderPage();
+    });
+
+    // ════════════════════════════════════════════
+    // OPEN ADD MODAL
+    // ════════════════════════════════════════════
+    function openModal() {
+        clearForm();
+        document.getElementById('modalTitleText').textContent
+            = 'Add Item Size';
+        // document.getElementById('sizeDate').value =
+        //     new Date().toISOString().split('T')[0];
+        document.getElementById('deptId').disabled = false;
+        modal.show();
+    }
+
+    // ════════════════════════════════════════════
+    // EDIT
+    // ════════════════════════════════════════════
+    async function editSize(id) {
+        try {
+            const r = await fetch(`/ItemSize/GetById?id=${id}`);
+            const d = await r.json();
+            document.getElementById('modalTitleText').textContent
+                = 'Edit Item Size';
+            document.getElementById('sizeId').value    = d.sizeId;
+            document.getElementById('deptId').value    = d.departmentId;
+            document.getElementById('sizeCode').value  = d.itemSize_Code;
+            document.getElementById('itemSize').value  = d.item_Size;
+            document.getElementById('rate').value      = d.rate;
+            // document.getElementById('sizeDate').value  = d.date;
+            document.getElementById('minStock').value  = d.mIN_Stock;
+            document.getElementById('maxStock').value  = d.mAX_Stock;
+            // document.getElementById('createdBy').value = d.createdBy;
+            document.getElementById('deptId').disabled = true;
+            clearErrors();
+            modal.show();
+        } catch {
+            showToast('Failed to load data.', 'danger');
+        }
+    }
+
+    // ════════════════════════════════════════════
+    // SAVE
+    // ════════════════════════════════════════════
+    async function saveSize() {
+        clearErrors();
+
+        const deptId   = document.getElementById('deptId').value;
+        const sizeCode = document.getElementById('sizeCode').value.trim();
+        const itemSize = document.getElementById('itemSize').value.trim();
+        const rate     = document.getElementById('rate').value;
+        const minStock = parseFloat(
+            document.getElementById('minStock').value || '0');
+        const maxStock = parseFloat(
+            document.getElementById('maxStock').value || '0');
+        // const sizeDate = document.getElementById('sizeDate').value;
+
+        let valid = true;
+
+        if (!deptId) {
+            showError('deptId', 'err-dept', 'Department is required.');
+            valid = false;
+        }
+        if (!sizeCode) {
+            showError('sizeCode', 'err-code', 'Item Size Code is required.');
+            valid = false;
+        }
+        if (!itemSize) {
+            showError('itemSize', 'err-size', 'Item Size is required.');
+            valid = false;
+        }
+        if (!rate || parseFloat(rate) < 0) {
+            showError('rate', 'err-rate', 'Enter a valid Rate.');
+            valid = false;
+        }
+        if (isNaN(minStock) || minStock < 0) {
+            showError('minStock', 'err-min', 'Enter a valid MIN Stock.');
+            valid = false;
+        }
+        if (isNaN(maxStock) || maxStock <= 0) {
+            showError('maxStock', 'err-max', 'Enter a valid MAX Stock.');
+            valid = false;
+        }
+        if (valid && minStock >= maxStock) {
+            showError('maxStock', 'err-max',
+                'MAX Stock must be greater than MIN Stock.');
+            valid = false;
+        }
+        // if (!sizeDate) {
+        //     showError('sizeDate', 'err-date', 'Date is required.');
+        //     valid = false;
+        // }
+
+        if (!valid) return;
+
+        const token = document.querySelector(
+            '#sizeForm input[name="__RequestVerificationToken"]').value;
+
+        const payload = new URLSearchParams({
+            SizeId:        document.getElementById('sizeId').value,
+            DepartmentId:  deptId,
+            ItemSize_Code: sizeCode,
+            Item_Size:     itemSize,
+            Rate:          rate,
+            // Date:          sizeDate,
+            MIN_Stock:     minStock,
+            MAX_Stock:     maxStock,
+            __RequestVerificationToken: token
+        });
+
+        try {
+            const r = await fetch('/ItemSize/Save', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body:    payload
+            });
+            const d = await r.json();
+
+            if (!d.success) {
+                showToast(d.message || 'Save failed.', 'danger');
+                return;
+            }
+
+            modal.hide();
+            showToast(d.message || 'Saved successfully!', 'success');
+            setTimeout(() => location.reload(), 1200);
+
+        } catch {
+            showToast('Network error. Please try again.', 'danger');
+        }
+    }
+
+    // ════════════════════════════════════════════
+    // DELETE
+    // ════════════════════════════════════════════
+    function deleteSize(id, code) {
+        pendingDeleteId = id;
+        document.getElementById('deleteSizeName').textContent = code;
+        deleteModal.show();
+    }
+
+    document.getElementById('btnConfirmDelete')
+        .addEventListener('click', async () => {
+        const token = document.querySelector(
+            'input[name="__RequestVerificationToken"]').value;
+        try {
+            const r = await fetch('/ItemSize/Delete', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body:    new URLSearchParams({
+                    id: pendingDeleteId,
+                    __RequestVerificationToken: token
+                })
+            });
+            const d = await r.json();
+            deleteModal.hide();
+            // if (d.success) {
+            //     document.getElementById(`row-${pendingDeleteId}`)?.remove();
+            //     filteredRows = filteredRows.filter(
+            //         row => row.id !== `row-${pendingDeleteId}`);
+            //     filteredRows = getAllRows();
+            //     renderPage();
+            //     showToast('Item Size deleted.', 'success');
+             
+                
+            // } 
+            if (d.success) {
+
+    const rowId = "row-" + pendingDeleteId;
+
+    const row = document.getElementById(rowId);
+    if (row) {
+        row.remove();
+    }
+
+    // 🔥 rebuild list (main fix)
+    filteredRows = getAllRows();
+
+    // 🔥 fix numbering
+    updateSerialNumbers();
+
+    // 🔥 re-render pagination
+    renderPage();
+
+    showToast('Item Size deleted.', 'success');
+}
+            else {
+                showToast('Delete failed.', 'danger');
+            }
+        } catch {
+            showToast('Network error.', 'danger');
+        }
+    });
+
+    // ════════════════════════════════════════════
+    // HELPERS
+    // ════════════════════════════════════════════
+    function clearForm() {
+        document.getElementById('sizeId').value   = '0';
+        document.getElementById('deptId').value   = '';
+        document.getElementById('sizeCode').value = '';
+        document.getElementById('itemSize').value = '';
+        document.getElementById('rate').value     = '';
+        document.getElementById('minStock').value = '';
+        document.getElementById('maxStock').value = '';
+        // document.getElementById('sizeDate').value = '';
+
+        document.getElementById('deptId').disabled = false;
+        clearErrors();
+    }
+
+    function clearErrors() {
+        document.querySelectorAll('.invalid-feedback.d-block')
+            .forEach(el => { el.textContent = ''; });
+        document.querySelectorAll(
+            '#sizeForm .form-control, #sizeForm .form-select')
+            .forEach(el => el.classList.remove('is-invalid'));
+    }
+
+    function showError(fieldId, errId, msg) {
+        document.getElementById(fieldId)?.classList.add('is-invalid');
+        document.getElementById(errId).textContent = msg;
+    }
+
+    function showToast(msg, type = 'success') {
+        toastEl.className =
+            `toast align-items-center text-white border-0 bg-${type}`;
+        document.getElementById('toastMsg').textContent = msg;
+        bsToast.show();
+    }
+    function updateSerialNumbers() {
+    let rows = document.querySelectorAll('#tableBody tr');
+    rows.forEach((row, index) => {
+        row.children[0].textContent = index + 1;
+    });
+}
+</script>
+}

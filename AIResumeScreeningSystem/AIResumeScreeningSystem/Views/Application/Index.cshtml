@@ -1,0 +1,262 @@
+﻿@model AIResumeScreeningSystem.ViewModels.SkillMatching.CandidateRankingViewModel
+@{
+    ViewData["Title"] = $"Applications — {Model.JobTitle}";
+    int jobId = ViewBag.JobId ?? Model.JobId;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-2">
+        <a asp-controller="Job" asp-action="Index" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h4 class="fw-bold mb-0">Applications — @Model.JobTitle</h4>
+            <small class="text-muted">@Model.Company · @Model.TotalApplications total</small>
+        </div>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <form asp-action="RecalculateScores" asp-route-jobId="@jobId" method="post">
+            <button type="submit" class="btn btn-outline-warning btn-sm">
+                <i class="bi bi-arrow-repeat me-1"></i>Recalculate AI Scores
+            </button>
+        </form>
+        <a asp-action="Ranking" asp-route-jobId="@jobId" class="btn btn-primary btn-sm">
+            <i class="bi bi-bar-chart-steps me-1"></i>Full Ranking View
+        </a>
+    </div>
+</div>
+
+<!-- Summary Stats -->
+<div class="row g-3 mb-4">
+    @foreach (var (label, count, color, icon) in new[] {
+        ("Total", Model.TotalApplications.ToString(), "primary", "bi-people"),
+        ("Avg Score", Model.AverageScore + "%", "info", "bi-bar-chart"),
+        ("High Match (75%+)", Model.ExcellentCount.ToString(), "success", "bi-star"),
+        ("Shortlisted", Model.ShortlistedCount.ToString(), "warning", "bi-bookmark-check")
+    })
+    {
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body py-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted small mb-1">@label</p>
+                            <h4 class="fw-bold mb-0 text-@color">@count</h4>
+                        </div>
+                        <div class="rounded-circle bg-@color bg-opacity-10 d-flex
+                            align-items-center justify-content-center"
+                             style="width:44px;height:44px;">
+                            <i class="bi @icon text-@color"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Filter Bar -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body py-3">
+        <form asp-action="Index" method="get" class="row g-2 align-items-end">
+            <input type="hidden" name="jobId" value="@jobId" />
+            <div class="col-6 col-md-3">
+                <label class="form-label small fw-500">Filter by Status</label>
+                <select name="statusFilter" class="form-select form-select-sm"
+                        onchange="this.form.submit()">
+                    <option value="">All Statuses</option>
+                    @foreach (var s in Enum.GetValues<ApplicationStatus>())
+                    {
+                        <option value="@s"
+                                selected="@(ViewBag.StatusFilter?.ToString() == s.ToString())">
+                            @s
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label small fw-500">Min AI Score (%)</label>
+                <input type="number" name="minScore" class="form-control form-control-sm"
+                       min="0" max="100" value="@ViewBag.MinScore"
+                       placeholder="e.g. 60" />
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                <a asp-action="Index" asp-route-jobId="@jobId"
+                   class="btn btn-outline-secondary btn-sm ms-1">Reset</a>
+            </div>
+            <div class="col-auto ms-auto">
+                <form asp-action="BulkShortlist" method="post" class="d-flex gap-2 align-items-center">
+                    <input type="hidden" name="jobId" value="@jobId" />
+                    <label class="form-label small fw-500 mb-0">Bulk Shortlist Top</label>
+                    <input type="number" name="topN" value="5" min="1" max="50"
+                           class="form-control form-control-sm" style="width:60px;" />
+                    <button type="submit" class="btn btn-warning btn-sm">
+                        <i class="bi bi-bookmark-check me-1"></i>Shortlist
+                    </button>
+                </form>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Applications Table -->
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        @if (!Model.RankedCandidates.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-inbox text-muted" style="font-size:3rem;"></i>
+                <h5 class="text-muted mt-3">No applications found</h5>
+                <p class="text-muted small">Try adjusting your filters.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">Rank</th>
+                            <th>Candidate</th>
+                            <th>Experience</th>
+                            <th>Matched Skills</th>
+                            <th class="text-center">AI Score</th>
+                            <th class="text-center">Status</th>
+                            <th>Applied</th>
+                            <th class="text-end pe-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var candidate in Model.RankedCandidates)
+                        {
+                            <tr class="@(candidate.Status == ApplicationStatus.Shortlisted ? "table-warning" : "")
+                                @(candidate.Status == ApplicationStatus.Approved ? "table-success" : "")
+                                @(candidate.Status == ApplicationStatus.Rejected ? "table-danger bg-opacity-25" : "")">
+                                <td class="text-center fw-bold">
+                                    <span class="fs-5">@candidate.RankMedal</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if (!string.IsNullOrEmpty(candidate.ProfileImagePath))
+                                        {
+                                            <img src="@candidate.ProfileImagePath"
+                                                 class="rounded-circle"
+                                                 style="width:36px;height:36px;object-fit:cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="rounded-circle bg-primary text-white
+                                                d-flex align-items-center justify-content-center fw-bold"
+                                                 style="width:36px;height:36px;font-size:13px;">
+                                                @candidate.InitialsAvatar
+                                            </div>
+                                        }
+                                        <div>
+                                            <a asp-action="Details"
+                                                   asp-route-id="@candidate.ApplicationId"
+                                                   class="fw-600 text-dark text-decoration-none">
+                                                @candidate.CandidateName
+                                            </a>
+                                            @if (!string.IsNullOrEmpty(candidate.CandidateHeadline))
+                                            {
+                                                <div class="text-muted"
+                                                     style="font-size:11px;max-width:180px;
+                                                    white-space:nowrap;overflow:hidden;
+                                                    text-overflow:ellipsis;">
+                                                    @candidate.CandidateHeadline
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        @candidate.CandidateExperienceYears yr(s)
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var skill in candidate.MatchedSkills.Take(3))
+                                        {
+                                            <span class="badge bg-success bg-opacity-10 text-success"
+                                                  style="font-size:10px;">@skill</span>
+                                        }
+                                        @if (candidate.MissingSkills.Any())
+                                        {
+                                            <span class="badge bg-danger bg-opacity-10 text-danger"
+                                                  style="font-size:10px;"
+                                                  title="Missing: @string.Join(", ", candidate.MissingSkills)">
+                                                -@candidate.MissingSkills.Count missing
+                                            </span>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <span class="badge @candidate.GradeBadgeClass px-3 py-2 mb-1"
+                                              style="font-size:14px;">
+                                            @candidate.OverallMatchScore.ToString("F0")%
+                                        </span>
+                                        <small class="text-muted">@candidate.MatchGrade</small>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge @candidate.StatusBadgeClass">
+                                        @candidate.Status
+                                    </span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        @candidate.AppliedAt.ToString("MMM dd")
+                                    </small>
+                                </td>
+                                <td class="text-end pe-3">
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <a asp-action="Details"
+                                               asp-route-id="@candidate.ApplicationId"
+                                               class="btn btn-sm btn-outline-secondary" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        @if (candidate.Status != ApplicationStatus.Shortlisted &&
+                                                                                     candidate.Status != ApplicationStatus.Approved)
+                                        {
+                                            <form asp-action="UpdateStatus" method="post">
+                                                <input type="hidden" name="applicationId"
+                                                       value="@candidate.ApplicationId" />
+                                                <input type="hidden" name="status"
+                                                       value="Shortlisted" />
+                                                <input type="hidden" name="jobId" value="@jobId" />
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-warning"
+                                                        title="Shortlist">
+                                                    <i class="bi bi-star"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        @if (candidate.Status != ApplicationStatus.Rejected)
+                                        {
+                                            <form asp-action="UpdateStatus" method="post">
+                                                <input type="hidden" name="applicationId"
+                                                       value="@candidate.ApplicationId" />
+                                                <input type="hidden" name="status"
+                                                       value="Rejected" />
+                                                <input type="hidden" name="jobId" value="@jobId" />
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        title="Reject"
+                                                        onclick="return confirm('Reject this candidate?')">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

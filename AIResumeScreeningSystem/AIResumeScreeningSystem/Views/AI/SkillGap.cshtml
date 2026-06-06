@@ -1,0 +1,217 @@
+﻿@model AIResumeScreeningSystem.ViewModels.AI.SkillGapAIViewModel
+@{
+    ViewData["Title"] = "AI Skill Gap Analysis";
+}
+
+<div class="d-flex align-items-center gap-2 mb-4">
+    <a asp-controller="Application" asp-action="Details"
+           asp-route-id="@Model.ApplicationId"
+           class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+        <h4 class="fw-bold mb-0">
+            <i class="bi bi-bullseye me-2 text-warning"></i>AI Skill Gap Analysis
+        </h4>
+        <small class="text-muted">@Model.CandidateName — @Model.JobTitle</small>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger"><i class="bi bi-exclamation-circle me-2"></i>@Model.Error</div>
+}
+else if (Model.IsLoaded)
+{
+    <!-- Summary Bar -->
+    <div class="card shadow-sm mb-4" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:none;">
+        <div class="card-body">
+            <div class="row align-items-center g-3">
+                <div class="col">
+                    <h6 class="fw-bold mb-1">
+                        <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                        @* @Model.TotalGaps gap(s) identified *@
+                        @(Model.MissingRequiredSkills.Count + Model.MissingOptionalSkills.Count) gap(s) identified
+                    </h6>
+                    <p class="text-muted small mb-0">
+                        @Model.MissingRequiredSkills.Count critical ·
+                        @Model.MissingOptionalSkills.Count nice-to-have
+                    </p>
+                </div>
+                <div class="col-auto">
+                    <div class="fw-bold text-warning fs-3">@Model.MatchScore.ToString("F0")%</div>
+                    <small class="text-muted">Current Match</small>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.TimeToReadiness))
+                {
+                    <div class="col-auto text-center">
+                        <div class="fw-bold text-primary">@Model.TimeToReadiness</div>
+                        <small class="text-muted">Time to Ready</small>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+
+            <!-- Narrative Analysis -->
+            @if (!string.IsNullOrEmpty(Model.GapAnalysisNarrative))
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-cpu me-2 text-primary"></i>AI Gap Analysis
+                        </h6>
+                    </div>
+                    <div class="card-body text-muted" style="line-height:1.8;">
+                        @Model.GapAnalysisNarrative
+                    </div>
+                </div>
+            }
+
+            <!-- Learning Plan Table -->
+            @if (Model.LearningPlan.Any())
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header py-3 d-flex justify-content-between">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-map me-2 text-primary"></i>Personalised Learning Plan
+                        </h6>
+                        <span class="badge bg-primary bg-opacity-10 text-primary">
+                            @Model.LearningPlan.Count skill(s)
+                        </span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Skill</th>
+                                        <th>Priority</th>
+                                        <th>Time</th>
+                                        <th>Resource</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.LearningPlan
+                                                                            .OrderByDescending(l =>
+                                                                                l.Priority.ToLower() == "critical" ? 4 :
+                                                                                l.Priority.ToLower() == "high" ? 3 :
+                                                                                l.Priority.ToLower() == "medium" ? 2 : 1))
+                                    {
+                                        <tr>
+                                            <td class="fw-600">@item.SkillName</td>
+                                            <td>
+                                                <span class="badge @item.PriorityBadgeClass">
+                                                    @item.Priority
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">@item.EstimatedTime</small>
+                                            </td>
+                                            <td>
+                                                <div class="small">@item.ResourceType</div>
+                                                @if (!string.IsNullOrEmpty(item.CourseName))
+                                                {
+                                                    <small class="text-muted">@item.CourseName</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(item.ResourceUrl))
+                                                {
+                                                    <a href="@item.ResourceUrl" target="_blank"
+                                                           class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-box-arrow-up-right"></i>
+                                                    </a>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Learning Roadmap -->
+            @if (!string.IsNullOrEmpty(Model.LearningRoadmap))
+            {
+                <div class="card shadow-sm">
+                    <div class="card-header py-3">
+                        <h6 class="mb-0 fw-600">
+                            <i class="bi bi-signpost-2 me-2 text-primary"></i>Learning Roadmap
+                        </h6>
+                    </div>
+                    <div class="card-body text-muted" style="line-height:1.8;white-space:pre-line;">
+                        @Model.LearningRoadmap
+                    </div>
+                </div>
+            }
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <!-- Missing Skills Summary -->
+            @if (Model.MissingRequiredSkills.Any())
+            {
+                <div class="card shadow-sm mb-4 border-danger border-opacity-25">
+                    <div class="card-header py-3 bg-danger bg-opacity-5">
+                        <h6 class="mb-0 fw-600 text-danger">
+                            <i class="bi bi-x-circle me-2"></i>Critical Gaps
+                            (@Model.MissingRequiredSkills.Count)
+                        </h6>
+                    </div>
+                    <div class="card-body d-flex flex-wrap gap-2">
+                        @foreach (var skill in Model.MissingRequiredSkills)
+                        {
+                            <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2">
+                                @skill
+                            </span>
+                        }
+                    </div>
+                </div>
+            }
+
+            @if (Model.MissingOptionalSkills.Any())
+            {
+                <div class="card shadow-sm mb-4 border-warning border-opacity-25">
+                    <div class="card-header py-3 bg-warning bg-opacity-5">
+                        <h6 class="mb-0 fw-600 text-warning">
+                            <i class="bi bi-exclamation-circle me-2"></i>Nice-to-have Gaps
+                            (@Model.MissingOptionalSkills.Count)
+                        </h6>
+                    </div>
+                    <div class="card-body d-flex flex-wrap gap-2">
+                        @foreach (var skill in Model.MissingOptionalSkills)
+                        {
+                            <span class="badge bg-warning bg-opacity-10 text-dark px-3 py-2">
+                                @skill
+                            </span>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Priority Recommendation -->
+            @if (!string.IsNullOrEmpty(Model.PriorityRecommendation))
+            {
+                <div class="card shadow-sm border-primary border-opacity-25">
+                    <div class="card-header py-3 bg-primary bg-opacity-5">
+                        <h6 class="mb-0 fw-600 text-primary">
+                            <i class="bi bi-lightbulb me-2"></i>Start Here
+                        </h6>
+                    </div>
+                    <div class="card-body text-muted small" style="line-height:1.7;">
+                        @Model.PriorityRecommendation
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+}

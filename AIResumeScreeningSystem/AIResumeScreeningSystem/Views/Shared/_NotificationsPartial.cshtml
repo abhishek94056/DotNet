@@ -1,0 +1,37 @@
+﻿@using AIResumeScreeningSystem.Services.Interfaces
+@using AIResumeScreeningSystem.Models
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject INotificationService NotificationService
+
+@if (SignInManager.IsSignedIn(User))
+{
+    var user = await UserManager.GetUserAsync(User);
+    if (user != null)
+    {
+        var unread = await NotificationService.GetUnreadCountAsync(user.Id);
+        if (unread > 0)
+        {
+            <div class="position-fixed bottom-0 end-0 p-3" style="z-index:1100;">
+                <div id="liveToast" class="toast show align-items-center text-white
+                    bg-primary border-0 shadow"
+                     role="alert" aria-live="assertive"
+                     style="min-width:280px;border-radius:12px;">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi bi-bell-fill me-2"></i>
+                            You have <strong>@unread</strong> unread notification@(unread != 1 ? "s" : "").
+                        </div>
+                        <a asp-controller="Notification" asp-action="Index"
+                               class="btn btn-sm btn-light ms-auto me-2 my-auto text-primary">
+                            View
+                        </a>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                                data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+}

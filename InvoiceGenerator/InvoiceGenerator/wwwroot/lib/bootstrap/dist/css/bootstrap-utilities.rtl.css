@@ -1846,7 +1846,7 @@
   color: rgba(var(--bs-secondary-rgb), var(--bs-text-opacity)) !important;
 }
 
-.text-success {
+.text-primary {
   --bs-text-opacity: 1;
   color: rgba(var(--bs-success-rgb), var(--bs-text-opacity)) !important;
 }
@@ -1950,7 +1950,7 @@
   color: var(--bs-secondary-text-emphasis) !important;
 }
 
-.text-success-emphasis {
+.text-primary-emphasis {
   color: var(--bs-success-text-emphasis) !important;
 }
 
